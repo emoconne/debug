@@ -11,6 +11,9 @@ const WEB_CHAT_LABEL = process.env.NEXT_PUBLIC_WEB_CHAT_TYPE_LABEL || "Web検索
 const DATA_CHAT_LABEL = process.env.NEXT_PUBLIC_DATA_CHAT_TYPE_LABEL || "ファイル読込";
 const DOC_CHAT_LABEL = process.env.NEXT_PUBLIC_DOC_CHAT_TYPE_LABEL || "準備中";
 
+// Webチャットの表示制御
+const WEB_DISPLAY_ENABLED = process.env.NEXT_PUBLIC_WEB_DISPLAY === "TRUE";
+
 interface Prop {
   disable: boolean;
 }
@@ -19,12 +22,15 @@ export const ChatTypeSelector: FC<Prop> = (props) => {
   const { data: session } = useSession();
   const { chatBody, onChatTypeChange } = useChatContext();
 
+  // グリッドの列数を動的に計算
+  const gridCols = WEB_DISPLAY_ENABLED ? 4 : 3;
+
   return (
     <Tabs
       defaultValue={chatBody.chatType}
       onValueChange={(value) => onChatTypeChange(value as ChatType)}
     >
-      <TabsList className="grid w-full grid-cols-4 h-12 items-stretch">
+      <TabsList className={`grid w-full grid-cols-${gridCols} h-12 items-stretch`}>
         <TabsTrigger
           value="simple"
           className="flex gap-1"
@@ -32,13 +38,15 @@ export const ChatTypeSelector: FC<Prop> = (props) => {
         >
           <MessageCircle size={20} /> {SIMPLE_CHAT_LABEL}
         </TabsTrigger>    
-        <TabsTrigger
-          value="web"
-          className="flex gap-1"
-          disabled={props.disable}
-        >
-          <Globe size={20} /> {WEB_CHAT_LABEL}
-        </TabsTrigger>   
+        {WEB_DISPLAY_ENABLED && (
+          <TabsTrigger
+            value="web"
+            className="flex gap-1"
+            disabled={props.disable}
+          >
+            <Globe size={20} /> {WEB_CHAT_LABEL}
+          </TabsTrigger>   
+        )}
         <TabsTrigger
           value="data"
           className="flex gap-1"
