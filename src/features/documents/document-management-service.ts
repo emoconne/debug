@@ -1,11 +1,11 @@
 "use server";
 
-import { uploadFile, downloadFile, deleteFile, listUserFiles } from "./azure-blob-service";
-import { extractText, isSupportedFileType, isFileSizeValid } from "./azure-document-intelligence-service";
-import { generateEmbeddings } from "../common/azure-openai-embedding";
-import { indexDocument, deleteDocument as deleteSearchDocument, searchDocuments as searchDocumentsService, getAllDocuments as getAllSearchDocuments, getDocument as getSearchDocument, getIndexStats, SearchDocument } from "./azure-cognitive-search-service";
-import { saveDocument, updateDocument, deleteDocument as deleteCosmosDocument, getAllDocuments, getDocument as getCosmosDocument, getDocumentStats, updateDocumentTags as updateDocumentTagsService, updateDocumentCategories as updateDocumentCategoriesService, updateDocumentDescription as updateDocumentDescriptionService, DocumentMetadata } from "./cosmos-db-document-service";
+import { uploadFileToBlob, downloadFile, deleteFile, listFiles } from "./azure-blob-dept-service";
+import { saveDocument, updateDocument, deleteDocument as deleteCosmosDocument, getAllDocuments, getDocument as getCosmosDocument, getDocumentStats, DocumentMetadata } from "./cosmos-db-document-service";
+import { getDepartment } from "./cosmos-db-dept-service";
 import { userHashedId } from "@/features/auth/helpers";
+import { processDocumentAsync } from "./document-intelligence-service";
+import { deleteDocumentsByDocumentId } from "@/features/chat/chat-services/azure-cog-search/azure-cog-vector-store";
 
 export interface DocumentInfo {
   id: string;
@@ -14,12 +14,12 @@ export interface DocumentInfo {
   fileSize: number;
   uploadedBy: string;
   uploadedAt: string;
-  status: 'uploaded' | 'processing' | 'completed' | 'error';
-  pages: number;
-  confidence: number;
-  categories?: string[];
-  tags?: string[];
-  description?: string;
+  status: 'uploaded' | 'completed' | 'error';
+  departmentId: string;
+  departmentName: string;
+  containerName: string;
+  blobName: string;
+  blobUrl: string;
 }
 
 export interface UploadResult {
@@ -29,114 +29,46 @@ export interface UploadResult {
   error?: string;
 }
 
-// サービスインスタンスを作成（CosmosDBDocumentServiceは関数に変換済み）
-
-// バックグラウンドでドキュメントを処理
-async function processDocumentInBackground(documentId: string, file: File, blobName: string) {
-  console.log('=== BACKGROUND PROCESSING START ===');
-  try {
-    console.log('Debug: Starting background document processing', { documentId, fileName: file.name });
-    
-    // ステータスを処理中に更新
-    console.log('Debug: Updating document status to processing');
-    await updateDocument(documentId, { status: 'processing' });
-
-    // 1. Document Intelligenceでテキスト抽出
-    console.log('Debug: Converting file to ArrayBuffer');
-    const arrayBuffer = await file.arrayBuffer();
-    console.log('Debug: ArrayBuffer created', { byteLength: arrayBuffer.byteLength });
-    
-    console.log('Debug: Starting text extraction with Document Intelligence');
-    const extractedText = await extractText(arrayBuffer, file.name);
-    console.log('Debug: Text extraction completed', { 
-      contentLength: extractedText.content.length,
-      pages: extractedText.pages,
-      confidence: extractedText.confidence,
-      wordCount: extractedText.wordCount,
-      processingTime: extractedText.processingTime
-    });
-    
-    // 2. Embeddingを生成
-    console.log('Debug: Generating embeddings');
-    const embeddings = await generateEmbeddings(extractedText.content);
-    console.log('Debug: Embeddings generated, length:', embeddings.length);
-
-    // 2. Azure Cognitive Searchにインデックス作成
-    const searchDocument: SearchDocument = {
-      id: documentId,
-      fileName: file.name,
-      content: extractedText.content,
-      contentVector: embeddings,
-      fileType: file.type,
-      fileSize: file.size,
-      uploadedBy: await userHashedId(),
-      uploadedAt: new Date().toISOString(),
-      blobUrl: (await listUserFiles(await userHashedId()))
-        .find(f => f.name === file.name)?.url || '',
-      pages: extractedText.pages,
-      confidence: extractedText.confidence,
-    };
-
-            await indexDocument(searchDocument);
-
-    // 3. Cosmos DBのメタデータを更新
-    await updateDocument(documentId, {
-      status: 'completed',
-      pages: extractedText.pages,
-      confidence: extractedText.confidence,
-      searchIndexId: documentId,
-    });
-
-    console.log(`Document processing completed: ${documentId}`);
-
-  } catch (error) {
-    console.error("=== DOCUMENT PROCESSING ERROR ===");
-    console.error("Document processing error:", {
-      error: error instanceof Error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      } : error,
-      documentId,
-      fileName: file.name
-    });
-    
-    // エラー時はステータスを更新
-    console.log('Debug: Updating document status to error');
-    await updateDocument(documentId, { 
-      status: 'error' 
-    });
-  }
-}
-
-// ファイルをアップロードして処理
-export async function uploadAndProcessFile(file: File): Promise<UploadResult> {
-  console.log('=== UPLOAD AND PROCESS FILE START ===');
+// ファイルをアップロード（BLOBコンテナのみ）
+export async function uploadFileToDepartment(
+  file: File, 
+  departmentId: string
+): Promise<UploadResult> {
+  console.log('=== UPLOAD FILE TO DEPARTMENT START ===');
   try {
     const userId = await userHashedId();
     console.log('Debug: User ID:', userId);
     
-    // 1. ファイルの検証
-    if (!(await isSupportedFileType(file.name))) {
+    // 1. 部門情報を取得
+    const department = await getDepartment(departmentId);
+    if (!department) {
       return {
         success: false,
-        message: "サポートされていないファイル形式です",
-        error: "Unsupported file type"
+        message: "指定された部門が見つかりません",
+        error: "Department not found"
       };
     }
 
-    if (!(await isFileSizeValid(file.size))) {
-      return {
-        success: false,
-        message: "ファイルサイズが500MBを超えています",
-        error: "File size too large"
-      };
-    }
+    console.log('Debug: Department found:', {
+      name: department.name,
+      blobContainerName: department.blobContainerName
+    });
 
-    // 2. Azure Blob Storageにアップロード
-    const uploadResult = await uploadFile(file, userId);
+    // 2. ファイルをArrayBufferに変換
+    const arrayBuffer = await file.arrayBuffer();
     
-    // 3. Cosmos DBにメタデータを保存（初期状態）
+    // 3. Azure Blob Storageにアップロード
+    console.log('Debug: Uploading to blob container:', department.blobContainerName);
+    const uploadResult = await uploadFileToBlob(
+      department.blobContainerName,
+      file.name,
+      arrayBuffer,
+      file.type
+    );
+    
+    console.log('Debug: Upload result:', uploadResult);
+    
+    // 4. Cosmos DBにメタデータを保存（初期ステータスはuploaded）
     const documentId = await saveDocument({
       fileName: file.name,
       fileType: file.type,
@@ -145,20 +77,22 @@ export async function uploadAndProcessFile(file: File): Promise<UploadResult> {
       uploadedAt: new Date().toISOString(),
       blobUrl: uploadResult.url,
       blobName: uploadResult.blobName,
-      pages: 0,
-      confidence: 0,
-      status: 'uploaded',
+      departmentId: departmentId,
+      departmentName: department.name,
+      containerName: department.blobContainerName,
+      status: 'uploaded', // 初期ステータス
       isDeleted: false,
     });
 
-    console.log('Debug: Starting background processing');
-    // 4. バックグラウンドでテキスト抽出とインデックス作成を実行
-    processDocumentInBackground(documentId, file, uploadResult.blobName);
+    // 5. 非同期でDocument Intelligence処理を開始
+    processDocumentAsync(file, documentId, department.name).catch(error => {
+      console.error('Document Intelligence processing failed:', error);
+    });
 
     const result = {
       success: true,
       documentId,
-      message: "ファイルが正常にアップロードされました。処理中です..."
+      message: "ファイルが正常にアップロードされました"
     };
     console.log('Debug: Returning result:', result);
     return result;
@@ -180,10 +114,17 @@ export async function uploadAndProcessFile(file: File): Promise<UploadResult> {
   }
 }
 
-// ドキュメント一覧を取得
+// ドキュメント一覧を取得（最適化版）
 export async function getDocuments(): Promise<DocumentInfo[]> {
   try {
+    console.log('=== GET DOCUMENTS START ===');
+    const startTime = Date.now();
+    
     const documents = await getAllDocuments();
+    
+    console.log(`=== GET DOCUMENTS COMPLETED in ${Date.now() - startTime}ms ===`);
+    console.log(`Retrieved ${documents.length} documents`);
+    
     return documents.map(doc => ({
       id: doc.id,
       fileName: doc.fileName,
@@ -192,11 +133,11 @@ export async function getDocuments(): Promise<DocumentInfo[]> {
       uploadedBy: doc.uploadedBy,
       uploadedAt: doc.uploadedAt,
       status: doc.status,
-      pages: doc.pages,
-      confidence: doc.confidence,
-      categories: doc.categories,
-      tags: doc.tags,
-      description: doc.description,
+      departmentId: doc.departmentId || '',
+      departmentName: doc.departmentName || '',
+      containerName: doc.containerName || '',
+      blobName: doc.blobName || '',
+      blobUrl: doc.blobUrl || '',
     }));
   } catch (error) {
     console.error("Get documents error:", error);
@@ -207,21 +148,37 @@ export async function getDocuments(): Promise<DocumentInfo[]> {
 // ドキュメントを削除
 export async function deleteDocument(documentId: string): Promise<void> {
   try {
+    console.log('=== DELETE DOCUMENT START ===');
+    console.log('Deleting document:', documentId);
+
     const document = await getCosmosDocument(documentId);
     if (!document) {
       throw new Error("ドキュメントが見つかりません");
     }
 
-    // 1. Azure Blob Storageから削除
-    await deleteFile(document.blobName);
+    // 1. AI Searchから削除
+    try {
+      console.log('Deleting from AI Search...');
+      await deleteDocumentsByDocumentId(documentId);
+      console.log('AI Search deletion completed');
+    } catch (searchError) {
+      console.error('AI Search deletion error:', searchError);
+      // AI Searchの削除に失敗しても処理を続行
+    }
 
-            // 2. Azure Cognitive Searchから削除
-        if (document.searchIndexId) {
-          await deleteSearchDocument(document.searchIndexId);
-        }
+    // 2. Azure Blob Storageから削除
+    if (document.containerName && document.blobName) {
+      console.log('Deleting from Azure Blob Storage...');
+      await deleteFile(document.containerName, document.blobName);
+      console.log('Azure Blob Storage deletion completed');
+    }
 
     // 3. Cosmos DBから論理削除
+    console.log('Deleting from Cosmos DB...');
     await deleteCosmosDocument(documentId);
+    console.log('Cosmos DB deletion completed');
+
+    console.log('=== DELETE DOCUMENT COMPLETED ===');
 
   } catch (error) {
     console.error("Delete document error:", error);
@@ -241,7 +198,11 @@ export async function downloadDocument(documentId: string): Promise<{
       throw new Error("ドキュメントが見つかりません");
     }
 
-    const downloadResult = await downloadFile(document.blobName);
+    if (!document.containerName || !document.blobName) {
+      throw new Error("BLOB情報が見つかりません");
+    }
+
+    const downloadResult = await downloadFile(document.containerName, document.blobName);
     
     return {
       data: downloadResult.data,
@@ -255,67 +216,18 @@ export async function downloadDocument(documentId: string): Promise<{
   }
 }
 
-// ドキュメントを検索
-export async function searchDocuments(query: string, filters?: string): Promise<any[]> {
-  try {
-          const results = await searchDocumentsService(query, filters);
-    return results;
-  } catch (error) {
-    console.error("Search documents error:", error);
-    throw new Error("ドキュメント検索に失敗しました");
-  }
-}
-
 // 統計情報を取得
 export async function getStats(): Promise<{
   total: number;
   byStatus: Record<string, number>;
   byType: Record<string, number>;
   totalSize: number;
-  indexStats: { documentCount: number; storageSize: number };
 }> {
   try {
-    const [cosmosStats, indexStats] = await Promise.all([
-      getDocumentStats(),
-              getIndexStats(),
-    ]);
-
-    return {
-      ...cosmosStats,
-      indexStats,
-    };
+    const cosmosStats = await getDocumentStats();
+    return cosmosStats;
   } catch (error) {
     console.error("Get stats error:", error);
     throw new Error("統計情報の取得に失敗しました");
-  }
-}
-
-// ドキュメントのタグを更新
-export async function updateDocumentTags(documentId: string, tags: string[]): Promise<void> {
-  try {
-    await updateDocumentTagsService(documentId, tags);
-  } catch (error) {
-    console.error("Update tags error:", error);
-    throw new Error("タグの更新に失敗しました");
-  }
-}
-
-// ドキュメントのカテゴリを更新
-export async function updateDocumentCategories(documentId: string, categories: string[]): Promise<void> {
-  try {
-    await updateDocumentCategoriesService(documentId, categories);
-  } catch (error) {
-    console.error("Update categories error:", error);
-    throw new Error("カテゴリの更新に失敗しました");
-  }
-}
-
-// ドキュメントの説明を更新
-export async function updateDocumentDescription(documentId: string, description: string): Promise<void> {
-  try {
-    await updateDocumentDescriptionService(documentId, description);
-  } catch (error) {
-    console.error("Update description error:", error);
-    throw new Error("説明の更新に失敗しました");
   }
 } 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Department } from "@/features/documents/cosmos-db-dept-service";
 import { 
   Upload, 
   FileText, 
@@ -42,11 +44,11 @@ interface Document {
   uploadedBy: string;
   uploadedAt: string;
   status: 'uploaded' | 'processing' | 'completed' | 'error';
-  pages: number;
-  confidence: number;
-  categories?: string[];
-  tags?: string[];
-  description?: string;
+  departmentId: string;
+  departmentName: string;
+  containerName: string;
+  blobName: string;
+  blobUrl: string;
 }
 
 interface DocumentStats {
@@ -63,6 +65,7 @@ export const DocumentsManagement = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [stats, setStats] = useState<DocumentStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -73,6 +76,8 @@ export const DocumentsManagement = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [batchFiles, setBatchFiles] = useState<File[]>([]);
   const [showBatchUpload, setShowBatchUpload] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
 
   // ドキュメント一覧を取得
   const fetchDocuments = async () => {
@@ -92,6 +97,58 @@ export const DocumentsManagement = () => {
     }
   };
 
+  // ステータスのみを更新（軽量版）
+  const updateDocumentStatuses = async () => {
+    try {
+      const response = await fetch('/api/documents');
+      if (response.ok) {
+        const data = await response.json();
+        const newDocuments = data.documents || [];
+        
+        setDocuments(prevDocuments => {
+          const updatedDocuments = [...prevDocuments];
+          
+          // 既存のドキュメントのステータスを更新
+          updatedDocuments.forEach((prevDoc, index) => {
+            const newDoc = newDocuments.find((d: Document) => d.id === prevDoc.id);
+            if (newDoc && newDoc.status !== prevDoc.status) {
+              // ステータスが変更された場合のみ更新
+              updatedDocuments[index] = { ...prevDoc, status: newDoc.status };
+            }
+          });
+          
+          // 新しいドキュメントを追加（存在しない場合）
+          newDocuments.forEach((newDoc: Document) => {
+            const exists = updatedDocuments.some(d => d.id === newDoc.id);
+            if (!exists) {
+              updatedDocuments.push(newDoc);
+            }
+          });
+          
+          return updatedDocuments;
+        });
+      }
+    } catch (error) {
+      console.error('Status update error:', error);
+    }
+  };
+
+  // 部門一覧を取得
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch('/api/settings/departments');
+      if (response.ok) {
+        const data = await response.json();
+        setDepartments(data.departments || []);
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || '部門一覧の取得に失敗しました');
+      }
+    } catch (error) {
+      showError('部門一覧の取得に失敗しました');
+    }
+  };
+
   // ファイルアップロード
   const handleFileUpload = async () => {
     if (!selectedFile) {
@@ -99,12 +156,28 @@ export const DocumentsManagement = () => {
       return;
     }
 
+    if (!selectedDepartment) {
+      showError('部門を選択してください');
+      return;
+    }
+
+    let progressInterval: NodeJS.Timeout | null = null;
+
     try {
-      setIsLoading(true);
+      setIsUploading(true);
       setUploadProgress(0);
+
+      // プログレスバーのシミュレーション
+      progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) return prev;
+          return prev + 10;
+        });
+      }, 200);
 
       const formData = new FormData();
       formData.append('file', selectedFile);
+      formData.append('departmentId', selectedDepartment);
 
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
@@ -112,18 +185,32 @@ export const DocumentsManagement = () => {
       });
 
       if (response.ok) {
-        showSuccess('ファイルが正常にアップロードされました');
+        setUploadProgress(100);
+        showSuccess('ファイルが正常にアップロードされました。Document Intelligence処理が開始されました。');
         setSelectedFile(null);
+        setSelectedDepartment('');
         fetchDocuments(); // 一覧を更新
       } else {
         const errorData = await response.json();
         showError(errorData.message || 'アップロードに失敗しました');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       showError('アップロード中にエラーが発生しました');
     } finally {
-      setIsLoading(false);
+      // プログレスバーのクリーンアップ
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      
+      // アップロード状態のリセット
+      setIsUploading(false);
       setUploadProgress(0);
+      
+      // 少し遅延を入れてからボタンを有効化（UIの安定性のため）
+      setTimeout(() => {
+        setIsUploading(false);
+      }, 100);
     }
   };
 
@@ -158,7 +245,7 @@ export const DocumentsManagement = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = document.name;
+        a.download = document.fileName;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -186,7 +273,7 @@ export const DocumentsManagement = () => {
       case 'uploaded':
         return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />アップロード済み</Badge>;
       case 'processing':
-        return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />処理中</Badge>;
+        return <Badge variant="outline" className="animate-pulse"><RefreshCw className="w-3 h-3 mr-1 animate-spin" />処理中</Badge>;
       case 'completed':
         return <Badge variant="default"><CheckCircle className="w-3 h-3 mr-1" />完了</Badge>;
       case 'error':
@@ -198,12 +285,76 @@ export const DocumentsManagement = () => {
 
   // 検索フィルター
   const filteredDocuments = documents.filter(doc =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.fileName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
     fetchDocuments();
+    fetchDepartments();
   }, []);
+
+  // 定期的にステータスのみを更新（処理中のドキュメントのステータス変更を反映）
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateDocumentStatuses();
+    }, 5000); // 5秒ごとに更新
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // アップロード状態のデバッグ用
+  useEffect(() => {
+    console.log('Upload state changed:', { isUploading, uploadProgress });
+  }, [isUploading, uploadProgress]);
+
+  // メモ化されたテーブル行コンポーネント
+  const DocumentRow = memo(({ 
+    document, 
+    onDownload, 
+    onDelete 
+  }: { 
+    document: Document; 
+    onDownload: (doc: Document) => void; 
+    onDelete: (id: string) => void; 
+  }) => (
+    <TableRow key={document.id}>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          <FileText className="w-4 h-4 text-muted-foreground" />
+          {document.fileName}
+        </div>
+      </TableCell>
+      <TableCell>{document.departmentName || '-'}</TableCell>
+      <TableCell>{formatFileSize(document.fileSize)}</TableCell>
+      <TableCell>
+        {new Date(document.uploadedAt).toLocaleDateString('ja-JP')}
+      </TableCell>
+      <TableCell>
+        {getStatusBadge(document.status)}
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onDownload(document)}
+            disabled={document.status !== 'completed'}
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => onDelete(document.id)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  ));
+
+  DocumentRow.displayName = 'DocumentRow';
 
   if (!session?.user?.isAdmin) {
     return (
@@ -226,7 +377,7 @@ export const DocumentsManagement = () => {
       <div>
         <h1 className="text-3xl font-bold mb-2">ドキュメント管理</h1>
         <p className="text-muted-foreground">
-          AI Searchにアップロードされたドキュメントの管理を行います
+          部門別BLOBコンテナにアップロードされたドキュメントの管理を行います
         </p>
       </div>
 
@@ -239,21 +390,62 @@ export const DocumentsManagement = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <Input
-              type="file"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
-              className="flex-1"
-            />
-            <Button 
-              onClick={handleFileUpload}
-              disabled={!selectedFile || isLoading}
-              className="flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              アップロード
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium">部門選択 *</label>
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="部門を選択してください" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">ファイル選択 *</label>
+              <Input
+                type="file"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button 
+                onClick={handleFileUpload}
+                disabled={!selectedFile || !selectedDepartment || isUploading}
+                className="flex items-center gap-2 w-full"
+                title={isUploading ? 'アップロード処理中...' : 'ファイルをアップロード'}
+              >
+                {isUploading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    アップロード中...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    アップロード
+                  </>
+                )}
+              </Button>
+            </div>
+            {isUploading && (
+              <div className="mt-2">
+                <Progress value={uploadProgress} className="w-full" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  ファイルをアップロード中... Document Intelligence処理は非同期で実行されます
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  プログレス: {uploadProgress}% | 状態: {isUploading ? 'アップロード中' : '完了'}
+                </p>
+              </div>
+            )}
           </div>
           {selectedFile && (
             <div className="text-sm text-muted-foreground">
@@ -310,6 +502,7 @@ export const DocumentsManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>ファイル名</TableHead>
+                  <TableHead>部門</TableHead>
                   <TableHead>サイズ</TableHead>
                   <TableHead>アップロード日時</TableHead>
                   <TableHead>ステータス</TableHead>
@@ -318,40 +511,12 @@ export const DocumentsManagement = () => {
               </TableHeader>
               <TableBody>
                 {filteredDocuments.map((document) => (
-                  <TableRow key={document.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-muted-foreground" />
-                        {document.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatFileSize(document.size)}</TableCell>
-                    <TableCell>
-                      {new Date(document.uploadDate).toLocaleDateString('ja-JP')}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(document.status)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDownloadDocument(document)}
-                          disabled={document.status !== 'completed'}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteDocument(document.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <DocumentRow
+                    key={document.id}
+                    document={document}
+                    onDownload={handleDownloadDocument}
+                    onDelete={handleDeleteDocument}
+                  />
                 ))}
               </TableBody>
             </Table>

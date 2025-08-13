@@ -7,13 +7,14 @@ import { ChatFileUI_doc } from "../chat-file/chat-file-ui-doc";
 import { ChatStyleSelector } from "./chat-style-selector";
 import { ChatTypeSelector } from "./chat-type-selector";
 import { ChatAPISelector } from "./chat-api-selector";
+import { DepartmentSelector } from "./department-selector";
 import { AI_NAME } from "@/features/theme/customise";
 import { useSession } from "next-auth/react";
 
 interface Prop {}
 
 export const ChatMessageEmptyState: FC<Prop> = (props) => {
-  const { fileState } = useChatContext();
+  const { fileState, chatBody } = useChatContext();
   const { data: session } = useSession();
 
   const { showFileUpload } = fileState;
@@ -50,6 +51,14 @@ export const ChatMessageEmptyState: FC<Prop> = (props) => {
           </p>
           <ChatTypeSelector disable={false} />
         </div>
+        {chatBody.chatType === "doc" && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground">
+              検索対象の部門を選択してください。
+            </p>
+            <DepartmentSelector disable={false} />
+          </div>
+        )}
         {(showFileUpload === "data") && <ChatFileUI />} 
         {((showFileUpload === "doc") && session?.user?.isAdmin) && <ChatFileUI_doc />} 
         

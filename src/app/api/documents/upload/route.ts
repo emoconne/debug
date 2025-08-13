@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
-import { uploadAndProcessFile } from "@/features/documents/document-management-service";
+import { uploadFileToDepartment } from "@/features/documents/document-management-service";
 
 export async function POST(request: NextRequest) {
   console.log('=== UPLOAD ROUTE START ===');
@@ -19,22 +19,28 @@ export async function POST(request: NextRequest) {
     console.log('Debug: Starting file upload process');
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const departmentId = formData.get('departmentId') as string;
 
     if (!file) {
       console.log('Debug: No file found in form data');
       return NextResponse.json({ error: "ファイルが選択されていません" }, { status: 400 });
     }
 
+    if (!departmentId) {
+      console.log('Debug: No department ID found in form data');
+      return NextResponse.json({ error: "部門が選択されていません" }, { status: 400 });
+    }
+
     console.log('Debug: File details:', {
       name: file.name,
       type: file.type,
-      size: file.size
+      size: file.size,
+      departmentId
     });
 
-    console.log('Debug: Calling uploadAndProcessFile');
-    const result = await uploadAndProcessFile(file);
-    console.log('Debug: uploadAndProcessFile result:', result);
-
+    // 新しいアップロード関数を使用
+    const result = await uploadFileToDepartment(file, departmentId);
+    
     if (result.success) {
       return NextResponse.json({
         success: true,
@@ -45,9 +51,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       return NextResponse.json({
-        success: false,
-        message: result.message,
-        error: result.error
+        error: result.message
       }, { status: 400 });
     }
 

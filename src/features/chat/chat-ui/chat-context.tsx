@@ -32,6 +32,7 @@ interface ChatContextProps extends UseChatHelpers {
   onChatDocChange: (value: ChatDoc) => void;
   onChatAPIModelChange: (value: ChatAPIModel) => void;
   onConversationStyleChange: (value: ConversationStyle) => void;
+  onDepartmentChange: (departmentId: string) => void;
   speech: TextToSpeechProps & SpeechToTextProps;
 }
 const ChatContext = createContext<ChatContextProps | null>(null);
@@ -57,6 +58,7 @@ export const ChatProvider: FC<Prop> = (props) => {
     chatAPIModel: props.chatThread.chatAPIModel,
     conversationStyle: props.chatThread.conversationStyle,
     chatOverFileName: props.chatThread.chatOverFileName,
+    selectedDepartmentId: "all",
   });
   const { textToSpeech } = speechSynthesizer;
   const { isMicrophoneUsed, resetMicrophoneUsed } = speechRecognizer;
@@ -89,6 +91,9 @@ export const ChatProvider: FC<Prop> = (props) => {
   const onChatAPIModelChange = (value: ChatAPIModel) => {
     setChatBody({ ...chatBody, chatAPIModel: value });
   };
+  const onDepartmentChange = (departmentId: string) => {
+    setChatBody({ ...chatBody, selectedDepartmentId: departmentId });
+  };
   function onError(error: Error) {
     showError(error.message, response.reload);
   }
@@ -102,6 +107,7 @@ export const ChatProvider: FC<Prop> = (props) => {
         onChatDocChange,
         onChatAPIModelChange,
         onConversationStyleChange,
+        onDepartmentChange,
         fileState,
         id: props.id,
         speech: {

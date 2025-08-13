@@ -183,6 +183,54 @@ export const deleteDocuments = async (chatThreadId: string): Promise<void> => {
   );
 };
 
+// ドキュメント管理用：documentIdでAI Searchから削除
+export const deleteDocumentsByDocumentId = async (documentId: string): Promise<void> => {
+  try {
+    console.log('=== DELETE DOCUMENTS BY DOCUMENT ID START ===');
+    console.log('Deleting documents for documentId:', documentId);
+
+    // documentIdでAI Searchからドキュメントを検索
+    const documentsInSearch = await simpleSearch({
+      filter: `chatThreadId eq '${documentId}'`,
+    });
+
+    console.log(`Found ${documentsInSearch.length} documents in AI Search to delete`);
+
+    if (documentsInSearch.length === 0) {
+      console.log('No documents found in AI Search for deletion');
+      return;
+    }
+
+    const documentsToDelete: DocumentDeleteModel[] = [];
+
+    documentsInSearch.forEach((document: { id: string }) => {
+      const doc: DocumentDeleteModel = {
+        "@search.action": "delete",
+        id: document.id,
+      };
+      documentsToDelete.push(doc);
+    });
+
+    // AI Searchからドキュメントを削除
+    const response = await fetcher(
+      `${baseIndexUrl()}/docs/index?api-version=${
+        process.env.AZURE_SEARCH_API_VERSION
+      }`,
+      {
+        method: "POST",
+        body: JSON.stringify({ value: documentsToDelete }),
+      }
+    );
+
+    console.log('AI Search deletion response:', response);
+    console.log('=== DELETE DOCUMENTS BY DOCUMENT ID COMPLETED ===');
+
+  } catch (error) {
+    console.error('DeleteDocumentsByDocumentId error:', error);
+    throw error;
+  }
+};
+
 export const embedDocuments = async (
   documents: Array<AzureCogDocumentIndex>
 ) => {

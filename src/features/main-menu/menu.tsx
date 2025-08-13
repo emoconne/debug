@@ -2,13 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  LayoutDashboard,
   MessageCircle,
   PanelLeftClose,
   PanelRightClose,
   Home,
   Lightbulb,
   FileText,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "../theme/theme-toggle";
@@ -53,19 +53,19 @@ export const MainMenu = () => {
               className="rounded-full w-[40px] h-[40px] p-2 text-primary"
               variant={"outline"}
             >
-              <Link href="/reporting" title="管理者向けレポート">
-                <LayoutDashboard />
+              <Link href="/documents" title="ドキュメント管理">
+                <FileText />
               </Link>
             </Button>
-            {/* <Button
+            <Button
               asChild
               className="rounded-full w-[40px] h-[40px] p-2 text-primary"
               variant={"outline"}
             >
-              <Link href="/documents" title="ドキュメント管理">
-                <FileText />
+              <Link href="/settings" title="システム設定">
+                <Settings />
               </Link>
-            </Button> */}
+            </Button>
           </>
         ) : (
           <></>

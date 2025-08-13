@@ -22,15 +22,12 @@ export const ChatTypeSelector: FC<Prop> = (props) => {
   const { data: session } = useSession();
   const { chatBody, onChatTypeChange } = useChatContext();
 
-  // グリッドの列数を動的に計算
-  const gridCols = WEB_DISPLAY_ENABLED ? 4 : 3;
-
   return (
     <Tabs
       defaultValue={chatBody.chatType}
       onValueChange={(value) => onChatTypeChange(value as ChatType)}
     >
-      <TabsList className={`grid w-full grid-cols-${gridCols} h-12 items-stretch`}>
+      <TabsList className="grid w-full grid-cols-4 h-12 items-stretch">
         <TabsTrigger
           value="simple"
           className="flex gap-1"
@@ -38,15 +35,13 @@ export const ChatTypeSelector: FC<Prop> = (props) => {
         >
           <MessageCircle size={20} /> {SIMPLE_CHAT_LABEL}
         </TabsTrigger>    
-        {WEB_DISPLAY_ENABLED && (
-          <TabsTrigger
-            value="web"
-            className="flex gap-1"
-            disabled={props.disable}
-          >
-            <Globe size={20} /> {WEB_CHAT_LABEL}
-          </TabsTrigger>   
-        )}
+        <TabsTrigger
+          value="web"
+          className={`flex gap-1 ${!WEB_DISPLAY_ENABLED ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={props.disable || !WEB_DISPLAY_ENABLED}
+        >
+          <Globe size={20} /> {WEB_CHAT_LABEL}
+        </TabsTrigger>
         <TabsTrigger
           value="data"
           className="flex gap-1"

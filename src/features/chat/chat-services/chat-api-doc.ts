@@ -6,6 +6,7 @@ import { similaritySearchVectorWithScore } from "./azure-cog-search/azure-cog-ve
 import { initAndGuardChatSession } from "./chat-thread-service";
 import { CosmosDBChatMessageHistory } from "./cosmosdb/cosmosdb";
 import { PromptGPTProps } from "./models";
+import { getDepartment } from "@/features/documents/cosmos-db-dept-service";
 
 const SYSTEM_PROMPT = `あなたは ${AI_NAME}です。ユーザーからの質問に対して日本語で丁寧に回答します。 \n`;
 
@@ -56,7 +57,8 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
 
   const relevantDocuments = await findRelevantDocuments(
     lastHumanMessage.content,
-    id
+    id,
+    props.selectedDepartmentId
   );
 
   const context = relevantDocuments
@@ -121,10 +123,58 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
   }
 };
 
-const findRelevantDocuments = async (query: string, chatThreadId: string) => {
-  const relevantDocuments = await similaritySearchVectorWithScore(query, 10, {
-    filter: `chatType eq 'doc' `,
+const findRelevantDocuments = async (query: string, chatThreadId: string, selectedDepartmentId?: string) => {
+  let filter = `chatType eq 'doc'`;
+  
+  // 部門が選択されている場合は、その部門のドキュメントのみを検索
+  if (selectedDepartmentId && selectedDepartmentId.trim() !== "" && selectedDepartmentId !== "all") {
+    // 部門IDから部門名を取得
+    const department = await getDepartment(selectedDepartmentId);
+    if (department) {
+      filter += ` and deptName eq '${department.name}'`;
+      console.log('Filtering by department:', department.name);
+    } else {
+      console.log('Department not found for ID:', selectedDepartmentId);
+    }
+  } else {
+    console.log('No department selected or "all" selected, searching all departments');
+  }
+  
+  console.log('AI Search filter:', filter);
+  
+  // デバッグ用：まずフィルターなしで全ドキュメントを確認
+  console.log('=== DEBUG: Checking all documents in AI Search ===');
+  const allDocuments = await similaritySearchVectorWithScore(query, 10, {
+    filter: `chatType eq 'doc'`,
   });
+  console.log('All documents found:', allDocuments.length);
+  allDocuments.forEach((doc, index) => {
+    console.log(`Document ${index}:`, {
+      id: doc.id,
+      chatType: doc.chatType,
+      deptName: doc.deptName,
+      metadata: doc.metadata,
+      pageContentLength: doc.pageContent?.length || 0
+    });
+  });
+  
+  // さらに詳細なデバッグ：chatType別の検索
+  console.log('=== DEBUG: Checking documents by chatType ===');
+  const documentTypeDocs = await similaritySearchVectorWithScore(query, 10, {
+    filter: `chatType eq 'document'`,
+  });
+  console.log('Documents with chatType "document":', documentTypeDocs.length);
+  
+  const docTypeDocs = await similaritySearchVectorWithScore(query, 10, {
+    filter: `chatType eq 'doc'`,
+  });
+  console.log('Documents with chatType "doc":', docTypeDocs.length);
+  
+  const relevantDocuments = await similaritySearchVectorWithScore(query, 10, {
+    filter: filter,
+  });
+  
+  console.log('Filtered documents found:', relevantDocuments.length);
   return relevantDocuments;
 };
 

@@ -58,6 +58,7 @@ export interface PromptGPTBody {
   conversationStyle: ConversationStyle;
   chatAPIModel:ChatAPIModel;
   chatOverFileName: string;
+  selectedDepartmentId?: string;
 }
 
 
