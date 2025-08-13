@@ -513,14 +513,20 @@ const AZURE_SEARCH_INDEX = {
       facetable: false,
       retrievable: true,
       dimensions: 1536,
-      vectorSearchConfiguration: "vectorConfig",
+      vectorSearchProfile: "default",
     },
   ],
   vectorSearch: {
-    algorithmConfigurations: [
+    algorithms: [
       {
-        name: "vectorConfig",
+        name: "default",
         kind: "hnsw",
+      },
+    ],
+    profiles: [
+      {
+        name: "default",
+        algorithm: "default",
       },
     ],
   },

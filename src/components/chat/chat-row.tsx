@@ -1,23 +1,42 @@
 "use client";
-import { ChatRole } from "@/features/chat/chat-services/models";
+import { ChatRole, SearchResult } from "@/features/chat/chat-services/models";
 import { isNotNullOrEmpty } from "@/features/chat/chat-services/utils";
 import { cn } from "@/lib/utils";
-import { CheckIcon, ClipboardIcon, UserCircle } from "lucide-react";
+import { CheckIcon, ClipboardIcon, UserCircle, ExternalLink, ChevronDown } from "lucide-react";
 import { FC, useState } from "react";
 import { Markdown } from "../markdown/markdown";
 import Typography from "../typography";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 interface ChatRowProps {
   name: string;
   profilePicture: string;
   message: string;
   type: ChatRole;
+  searchResults?: SearchResult[];
 }
 
 const ChatRow: FC<ChatRowProps> = (props) => {
   const [isIconChecked, setIsIconChecked] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(true);
+  
+  // デバッグ用ログ
+  console.log('ChatRow props:', {
+    type: props.type,
+    searchResults: props.searchResults,
+    hasSearchResults: props.searchResults && props.searchResults.length > 0
+  });
+
+  // エラーハンドリング
+  if (!props.message) {
+    console.error('ChatRow: message is undefined');
+    return null;
+  }
+  
+
+  
   const toggleIcon = () => {
     setIsIconChecked((prevState) => !prevState);
   };
@@ -26,6 +45,8 @@ const ChatRow: FC<ChatRowProps> = (props) => {
     toggleIcon();
     navigator.clipboard.writeText(props.message);
   };
+
+
 
 
   return (
@@ -37,7 +58,7 @@ const ChatRow: FC<ChatRowProps> = (props) => {
     >
       <div
         className={cn(
-          "flex flex-col  max-w-[690px] border rounded-lg overflow-hidden  p-4 gap-8"
+          "flex flex-col  max-w-[900px] border rounded-lg overflow-hidden  p-4 gap-8"
         )}
       >
         <div className="flex flex-1">
@@ -85,6 +106,8 @@ const ChatRow: FC<ChatRowProps> = (props) => {
         >
           <Markdown content={props.message} />
         </div>
+
+        {/* WebCitationはMarkdownレンダリングで表示されるため、ここでは手動表示しない */}
       </div>
     </div>
   );

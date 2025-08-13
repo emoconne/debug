@@ -95,8 +95,32 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
     BingResult = '検索結果が見つかりませんでした。';
   }
 
+  // 検索結果を構造化データとして保存（後で表示用）
+  const searchResults = webPages.slice(0, 5).map((page, index) => ({
+    name: page.name || 'タイトルなし',
+    snippet: page.snippet || '説明なし',
+    url: page.url || '#',
+    sortOrder: index + 1
+  }));
+
   //console.log(snippet) ;
-  Prompt = "次の{問い合わせ}について、{Web検索結果}を元に2000文字程度で回答を生成してください。" ;
+  
+  // 検索結果からCitation用のデータを準備
+  const citationItems = searchResults.map((result, index) => ({
+    name: result.name,
+    id: result.url,
+    snippet: result.snippet
+  }));
+  
+  Prompt = "次の{問い合わせ}について、{Web検索結果}を元に要点を絞って簡潔に回答してください（800文字程度）。" ;
+  Prompt += "回答の最後には必ず以下の形式でWebCitationを含めてください：{% webCitation items=[{name:\"" + citationItems[0]?.name + "\",id:\"" + citationItems[0]?.id + "\"}" ;
+  if (citationItems.length > 1) {
+    Prompt += ", {name:\"" + citationItems[1]?.name + "\",id:\"" + citationItems[1]?.id + "\"}" ;
+  }
+  if (citationItems.length > 2) {
+    Prompt += ", {name:\"" + citationItems[2]?.name + "\",id:\"" + citationItems[2]?.id + "\"}" ;
+  }
+  Prompt += "] /%}" ;
   Prompt += "【問い合わせ】 "  + lastHumanMessage.content ;
   //Prompt += "【Web検索結果】" + snippet; 
   Prompt += "【Web検索結果】" + snippet; 
@@ -138,12 +162,25 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
 
     const stream = OpenAIStream(response, {
       async onCompletion(completion) {
-        await chatHistory.addMessage({
+        // 検索結果をメッセージに含める
+        const messageWithSearchResults = {
           content: completion,
           role: "assistant",
+          searchResults: searchResults // 検索結果を追加
+        };
+        
+
+        
+        console.log('Saving message with search results:', {
+          contentLength: completion.length,
+          searchResultsCount: searchResults.length,
+          searchResults: searchResults
         });
+        
+        await chatHistory.addMessage(messageWithSearchResults);
       },
     });
+    
     return new StreamingTextResponse(stream);
     
   } catch (e: unknown) {

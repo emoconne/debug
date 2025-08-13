@@ -12,7 +12,7 @@ import { useChatInputDynamicHeight } from "./use-chat-input-dynamic-height";
 interface Props {}
 
 const ChatInput: FC<Props> = (props) => {
-  const { setInput, handleSubmit, isLoading, input, chatBody } =
+  const { setInput, handleSubmit, isLoading, input, chatBody, setStatus } =
     useChatContext();
 
   const { speechEnabled } = useGlobalConfigContext();
@@ -30,9 +30,24 @@ const ChatInput: FC<Props> = (props) => {
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleSubmit(e);
-    resetRows();
-    setInput("");
+    
+    try {
+      // チャットタイプに応じてステータスを設定
+      if (chatBody.chatType === "web") {
+        setStatus("searching");
+      } else if (chatBody.chatType === "doc" || chatBody.chatType === "document") {
+        setStatus("processing");
+      } else {
+        setStatus("generating");
+      }
+      
+      handleSubmit(e);
+      resetRows();
+      setInput("");
+    } catch (error) {
+      console.error('Submit error:', error);
+      setStatus('idle');
+    }
   };
 
   const onChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {

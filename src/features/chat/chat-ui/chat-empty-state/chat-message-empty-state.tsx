@@ -4,9 +4,9 @@ import { FC } from "react";
 import { useChatContext } from "../chat-context";
 import { ChatFileUI } from "../chat-file/chat-file-ui";
 import { ChatFileUI_doc } from "../chat-file/chat-file-ui-doc";
-import { ChatStyleSelector } from "./chat-style-selector";
+
 import { ChatTypeSelector } from "./chat-type-selector";
-import { ChatAPISelector } from "./chat-api-selector";
+
 import { DepartmentSelector } from "./department-selector";
 import { AI_NAME } from "@/features/theme/customise";
 import { useSession } from "next-auth/react";
@@ -32,19 +32,9 @@ export const ChatMessageEmptyState: FC<Prop> = (props) => {
 
           </p>
 
-          <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">
-            GPT-4oの利用を選択してください。
-            <ChatAPISelector disable={false} />
-          </p>
-          </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">
-          会話スタイルを選択してください。
-          </p>
-          <ChatStyleSelector disable={false} />
-        </div>
+
+
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">
             AIがお手伝いする方法を選択してください。

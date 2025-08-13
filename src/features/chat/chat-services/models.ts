@@ -4,6 +4,13 @@ export const CHAT_DOCUMENT_ATTRIBUTE = "CHAT_DOCUMENT";
 export const CHAT_THREAD_ATTRIBUTE = "CHAT_THREAD";
 export const MESSAGE_ATTRIBUTE = "CHAT_MESSAGE";
 
+export interface SearchResult {
+  name: string;
+  snippet: string;
+  url: string;
+  sortOrder: number;
+}
+
 export interface ChatMessageModel {
   id: string;
   createdAt: Date;
@@ -14,6 +21,7 @@ export interface ChatMessageModel {
   role: ChatRole;
   context: string;
   type: "CHAT_MESSAGE";
+  searchResults?: SearchResult[];
 }
 
 export type ConversationStyle = "creative" | "balanced" | "precise";
@@ -21,7 +29,7 @@ export type ChatType = "simple" | "web" | "document" | "data" | "doc" | "mssql";
 export type ChatAPIModel = "GPT-3" | "GPT-4";
 export type ChatDoc = "DeptA" | "DeptB" | "DeptC" | "DeptD" | "";
 
-export type ChatRole = "system" | "user" | "assistant" | "function";
+export type ChatRole = "system" | "user" | "assistant" | "function" | "data" | "tool";
 
 export interface ChatThreadModel {
   id: string;

@@ -10,6 +10,7 @@ export const transformCosmosToAIModel = (
       content: chat.content,
       id: chat.id,
       createdAt: chat.createdAt,
+      searchResults: chat.searchResults,
     };
   });
 };

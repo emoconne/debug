@@ -43,9 +43,7 @@ class SettingsCosmosDBContainer {
               id: CONTAINER_NAME,
               partitionKey: {
                 paths: ["/dataType"],
-              },
-              // settingsコンテナ用のスループット設定
-              throughput: 400 // settingsコンテナ用
+              }
             })
             .then((containerResponse) => {
               resolve(containerResponse.container);

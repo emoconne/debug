@@ -1,6 +1,7 @@
 import Markdoc from "@markdoc/markdoc";
 import React, { FC } from "react";
 import { Citation } from "../../features/chat/chat-ui/markdown/citation";
+import { WebCitation } from "../../features/chat/chat-ui/markdown/web-citation";
 import { CodeBlock } from "./code-block";
 import { citationConfig } from "./config";
 import { Paragraph } from "./paragraph";
@@ -17,6 +18,6 @@ export const Markdown: FC<Props> = (props) => {
   });
 
   return Markdoc.renderers.react(content, React, {
-    components: { Citation, Paragraph, CodeBlock },
+    components: { Citation, WebCitation, Paragraph, CodeBlock },
   });
 };

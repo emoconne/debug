@@ -24,13 +24,18 @@ import {
   FolderOpen,
   RefreshCw,
   BarChart3,
-  Download
+  Download,
+  Bot,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useSession } from "next-auth/react";
 import { useGlobalMessageContext } from "@/features/global-message/global-message-context";
 import { Department } from "@/features/documents/cosmos-db-dept-service";
+import { GPTModelData } from "@/features/documents/cosmos-db-gpt-model-service";
+
 
 interface DepartmentFormData {
   name: string;
@@ -71,6 +76,22 @@ export const SettingsManagement = () => {
   const [graphData, setGraphData] = useState<any[]>([]);
   const [graphPeriod, setGraphPeriod] = useState<'daily' | 'monthly'>('daily');
   const [isGraphLoading, setIsGraphLoading] = useState(false);
+
+  // GPTモデル設定用の状態
+  const [gptModels, setGptModels] = useState<GPTModelData[]>([]);
+  const [currentModel, setCurrentModel] = useState<string>('');
+  const [isGptModelLoading, setIsGptModelLoading] = useState(false);
+  const [editingGptModel, setEditingGptModel] = useState<GPTModelData | null>(null);
+  const [isEditingGptModel, setIsEditingGptModel] = useState(false);
+  const [gptModelFormData, setGptModelFormData] = useState({
+    name: '',
+    deploymentName: '',
+    description: '',
+    isAvailable: true,
+    isDefault: false,
+  });
+
+
 
   // 部門一覧を取得
   const fetchDepartments = async () => {
@@ -247,6 +268,165 @@ export const SettingsManagement = () => {
     }
   };
 
+  // GPTモデル一覧を取得
+  const fetchGptModels = async () => {
+    try {
+      setIsGptModelLoading(true);
+      const response = await fetch('/api/settings/gpt-models');
+      if (response.ok) {
+        const data = await response.json();
+        setGptModels(data.models || []);
+        setCurrentModel(data.currentModel || '');
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'GPTモデル一覧の取得に失敗しました');
+      }
+    } catch (error) {
+      showError('GPTモデル一覧の取得に失敗しました');
+    } finally {
+      setIsGptModelLoading(false);
+    }
+  };
+
+
+
+  // GPTモデルを選択
+  const selectGptModel = async (modelId: string) => {
+    try {
+      setIsGptModelLoading(true);
+      const response = await fetch('/api/settings/gpt-models', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ selectedModel: modelId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentModel(data.selectedModel);
+        showSuccess(data.message || 'GPTモデルが選択されました');
+        fetchGptModels(); // 一覧を再取得
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'GPTモデルの選択に失敗しました');
+      }
+    } catch (error) {
+      showError('GPTモデルの選択に失敗しました');
+    } finally {
+      setIsGptModelLoading(false);
+    }
+  };
+
+  // GPTモデルを保存
+  const handleSaveGptModel = async () => {
+    if (!gptModelFormData.name || !gptModelFormData.deploymentName) {
+      showError('モデル名とデプロイ名は必須です');
+      return;
+    }
+
+    try {
+      setIsGptModelLoading(true);
+      
+      const url = '/api/settings/gpt-models/manage';
+      const method = editingGptModel ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editingGptModel 
+          ? { id: editingGptModel.id, ...gptModelFormData }
+          : gptModelFormData
+        ),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showSuccess({
+          title: 'GPTモデル管理',
+          description: data.message || (editingGptModel ? 'GPTモデルが更新されました' : 'GPTモデルが作成されました')
+        });
+        
+        setGptModelFormData({
+          name: '',
+          deploymentName: '',
+          description: '',
+          isAvailable: true,
+          isDefault: false,
+        });
+        setEditingGptModel(null);
+        setIsEditingGptModel(false);
+        fetchGptModels();
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'GPTモデルの保存に失敗しました');
+      }
+    } catch (error) {
+      showError('GPTモデルの保存に失敗しました');
+    } finally {
+      setIsGptModelLoading(false);
+    }
+  };
+
+  // GPTモデルを削除
+  const handleDeleteGptModel = async (modelId: string) => {
+    if (!confirm('このGPTモデルを削除しますか？')) {
+      return;
+    }
+
+    try {
+      setIsGptModelLoading(true);
+      const response = await fetch(`/api/settings/gpt-models/manage?id=${modelId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showSuccess({
+          title: 'GPTモデル削除',
+          description: data.message || 'GPTモデルが削除されました'
+        });
+        fetchGptModels();
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'GPTモデルの削除に失敗しました');
+      }
+    } catch (error) {
+      console.error('Delete GPT model error:', error);
+      showError('GPTモデルの削除に失敗しました');
+    } finally {
+      setIsGptModelLoading(false);
+    }
+  };
+
+  // 編集モードを開始
+  const handleEditGptModel = (model: GPTModelData) => {
+    setEditingGptModel(model);
+    setGptModelFormData({
+      name: model.name,
+      deploymentName: model.deploymentName,
+      description: model.description,
+      isAvailable: model.isAvailable,
+      isDefault: model.isDefault,
+    });
+    setIsEditingGptModel(true);
+  };
+
+  // 編集をキャンセル
+  const handleCancelEditGptModel = () => {
+    setEditingGptModel(null);
+    setGptModelFormData({
+      name: '',
+      deploymentName: '',
+      description: '',
+      isAvailable: true,
+      isDefault: false,
+    });
+    setIsEditingGptModel(false);
+  };
+
   // CSVダウンロード
   const downloadCSV = async () => {
     try {
@@ -383,6 +563,7 @@ export const SettingsManagement = () => {
     fetchContainers();
     fetchChatThreads();
     fetchGraphData();
+    fetchGptModels();
   }, []);
 
   useEffect(() => {
@@ -415,7 +596,7 @@ export const SettingsManagement = () => {
       </div>
 
       <Tabs defaultValue="logs" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="logs" className="flex items-center gap-1 text-xs px-2">
             <Activity className="w-3 h-3" />
             利用ログ
@@ -432,6 +613,11 @@ export const SettingsManagement = () => {
             <Menu className="w-3 h-3" />
             メニュー設定
           </TabsTrigger>
+          <TabsTrigger value="gpt-models" className="flex items-center gap-1 text-xs px-2">
+            <Bot className="w-3 h-3" />
+            GPTモデル
+          </TabsTrigger>
+
           {process.env.NODE_ENV === 'development' && (
             <TabsTrigger value="containers" className="flex items-center gap-1 text-xs px-2">
               <FolderOpen className="w-3 h-3" />
@@ -716,29 +902,29 @@ export const SettingsManagement = () => {
                     
                     {/* スクロール可能なコンテンツ */}
                     <div className="max-h-32 overflow-y-auto">
-                      {containers.map((container) => (
+                        {containers.map((container) => (
                         <div key={container} className="grid grid-cols-3 gap-4 p-4 border-b last:border-b-0 hover:bg-muted/50">
                           <div className="font-medium w-64 truncate">{container}</div>
                           <div className="w-32">
                             <Badge variant="default" className="text-xs">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              存在
-                            </Badge>
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                存在
+                              </Badge>
                           </div>
                           <div className="w-32">
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => deleteContainer(container)}
-                              disabled={isContainerLoading}
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteContainer(container)}
+                                disabled={isContainerLoading}
                               className="flex items-center gap-1 h-7 px-2"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              削除
-                            </Button>
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                削除
+                              </Button>
                           </div>
                         </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -846,6 +1032,199 @@ export const SettingsManagement = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* GPTモデル設定タブ */}
+        <TabsContent value="gpt-models" className="space-y-6 pb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="w-5 h-5" />
+                GPTモデル設定
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* フォーム */}
+              {isEditingGptModel && (
+                <Card className="mb-6 border-2 border-dashed">
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {editingGptModel ? 'GPTモデルを編集' : 'GPTモデルを追加'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">モデル名 *</label>
+                        <Input
+                          value={gptModelFormData.name}
+                          onChange={(e) => setGptModelFormData({ ...gptModelFormData, name: e.target.value })}
+                          placeholder="例: GPT-4o"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">デプロイ名 *</label>
+                        <Input
+                          value={gptModelFormData.deploymentName}
+                          onChange={(e) => setGptModelFormData({ ...gptModelFormData, deploymentName: e.target.value })}
+                          placeholder="例: gpt-4o"
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">説明</label>
+                      <Textarea
+                        value={gptModelFormData.description}
+                        onChange={(e) => setGptModelFormData({ ...gptModelFormData, description: e.target.value })}
+                        placeholder="モデルの説明を入力"
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="isAvailable"
+                          checked={gptModelFormData.isAvailable}
+                          onChange={(e) => setGptModelFormData({ ...gptModelFormData, isAvailable: e.target.checked })}
+                          className="rounded"
+                        />
+                        <label htmlFor="isAvailable" className="text-sm font-medium">
+                          利用可能
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="isDefault"
+                          checked={gptModelFormData.isDefault}
+                          onChange={(e) => setGptModelFormData({ ...gptModelFormData, isDefault: e.target.checked })}
+                          className="rounded"
+                        />
+                        <label htmlFor="isDefault" className="text-sm font-medium">
+                          デフォルト
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleSaveGptModel}
+                        disabled={isGptModelLoading || (!gptModelFormData.name || !gptModelFormData.deploymentName)}
+                        className="flex-1"
+                      >
+                        {isGptModelLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            {editingGptModel ? '更新中...' : '保存中...'}
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            {editingGptModel ? '更新' : '保存'}
+                          </>
+                        )}
+                      </Button>
+                      <Button 
+                        onClick={handleCancelEditGptModel}
+                        variant="outline"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        キャンセル
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* 追加ボタン */}
+              {!isEditingGptModel && (
+                <div className="mb-6">
+                  <Button 
+                    onClick={() => setIsEditingGptModel(true)}
+                    className="w-full"
+                    variant="outline"
+                    disabled={isGptModelLoading}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    GPTモデルを追加
+                  </Button>
+                </div>
+              )}
+
+              {/* モデル一覧 */}
+              {isGptModelLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-muted-foreground">読み込み中...</p>
+                </div>
+              ) : gptModels.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">GPTモデルが登録されていません</p>
+                  <p className="text-sm text-muted-foreground mt-1">「GPTモデルを追加」ボタンから新しいモデルを追加してください</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">登録済みモデル</h3>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-32">モデル名</TableHead>
+                        <TableHead className="w-40">デプロイ名</TableHead>
+                        <TableHead className="w-48">説明</TableHead>
+                        <TableHead className="w-32">作成日</TableHead>
+                        <TableHead className="w-32">操作</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {gptModels.map((model) => (
+                        <TableRow key={model.id}>
+                          <TableCell className="font-medium w-32">{model.name}</TableCell>
+                          <TableCell className="w-40">{model.deploymentName}</TableCell>
+                          <TableCell className="max-w-48 truncate w-48" title={model.description || '-'}>
+                            {model.description || '-'}
+                          </TableCell>
+                          <TableCell className="w-32">
+                            {new Date(model.createdAt).toLocaleDateString('ja-JP')}
+                          </TableCell>
+                          <TableCell className="w-32">
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditGptModel(model)}
+                                className="flex items-center gap-1"
+                              >
+                                <Edit className="w-3 h-3" />
+                                編集
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteGptModel(model.id)}
+                                disabled={model.isDefault}
+                                className="flex items-center gap-1"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                削除
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+
 
         {/* 利用状況グラフタブ */}
         <TabsContent value="graph" className="space-y-6 pb-6">

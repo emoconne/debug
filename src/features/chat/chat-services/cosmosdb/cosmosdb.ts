@@ -45,7 +45,10 @@ export class CosmosDBChatMessageHistory {
       threadId: this.sessionId,
       userId: this.userId,
       context: citations,
+      searchResults: (message as any).searchResults,
     };
+
+
 
     await UpsertChat(modelToSave);
   }
@@ -58,6 +61,7 @@ function mapOpenAIChatMessages(
     return {
       role: message.role,
       content: message.content,
+      searchResults: message.searchResults,
     };
   });
 }

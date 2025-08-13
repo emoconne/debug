@@ -23,6 +23,8 @@ import {
   TextToSpeechProps,
   useTextToSpeech,
 } from "./chat-speech/use-text-to-speech";
+export type ChatStatus = 'idle' | 'searching' | 'processing' | 'generating';
+
 interface ChatContextProps extends UseChatHelpers {
   id: string;
   setChatBody: (body: PromptGPTBody) => void;
@@ -34,6 +36,10 @@ interface ChatContextProps extends UseChatHelpers {
   onConversationStyleChange: (value: ConversationStyle) => void;
   onDepartmentChange: (departmentId: string) => void;
   speech: TextToSpeechProps & SpeechToTextProps;
+  status: ChatStatus;
+  setStatus: (status: ChatStatus) => void;
+  messages: Message[];
+  isLoading: boolean;
 }
 const ChatContext = createContext<ChatContextProps | null>(null);
 interface Prop {
@@ -51,6 +57,7 @@ export const ChatProvider: FC<Prop> = (props) => {
     },
   });
   const fileState = useFileState();
+  const [status, setStatus] = useState<ChatStatus>('idle');
   const [chatBody, setBody] = useState<PromptGPTBody>({
     id: props.chatThread.id,
     chatType: props.chatThread.chatType,
@@ -72,6 +79,12 @@ export const ChatProvider: FC<Prop> = (props) => {
         await textToSpeech(lastMessage.content);
         resetMicrophoneUsed();
       }
+      setStatus('idle');
+    },
+    onError: (error) => {
+      console.error('Chat error:', error);
+      setStatus('idle');
+      showError(error.message, response.reload);
     },
   });
   const setChatBody = (body: PromptGPTBody) => {
@@ -101,6 +114,8 @@ export const ChatProvider: FC<Prop> = (props) => {
     <ChatContext.Provider
       value={{
         ...response,
+        messages: response.messages,
+        isLoading: response.isLoading,
         setChatBody,
         chatBody,
         onChatTypeChange,
@@ -110,6 +125,8 @@ export const ChatProvider: FC<Prop> = (props) => {
         onDepartmentChange,
         fileState,
         id: props.id,
+        status,
+        setStatus,
         speech: {
           ...speechSynthesizer,
           ...speechRecognizer,

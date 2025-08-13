@@ -19,9 +19,7 @@ export const initDBContainer = async () => {
       id: CONTAINER_NAME,
       partitionKey: {
         paths: ["/userId"],
-      },
-      // historyコンテナ用のスループット設定
-      throughput: 400 // historyコンテナ用
+      }
     });
 
   return containerResponse.container;
@@ -48,9 +46,7 @@ export class CosmosDBContainer {
               id: CONTAINER_NAME,
               partitionKey: {
                 paths: ["/userId"],
-              },
-              // historyコンテナ用のスループット設定
-              throughput: 400 // historyコンテナ用
+              }
             })
             .then((containerResponse) => {
               resolve(containerResponse.container);

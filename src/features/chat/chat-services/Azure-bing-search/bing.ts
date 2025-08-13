@@ -60,12 +60,9 @@ export class BingSearchResult {
 
     console.log('Attempting to authenticate with Azure AI Foundry...');
     
-    let project;
-    const apiKey = process.env.AZURE_AI_FOUNDRY_API_KEY;
-    
     console.log('Using Entra authentication with Azure CLI...');
     // DefaultAzureCredentialを使用
-    project = new AIProjectClient(projectEndpoint, new DefaultAzureCredential());
+    const project = new AIProjectClient(projectEndpoint, new DefaultAzureCredential());
     
     // エージェントを取得
     const agent = await project.agents.getAgent(agentId);
@@ -75,30 +72,10 @@ export class BingSearchResult {
     const thread = await project.agents.threads.create();
     console.log(`Created thread, ID: ${thread.id}`);
 
-    // メッセージを作成（プロンプトを工夫して関連URLを含む結果を取得）
-    const enhancedPrompt = `以下の検索クエリについて、詳細な情報と関連するURLを含めて回答してください：
-
-検索クエリ: "${searchText}"
-
-回答の形式：
-1. 検索クエリに関する詳細な情報を提供してください
-2. 関連する信頼できるWebサイトのURLを複数含めてください
-3. 各URLについて簡単な説明も添えてください
-4. 情報源として引用できる公式サイトや信頼できるニュースサイトを優先してください
-
-URLは以下のような形式で含めてください：
-- 公式サイト: https://example.com (公式サイトの説明)
-- 関連情報: https://example2.com (関連情報の説明)
-- ニュース記事: https://example3.com (ニュース記事の説明)
-
-重要：
-- 検索結果には必ず具体的なURLを含めてください
-- 各URLには説明文を添えてください
-- 信頼できる情報源を優先してください
-- 複数の異なる情報源を含めてください`;
-    
-    const message = await project.agents.messages.create(thread.id, "user", enhancedPrompt);
-    console.log(`Created message with enhanced prompt, ID: ${message.id}`);
+    // メッセージを作成（検索クエリを文字列として明示的に送信）
+    const searchMessage = `Search for: "${searchText}"`;
+    const message = await project.agents.messages.create(thread.id, "user", searchMessage);
+    console.log(`Created message, ID: ${message.id}`);
 
     // ランを作成
     let run = await project.agents.runs.create(thread.id, agent.id);
@@ -119,36 +96,157 @@ URLは以下のような形式で含めてください：
 
     console.log(`Run completed with status: ${run.status}`);
 
+    // ランからメタデータを取得
+    const runDetails = await project.agents.runs.get(thread.id, run.id);
+    console.log('Run details:', JSON.stringify(runDetails, null, 2));
+
+    // メタデータからURLを抽出
+    const metadataUrls: string[] = [];
+    if (runDetails.metadata) {
+      console.log('Run metadata:', JSON.stringify(runDetails.metadata, null, 2));
+      
+      // メタデータからURLを探す
+      const extractUrlsFromMetadata = (obj: any): string[] => {
+        const urls: string[] = [];
+        if (typeof obj === 'object' && obj !== null) {
+          for (const [key, value] of Object.entries(obj)) {
+            if (key === 'urls' && Array.isArray(value)) {
+              urls.push(...value);
+            } else if (key === 'url' && typeof value === 'string') {
+              urls.push(value);
+            } else if (typeof value === 'object') {
+              urls.push(...extractUrlsFromMetadata(value));
+            }
+          }
+        }
+        return urls;
+      };
+      
+      metadataUrls.push(...extractUrlsFromMetadata(runDetails.metadata));
+    }
+
+    // ツールリソースからURLを抽出
+    if (runDetails.toolResources) {
+      console.log('Tool resources:', JSON.stringify(runDetails.toolResources, null, 2));
+      
+      // ツールリソースからURLを探す
+      const extractUrlsFromToolResources = (obj: any): string[] => {
+        const urls: string[] = [];
+        if (typeof obj === 'object' && obj !== null) {
+          for (const [key, value] of Object.entries(obj)) {
+            if (key === 'urls' && Array.isArray(value)) {
+              urls.push(...value);
+            } else if (key === 'url' && typeof value === 'string') {
+              urls.push(value);
+            } else if (typeof value === 'object') {
+              urls.push(...extractUrlsFromToolResources(value));
+            }
+          }
+        }
+        return urls;
+      };
+      
+      metadataUrls.push(...extractUrlsFromToolResources(runDetails.toolResources));
+    }
+
+    // メッセージの内容からURLを抽出（詳細ログ付き）
+    try {
+      const messages = await project.agents.messages.list(thread.id, { order: "asc" });
+      
+      for await (const message of messages) {
+        console.log('Message:', JSON.stringify(message, null, 2));
+        
+        if (message.role === "assistant" && message.content) {
+          for (const content of message.content) {
+            console.log('Content:', JSON.stringify(content, null, 2));
+            
+            // テキストコンテンツからURLを抽出
+            if (content.type === "text" && "text" in content) {
+              const textValue = (content as any).text.value;
+              const annotations = (content as any).text.annotations;
+              
+              // annotationsからURLを抽出
+              if (annotations && Array.isArray(annotations)) {
+                for (const annotation of annotations) {
+                  if (annotation.type === "url_citation" && annotation.urlCitation) {
+                    const url = annotation.urlCitation.url;
+                    const title = annotation.urlCitation.title;
+                    console.log('Found URL citation:', { url, title });
+                    metadataUrls.push(url);
+                  }
+                }
+              }
+              
+              // テキストからもURLを抽出（フォールバック）
+              const urls = this.extractUrls(textValue);
+              if (urls.length > 0) {
+                console.log('Found URLs in text:', urls);
+                metadataUrls.push(...urls);
+              }
+            }
+            
+            // その他のコンテンツタイプも確認
+            if (content.type !== "text") {
+              console.log('Non-text content type:', content.type);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get message content:', error);
+    }
+
     // メッセージを取得
     const messages = await project.agents.messages.list(thread.id, { order: "asc" });
 
-    // メッセージから検索結果を抽出
-    const searchResults = [];
+    // メッセージを処理
+    const searchResults: Array<{
+      name: string;
+      snippet: string;
+      url: string;
+      sortOrder: number;
+    }> = [];
     for await (const m of messages) {
       const content = m.content.find((c: any) => c.type === "text" && "text" in c);
       if (content && m.role === "assistant" && "text" in content) {
         const textValue = (content as any).text.value;
         console.log(`Assistant response: ${textValue}`);
         
-        // テキストからURLを抽出
-        const urls = this.extractUrls(textValue);
+        // メタデータから取得したURLを優先し、テキストからも抽出
+        let urls = metadataUrls.length > 0 ? metadataUrls : this.extractUrls(textValue);
         
-        // メインのAI回答を検索結果として追加
-        searchResults.push({
-          name: `${searchText} - AI回答`,
-          snippet: textValue,
-          url: urls.length > 0 ? urls[0] : '#',
-          sortOrder: 0
-        });
+        // AI回答のテキストからソース情報を抽出（【3:1†source】形式）
+        const sourceUrls = this.extractSourceUrls(textValue);
+        if (sourceUrls.length > 0) {
+          // 重複を除去
+          const uniqueUrls = Array.from(new Set([...urls, ...sourceUrls]));
+          urls = uniqueUrls;
+        }
         
-        // 抽出されたURLを個別の検索結果として追加（説明付き）
+        // annotationsからURLとタイトルのマッピングを作成
+        const urlTitleMap = new Map<string, string>();
+        if (content.type === "text" && "text" in content) {
+          const annotations = (content as any).text.annotations;
+          if (annotations && Array.isArray(annotations)) {
+            for (const annotation of annotations) {
+              if (annotation.type === "url_citation" && annotation.urlCitation) {
+                urlTitleMap.set(annotation.urlCitation.url, annotation.urlCitation.title);
+              }
+            }
+          }
+        }
+        
+        // 取得したURLを個別の検索結果として追加
         urls.forEach((url: string, index: number) => {
+          // URLのタイトルを取得（annotationsから）
+          const title = urlTitleMap.get(url);
+          
           // URLの説明を抽出（URLの前後のテキストから）
           const urlDescription = this.extractUrlDescription(textValue, url);
           
           searchResults.push({
-            name: urlDescription || `関連リンク ${index + 1}`,
-            snippet: urlDescription || `「${searchText}」に関する関連情報です。`,
+            name: title || urlDescription || `関連リンク ${index + 1}`,
+            snippet: urlDescription || title || `「${searchText}」に関する関連情報です。`,
             url: url,
             sortOrder: index + 1
           });
@@ -204,4 +302,26 @@ URLは以下のような形式で含めてください：
     // 説明を適切な長さに切り詰める
     return description.length > 100 ? description.substring(0, 100) + '...' : description;
   }
+
+  private extractSourceUrls(text: string): string[] {
+    // 【3:1†source】形式のソース情報からURLを抽出
+    const sourceRegex = /【(\d+):(\d+)†source】/g;
+    const matches = text.match(sourceRegex);
+    
+    if (!matches) return [];
+    
+    // 現在はソース番号のみを返す（実際のURLは別途取得が必要）
+    // 将来的には、ソース番号とURLのマッピングを実装
+    const sourceNumbers = matches.map(match => {
+      const numbers = match.match(/(\d+):(\d+)/);
+      return numbers ? `${numbers[1]}:${numbers[2]}` : '';
+    }).filter(num => num !== '');
+    
+    console.log('Extracted source numbers:', sourceNumbers);
+    
+    // ソース番号からURLを生成（仮の実装）
+    // 実際のURLは、Bing検索の結果から取得する必要があります
+    return sourceNumbers.map(num => `https://example.com/source/${num}`);
+  }
+
 }

@@ -1,4 +1,5 @@
 import { citation } from "@/features/chat/chat-ui/markdown/citation";
+import { webCitation } from "@/features/chat/chat-ui/markdown/web-citation";
 import { Config } from "@markdoc/markdoc";
 import { fence } from "./code-block";
 import { paragraph } from "./paragraph";
@@ -10,5 +11,6 @@ export const citationConfig: Config = {
   },
   tags: {
     citation,
+    webCitation,
   },
 };

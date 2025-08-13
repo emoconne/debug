@@ -8,14 +8,30 @@ import { PromptGPTProps } from "./models";
 
 export const ChatAPISimple = async (props: PromptGPTProps) => {
   const { lastHumanMessage, chatThread } = await initAndGuardChatSession(props);
-  let chatAPIModel = "";
-  if (props.chatAPIModel === "GPT-3") {
-    chatAPIModel = "gpt-35-turbo-16k";
-  }else{
-    chatAPIModel = "gpt-4o";
+  // CosmosDBからデフォルトのGPTモデルを取得
+  let chatAPIModel = process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME || "gpt-4o";
+  
+  try {
+    const { getDefaultGPTModel } = await import("@/features/documents/cosmos-db-gpt-model-service");
+    const defaultModel = await getDefaultGPTModel();
+    if (defaultModel) {
+      chatAPIModel = defaultModel.deploymentName;
+    }
+  } catch (error) {
+    console.log('Failed to get default GPT model from CosmosDB, using environment variable:', error);
   }
   
+  console.log('Using model:', chatAPIModel);
+  
   const openAI = OpenAIInstance();
+  
+  // デバッグ情報を出力
+  console.log('OpenAI configuration:', {
+    baseURL: process.env.AZURE_OPENAI_ENDPOINT,
+    apiVersion: process.env.AZURE_OPENAI_API_VERSION,
+    deploymentName: process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME,
+    hasApiKey: !!process.env.OPENAI_API_KEY
+  });
 
   const userId = await userHashedId();
 
@@ -57,15 +73,35 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
     });
     return new StreamingTextResponse(stream);
   } catch (e: unknown) {
+    console.error('ChatAPISimple error:', e);
+    
     if (e instanceof Error) {
-      return new Response(e.message, {
+      console.error('Error details:', {
+        message: e.message,
+        stack: e.stack,
+        name: e.name
+      });
+      
+      return new Response(JSON.stringify({
+        error: e.message,
+        details: e.stack,
+        type: e.name
+      }), {
         status: 500,
-        statusText: e.toString(),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     } else {
-      return new Response("An unknown error occurred.", {
+      console.error('Unknown error:', e);
+      return new Response(JSON.stringify({
+        error: "An unknown error occurred.",
+        details: String(e)
+      }), {
         status: 500,
-        statusText: "Unknown Error",
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     }
   }

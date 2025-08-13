@@ -1,0 +1,130 @@
+"use client";
+
+import { FC } from "react";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
+
+interface WebCitation {
+  name: string;
+  id: string; // URL
+  snippet?: string; // スニペットを追加
+}
+
+interface Props {
+  items: WebCitation[];
+}
+
+export const webCitation = {
+  render: "WebCitation",
+  selfClosing: true,
+  attributes: {
+    items: {
+      type: Array,
+    },
+  },
+};
+
+export const WebCitation: FC<Props> = (props: Props) => {
+  // group citations by name
+  const citations = props.items.reduce((acc, citation) => {
+    const { name } = citation;
+    if (!acc[name]) {
+      acc[name] = [];
+    }
+    acc[name].push(citation);
+    return acc;
+  }, {} as Record<string, WebCitation[]>);
+
+    return (
+    <div className="interactive-citation p-4 border mt-4 rounded-md">
+      {Object.entries(citations).map(([name, items], index: number) => {
+        return (
+          <div key={index} className="flex flex-wrap gap-3">
+            {items.map((item, index: number) => {
+              return (
+                <div key={index}>
+                  <WebCitationButton
+                    index={index + 1}
+                    name={item.name}
+                    url={item.id}
+                    snippet={item.snippet}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+interface WebCitationButtonProps {
+  name: string;
+  index: number;
+  url: string;
+  snippet?: string;
+}
+
+const WebCitationButton: FC<WebCitationButtonProps> = (props) => {
+  const getDomainFromUrl = (url: string) => {
+    try {
+      const domain = new URL(url).hostname;
+      return domain.replace('www.', '');
+    } catch {
+      return url;
+    }
+  };
+
+  const getFaviconUrl = (url: string) => {
+    try {
+      const domain = new URL(url).hostname;
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+    } catch {
+      return '/ai-icon.png';
+    }
+  };
+
+  return (
+    <div className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer min-w-[200px] max-w-[280px]">
+      <a 
+        href={props.url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        title={props.name}
+        className="block"
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex flex-col items-center min-w-[24px]">
+            <span className="text-xs font-mono text-gray-500 border-r border-gray-200 pr-2">
+              {props.index}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <img
+                src={getFaviconUrl(props.url)}
+                alt=""
+                className="w-4 h-4 rounded"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/ai-icon.png';
+                }}
+              />
+            </div>
+            <div className="text-sm font-medium text-gray-900 truncate mb-1">
+              {props.name}
+            </div>
+            {props.snippet && (
+              <div className="text-xs text-gray-600 mb-1 line-clamp-2">
+                {props.snippet}
+              </div>
+            )}
+            <div className="text-xs text-gray-500 truncate">
+              {getDomainFromUrl(props.url)}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  );
+};
