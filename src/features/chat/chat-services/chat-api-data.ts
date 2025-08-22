@@ -36,12 +36,7 @@ export const ChatAPIData = async (props: PromptGPTProps) => {
   const openAI = OpenAIInstance();
 
   const userId = await userHashedId();
-  let chatAPIModel = "";
-  if (props.chatAPIModel === "GPT-3") {
-    chatAPIModel = "gpt-35-turbo-16k";
-  }else{
-    chatAPIModel = "gpt-4o";
-  }
+  let chatAPIModel = process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME || "gpt-4o";
 //  console.log("Model_data: ", process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME);
 //  console.log("PromptGPTProps_data: ", props.chatAPIModel);
 
@@ -66,6 +61,13 @@ export const ChatAPIData = async (props: PromptGPTProps) => {
     })
     .join("\n------\n");
 
+  console.log('Context for AI:', context);
+  console.log('Relevant documents:', relevantDocuments.map(doc => ({
+    id: doc.id,
+    metadata: doc.metadata,
+    fileName: doc.fileName
+  })));
+
   try {
     const response = await openAI.chat.completions.create({
       messages: [
@@ -87,18 +89,18 @@ export const ChatAPIData = async (props: PromptGPTProps) => {
       stream: true,
     });
 
-    const stream = OpenAIStream(response, {
+    const stream = OpenAIStream(response as any, {
       async onCompletion(completion) {
         await chatHistory.addMessage({
           content: lastHumanMessage.content,
           role: "user",
-        });
+        } as any);
 
         await chatHistory.addMessage(
           {
             content: completion,
             role: "assistant",
-          },
+          } as any,
           context
         );
       },

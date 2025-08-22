@@ -24,26 +24,68 @@ export class BingSearchResult {
       console.log('Project Endpoint:', projectEndpoint);
       console.log('Agent ID:', agentId);
       console.log('Search Text:', searchText);
+      console.log('Using Azure CLI authentication');
+
+      // 認証の確認
+      try {
+        const { DefaultAzureCredential } = await import("@azure/identity");
+        const credential = new DefaultAzureCredential();
+        console.log('DefaultAzureCredential created successfully');
+        
+        // 認証トークンの取得を試行
+        const token = await credential.getToken("https://cognitiveservices.azure.com/.default");
+        console.log('Authentication successful, token obtained');
+      } catch (authError) {
+        console.error('Authentication failed:', authError);
+        throw new Error(`認証に失敗しました: ${authError instanceof Error ? authError.message : '不明なエラー'}`);
+      }
 
       // タイムアウト付きでAzure AI Projects SDKを実行
       const result = await Promise.race([
         this.executeAzureAISearch(projectEndpoint, agentId, searchText),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Azure AI Projects SDK timeout')), 30000)
+          setTimeout(() => reject(new Error('Azure AI Projects SDK timeout (60秒)')), 60000)
         )
       ]);
 
       return result;
     } catch (err) {
       console.error('Azure AI Project error:', err);
+      console.error('Error details:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined
+      });
+      
+      // エラーの種類に応じた詳細なメッセージを生成
+      let errorMessage = '不明なエラー';
+      let suggestion = 'しばらく時間をおいて再度お試しください。';
+      
+      if (err instanceof Error) {
+        if (err.message.includes('認証')) {
+          errorMessage = '認証エラー';
+          suggestion = 'Azure CLIでログインしてください: az login';
+        } else if (err.message.includes('timeout')) {
+          errorMessage = 'タイムアウトエラー';
+          suggestion = 'ネットワーク接続を確認してください。';
+        } else if (err.message.includes('404') || err.message.includes('Not Found')) {
+          errorMessage = 'リソースが見つかりません';
+          suggestion = 'エンドポイントとエージェントIDを確認してください。';
+        } else if (err.message.includes('403') || err.message.includes('Forbidden')) {
+          errorMessage = 'アクセス権限がありません';
+          suggestion = '適切な権限を持つアカウントでログインしてください。';
+        } else {
+          errorMessage = err.message;
+        }
+      }
       
       // エラーが発生した場合は基本的な検索結果を返す
       return {
         webPages: {
           value: [
             {
-              name: '検索結果',
-              snippet: `「${searchText}」についての検索中にエラーが発生しました。しばらく時間をおいて再度お試しください。`,
+              name: '検索エラー',
+              snippet: `「${searchText}」についての検索中にエラーが発生しました。\n\nエラー: ${errorMessage}\n\n対処法: ${suggestion}`,
               url: '#',
               sortOrder: 0
             }
@@ -60,8 +102,8 @@ export class BingSearchResult {
 
     console.log('Attempting to authenticate with Azure AI Foundry...');
     
-    console.log('Using Entra authentication with Azure CLI...');
-    // DefaultAzureCredentialを使用
+    console.log('Using DefaultAzureCredential with Azure CLI...');
+    // DefaultAzureCredentialを使用（az loginでログイン済み）
     const project = new AIProjectClient(projectEndpoint, new DefaultAzureCredential());
     
     // エージェントを取得

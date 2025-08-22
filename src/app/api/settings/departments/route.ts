@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
         description: description || '',
         blobContainerName: containerName,
         isActive: isActive !== undefined ? isActive : true,
+        sortOrder: 0, // デフォルトのソート順
       });
 
       return NextResponse.json({

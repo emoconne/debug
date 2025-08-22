@@ -10,6 +10,7 @@ import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 
+
 interface ChatRowProps {
   name: string;
   profilePicture: string;
@@ -35,8 +36,6 @@ const ChatRow: FC<ChatRowProps> = (props) => {
     return null;
   }
   
-
-  
   const toggleIcon = () => {
     setIsIconChecked((prevState) => !prevState);
   };
@@ -45,7 +44,6 @@ const ChatRow: FC<ChatRowProps> = (props) => {
     toggleIcon();
     navigator.clipboard.writeText(props.message);
   };
-
 
 
 
@@ -104,10 +102,19 @@ const ChatRow: FC<ChatRowProps> = (props) => {
               : "bg-primary text-white"
           )}
         >
+          {/* デバッグ用: Citationのテスト */}
+          {props.type === "assistant" && (
+            <div className="mb-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-xs">
+              <div>Debug: Message content preview</div>
+              <div>Length: {props.message?.length || 0}</div>
+              <div>Contains citation: {props.message?.includes('{% citation') ? 'Yes' : 'No'}</div>
+              <div>Content: {props.message?.substring(0, 200)}...</div>
+            </div>
+          )}
           <Markdown content={props.message} />
         </div>
 
-        {/* WebCitationはMarkdownレンダリングで表示されるため、ここでは手動表示しない */}
+
       </div>
     </div>
   );

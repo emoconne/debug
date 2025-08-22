@@ -128,10 +128,13 @@ export async function downloadFile(containerName: string, blobName: string): Pro
     const downloadResponse = await blockBlobClient.download();
     const arrayBuffer = await streamToArrayBuffer(downloadResponse.readableStreamBody!);
     
+    // blobNameからタイムスタンプを除去して元のファイル名を取得
+    const originalName = blobName.replace(/^\d+_/, '');
+    
     return {
       data: arrayBuffer,
       contentType: downloadResponse.contentType || 'application/octet-stream',
-      originalName: blobName,
+      originalName: originalName,
     };
   } catch (error) {
     console.error("Error downloading file:", error);

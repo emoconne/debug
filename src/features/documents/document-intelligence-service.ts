@@ -12,7 +12,8 @@ import {
 } from "@/features/chat/chat-services/azure-cog-search/azure-cog-vector-store";
 import { userHashedId } from "@/features/auth/helpers";
 import { chunkDocumentWithOverlap, TextChunk } from "@/features/chat/chat-services/text-chunk";
-import { updateDocument } from "./cosmos-db-document-service";
+import { updateDocument, getDocument } from "./cosmos-db-document-service";
+import { generateSasUrl } from "./azure-blob-service";
 
 const MAX_DOCUMENT_SIZE = 20000000;
 
@@ -124,19 +125,47 @@ export const indexDocumentToSearch = async (
 ): Promise<void> => {
   try {
     console.log('=== INDEX DOCUMENT TO SEARCH START ===');
-    console.log('Indexing document:', { fileName, docsCount: docs.length, documentId, departmentName });
+    console.log('Indexing document:', { 
+      fileName, 
+      docsCount: docs.length, 
+      documentId, 
+      departmentName 
+    });
     
     // AI Searchの設定を確認
+    console.log('Ensuring search is configured...');
     await ensureSearchIsConfigured();
+    console.log('Search configuration verified');
     
     // ドキュメントをチャンクに分割
+    console.log('Chunking document content...');
     const splitDocuments = chunkDocumentWithOverlap(docs.join("\n"));
     console.log('Chunking completed, chunks count:', splitDocuments.length);
     
     const documentsToIndex: AzureCogDocumentIndex[] = [];
     const userId = await userHashedId();
+    console.log('User ID for indexing:', userId);
 
-    for (const doc of splitDocuments) {
+    // CosmosDBからドキュメント情報を取得してSAS URLを生成
+    console.log('Generating SAS URL for document...');
+    const document = await getDocument(documentId);
+    if (!document) {
+      throw new Error('ドキュメント情報が見つかりません');
+    }
+
+    let sasUrl = '';
+    if (document.containerName && document.blobName) {
+      try {
+        sasUrl = await generateSasUrl(document.containerName, document.blobName);
+        console.log('SAS URL generated successfully');
+      } catch (error) {
+        console.warn('Failed to generate SAS URL:', error);
+        sasUrl = '';
+      }
+    }
+
+    for (let i = 0; i < splitDocuments.length; i++) {
+      const doc = splitDocuments[i];
       // TextChunkオブジェクトからcontent文字列を抽出
       let pageContent: string;
       if (typeof doc === 'string') {
@@ -144,13 +173,13 @@ export const indexDocumentToSearch = async (
       } else if (doc && typeof doc === 'object' && 'content' in doc) {
         pageContent = (doc as TextChunk).content;
       } else {
-        console.warn('Unexpected document format:', doc);
+        console.warn('Unexpected document format at index', i, ':', doc);
         continue; // このドキュメントをスキップ
       }
       
       // 空のコンテンツをスキップ
       if (!pageContent || pageContent.trim().length === 0) {
-        console.warn('Empty document content, skipping');
+        console.warn('Empty document content at index', i, ', skipping');
         continue;
       }
       
@@ -163,12 +192,18 @@ export const indexDocumentToSearch = async (
         chatType: "doc", // 社内FAQ検索用
         deptName: departmentName,
         embedding: [],
+        sasUrl: sasUrl, // SAS URLを追加
       };
 
       documentsToIndex.push(docToAdd);
     }
 
     console.log('Documents prepared for indexing:', documentsToIndex.length);
+    if (documentsToIndex.length === 0) {
+      throw new Error('インデックス化するドキュメントがありません');
+    }
+    
+    console.log('Starting document indexing...');
     await indexDocuments(documentsToIndex);
     console.log('Documents indexed successfully');
 
@@ -177,7 +212,18 @@ export const indexDocumentToSearch = async (
     console.log('Document status updated to completed');
 
   } catch (e) {
-    console.error('IndexDocumentToSearch error:', e);
+    console.error('=== INDEX DOCUMENT TO SEARCH ERROR ===');
+    console.error('Error details:', {
+      fileName,
+      documentId,
+      departmentName,
+      docsCount: docs.length,
+      error: e instanceof Error ? {
+        name: e.name,
+        message: e.message,
+        stack: e.stack
+      } : e
+    });
     
     // エラーが発生した場合はステータスをエラーに更新
     try {
@@ -193,11 +239,22 @@ export const indexDocumentToSearch = async (
 
 // AI Searchの設定確認
 export const ensureSearchIsConfigured = async (): Promise<void> => {
-  const isSearchConfigured =
-    process.env.AZURE_SEARCH_NAME &&
-    process.env.AZURE_SEARCH_API_KEY &&
-    process.env.AZURE_SEARCH_INDEX_NAME &&
-    process.env.AZURE_SEARCH_API_VERSION;
+  console.log('=== ENSURING SEARCH IS CONFIGURED ===');
+  
+  // 環境変数の確認
+  const searchEndpoint = process.env.AZURE_SEARCH_ENDPOINT;
+  const searchKey = process.env.AZURE_SEARCH_API_KEY || process.env.AZURE_SEARCH_KEY;
+  const searchIndexName = process.env.AZURE_SEARCH_INDEX_NAME;
+  const searchApiVersion = process.env.AZURE_SEARCH_API_VERSION;
+  
+  console.log('Search configuration check:', {
+    endpoint: searchEndpoint ? 'SET' : 'NOT_SET',
+    key: searchKey ? 'SET' : 'NOT_SET',
+    indexName: searchIndexName || 'NOT_SET',
+    apiVersion: searchApiVersion || 'NOT_SET'
+  });
+
+  const isSearchConfigured = searchEndpoint && searchKey && searchIndexName && searchApiVersion;
 
   if (!isSearchConfigured) {
     throw new Error("Azure search environment variables are not configured.");
@@ -219,7 +276,9 @@ export const ensureSearchIsConfigured = async (): Promise<void> => {
     throw new Error("Azure openai embedding variables are not configured.");
   }
 
+  console.log('All configurations verified, ensuring index is created...');
   await ensureIndexIsCreated();
+  console.log('Search configuration completed successfully');
 };
 
 // 非同期でドキュメント処理を実行
@@ -230,22 +289,44 @@ export const processDocumentAsync = async (
 ): Promise<void> => {
   try {
     console.log('=== PROCESS DOCUMENT ASYNC START ===');
-    console.log('Processing document:', { fileName: file.name, documentId, departmentName });
+    console.log('Processing document:', { 
+      fileName: file.name, 
+      documentId, 
+      departmentName,
+      fileSize: file.size,
+      fileType: file.type
+    });
 
     // ステータスを処理中に更新
     await updateDocument(documentId, { status: 'processing' });
     console.log('Document status updated to processing');
 
     // Document Intelligenceでファイルを処理
+    console.log('Starting Document Intelligence processing...');
     const docs = await processFileWithDocumentIntelligence(file);
-    console.log('Document Intelligence processing completed');
+    console.log('Document Intelligence processing completed, extracted paragraphs:', docs.length);
+
+    if (docs.length === 0) {
+      throw new Error('Document Intelligenceでテキストが抽出されませんでした');
+    }
 
     // AI Searchにインデックス化
+    console.log('Starting AI Search indexing...');
     await indexDocumentToSearch(file.name, docs, documentId, departmentName);
     console.log('Document processing completed successfully');
 
   } catch (error) {
-    console.error('ProcessDocumentAsync error:', error);
+    console.error('=== PROCESS DOCUMENT ASYNC ERROR ===');
+    console.error('Error details:', {
+      fileName: file.name,
+      documentId,
+      departmentName,
+      error: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      } : error
+    });
     
     // エラーが発生した場合はステータスをエラーに更新
     try {
@@ -255,6 +336,7 @@ export const processDocumentAsync = async (
       console.error('Failed to update document status to error:', updateError);
     }
     
-    throw error;
+    // エラーを再スローしない（非同期処理なので）
+    console.error('Document processing failed but continuing:', error);
   }
 };

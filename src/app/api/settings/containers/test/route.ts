@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "接続テストが成功しました",
       accountInfo: {
-        name: accountInfo.accountName,
+        name: (accountInfo as any).accountName || 'Unknown',
         skuName: accountInfo.skuName,
         containerCount: containers.length
       }

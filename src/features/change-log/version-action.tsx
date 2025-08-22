@@ -1,6 +1,7 @@
 import { appVersionDetails } from "./app-version";
+import React from "react";
 
-export const UpdateIndicatorAction = async (): Promise<JSX.Element | null> => {
+export const UpdateIndicatorAction = async (): Promise<React.JSX.Element | null> => {
   try {
     const appVersion = await appVersionDetails();
 

@@ -7,8 +7,12 @@ export interface AzureCogDocumentIndex {
   user: string;
   chatThreadId: string;
   metadata: string;
+  // 元の（タイムスタンプ無しの）ファイル名
+  fileName?: string;
   chatType: string;
   deptName: string;
+  createdAt?: string;
+  sasUrl?: string; // SAS URLフィールドを追加
 }
 
 interface DocumentSearchResponseModel<TModel> {
@@ -27,9 +31,10 @@ type DocumentDeleteModel = {
 export interface AzureCogDocument {}
 
 type AzureCogVectorField = {
-  value: number[];
+  vector: number[];
   fields: string;
   k: number;
+  kind: string;
 };
 
 type AzureCogFilter = {
@@ -43,7 +48,7 @@ type AzureCogRequestObject = {
   search: string;
   facets: string[];
   filter: string;
-  vectors: AzureCogVectorField[];
+  vectorQueries?: AzureCogVectorField[];
   top: number;
 };
 
@@ -57,7 +62,6 @@ export const simpleSearch = async (
     search: filter?.search || "*",
     facets: filter?.facets || [],
     filter: filter?.filter || "",
-    vectors: [],
     top: filter?.top || 10,
   };
 
@@ -105,8 +109,8 @@ export const similaritySearchVectorWithScore = async (
     search: filter?.search || "*",
     facets: filter?.facets || [],
     filter: filter?.filter || "",
-    vectors: [
-      { value: embeddings.data[0].embedding, fields: "embedding", k: k },
+    vectorQueries: [
+      { vector: embeddings.data[0].embedding, fields: "embedding", k: k, kind: "vector" },
     ],
     top: filter?.top || k,
   };
@@ -135,6 +139,20 @@ export const indexDocuments = async (
     console.log('Generating embeddings...');
     await embedDocuments(documents);
     console.log('Embeddings generated successfully');
+
+    // 埋め込み次元数の確認
+    if (documents.length > 0 && documents[0].embedding) {
+      console.log('Embedding dimensions check:', {
+        documentId: documents[0].id,
+        embeddingLength: documents[0].embedding.length,
+        expectedDimensions: 3072 // text-embedding-3-largeの次元数
+      });
+      
+      // 次元数が一致しない場合は警告
+      if (documents[0].embedding.length !== 3072) {
+        console.warn(`WARNING: Embedding dimensions mismatch! Expected 3072, got ${documents[0].embedding.length}`);
+      }
+    }
 
     const documentIndexRequest: DocumentSearchResponseModel<AzureCogDocumentIndex> =
       {
@@ -238,198 +256,148 @@ export const embedDocuments = async (
     console.log('=== embedDocuments START ===');
     console.log('Documents to embed:', documents.length);
     
-    // 各ドキュメントのpageContentの型と内容をログ出力
-    documents.forEach((doc, index) => {
-      console.log(`Document ${index}:`);
-      console.log('  - pageContent type:', typeof doc.pageContent);
-      console.log('  - pageContent is array:', Array.isArray(doc.pageContent));
-      console.log('  - pageContent is object:', doc.pageContent && typeof doc.pageContent === 'object');
-      console.log('  - pageContent value:', doc.pageContent);
-      console.log('  - pageContent length:', doc.pageContent?.length);
-      console.log('  - pageContent keys (if object):', doc.pageContent && typeof doc.pageContent === 'object' ? Object.keys(doc.pageContent) : 'N/A');
-    });
-    
     const openai = OpenAIEmbeddingInstance();
 
-    // 空のテキストや無効な文字をフィルタリング
-    const contentsToEmbed = documents
-      .map((d, index) => {
-        console.log(`Processing document ${index} pageContent:`, d.pageContent);
-        return d.pageContent;
-      })
-      .filter((content: any, index) => {
-        console.log(`Filtering content ${index}:`, content);
-        console.log(`Content type:`, typeof content);
-        console.log(`Content is array:`, Array.isArray(content));
-        
-        // 型チェック: 文字列でない場合は文字列に変換
-        let contentStr = content;
-        if (typeof content !== 'string') {
-          console.log(`Converting non-string content ${index} to string`);
-          if (Array.isArray(content)) {
-            contentStr = content.join(' ');
-            console.log(`Converted array to string:`, contentStr);
-          } else if (content && typeof content === 'object') {
-            contentStr = JSON.stringify(content);
-            console.log(`Converted object to string:`, contentStr);
-          } else {
-            contentStr = String(content || '');
-            console.log(`Converted other type to string:`, contentStr);
-          }
-        }
-
-        // 空の文字列、null、undefinedを除外
-        if (!contentStr || contentStr.trim().length === 0) {
-          console.log(`Filtering out empty content ${index}`);
-          return false;
-        }
-        
-        // 制御文字や無効な文字をチェック
-        const hasInvalidChars = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(contentStr);
-        if (hasInvalidChars) {
-          console.log(`Filtering out content ${index} with invalid characters`);
-          return false;
-        }
-        
-        console.log(`Content ${index} passed filter`);
-        return true;
-      })
-      .map((content: any, index) => {
-        console.log(`Mapping content ${index}:`, content);
-        // 型チェック: 文字列でない場合は文字列に変換
-        let contentStr = content;
-        if (typeof content !== 'string') {
-          console.log(`Converting non-string content ${index} to string in map`);
-          if (Array.isArray(content)) {
-            contentStr = content.join(' ');
-          } else if (content && typeof content === 'object') {
-            contentStr = JSON.stringify(content);
-          } else {
-            contentStr = String(content || '');
-          }
-        }
-        const trimmed = contentStr.trim();
-        console.log(`Mapped content ${index} result:`, trimmed);
-        return trimmed; // 前後の空白を削除
+    // 各ドキュメントのpageContentを処理
+    for (let i = 0; i < documents.length; i++) {
+      const doc = documents[i];
+      console.log(`Processing document ${i}:`, {
+        id: doc.id,
+        pageContentType: typeof doc.pageContent,
+        pageContentLength: doc.pageContent?.length
       });
 
-    console.log('Valid contents to embed:', contentsToEmbed.length);
-    console.log('Content lengths:', contentsToEmbed.map(c => c.length));
+      // pageContentを文字列に変換
+      let contentStr = '';
+      if (typeof doc.pageContent === 'string') {
+        contentStr = doc.pageContent;
+      } else if (Array.isArray(doc.pageContent)) {
+        contentStr = (doc.pageContent as any[]).join(' ');
+      } else if (doc.pageContent && typeof doc.pageContent === 'object') {
+        contentStr = JSON.stringify(doc.pageContent);
+      } else {
+        contentStr = String(doc.pageContent || '');
+      }
 
-    // 有効なコンテンツがない場合は早期リターン
-    if (contentsToEmbed.length === 0) {
-      console.log('No valid content to embed');
-      return;
+      // 空の文字列をスキップ
+      if (!contentStr || contentStr.trim().length === 0) {
+        console.log(`Skipping empty content for document ${i}`);
+        continue;
+      }
+
+      // 制御文字を除去
+      contentStr = contentStr.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+      // embeddingを生成
+      try {
+        console.log(`Generating embedding for document ${i} using model:`, process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME);
+        const embedding = await openai.embeddings.create({
+          model: process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME,
+          input: contentStr,
+        });
+
+        doc.embedding = embedding.data[0].embedding;
+        console.log(`Embedding generated for document ${i}, length:`, doc.embedding.length, 'using model:', process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME);
+      } catch (embedError) {
+        console.error(`Failed to generate embedding for document ${i}:`, embedError);
+        // エラーが発生した場合は空の配列を設定
+        doc.embedding = [];
+      }
     }
 
-    console.log('Calling OpenAI embeddings API...');
-    const embeddings = await openai.embeddings.create({
-      input: contentsToEmbed,
-      model: process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME,
-    });
-
-    console.log('Embeddings received:', embeddings.data.length);
-    
-    // embeddingsを対応するドキュメントに割り当て
-    let embeddingIndex = 0;
-    documents.forEach((document, index) => {
-      console.log(`Assigning embedding to document ${index}`);
-      let content: any = document.pageContent;
-      
-      // 型チェック: 文字列でない場合は文字列に変換
-      if (typeof content !== 'string') {
-        console.log(`Converting document ${index} content to string`);
-        if (Array.isArray(content)) {
-          content = content.join(' ');
-        } else if (content && typeof content === 'object') {
-          content = JSON.stringify(content);
-        } else {
-          content = String(content || '');
-        }
-      }
-      
-      const contentStr = content.trim();
-      console.log(`Document ${index} content after trim:`, contentStr);
-      // 有効なコンテンツの場合のみembeddingを割り当て
-      if (contentStr && contentStr.length > 0 && !/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(contentStr)) {
-        if (embeddingIndex < embeddings.data.length) {
-          document.embedding = embeddings.data[embeddingIndex].embedding;
-          console.log(`Assigned embedding ${embeddingIndex} to document ${index}`);
-          embeddingIndex++;
-        }
-      } else {
-        console.log(`Skipped embedding assignment for document ${index}`);
-      }
-    });
-    
-    console.log('Embeddings assigned to documents successfully');
-  } catch (e) {
-    console.error('EmbedDocuments error:', e);
-    console.error('Error stack:', e instanceof Error ? e.stack : 'No stack trace');
-    const error = e as any;
-    
-    // より詳細なエラーメッセージを提供
-    if (error.status) {
-      if (error.status === 401) {
-        throw new Error('OpenAI API認証エラー: APIキーを確認してください');
-      } else if (error.status === 429) {
-        throw new Error('OpenAI APIレート制限: しばらく待ってから再試行してください');
-      } else if (error.status === 400) {
-        throw new Error(`OpenAI APIリクエストエラー: ${error.message || '無効なリクエスト'}`);
-      } else {
-        throw new Error(`OpenAI APIエラー (${error.status}): ${error.message || 'Unknown error'}`);
-      }
-    } else {
-      throw new Error(`Embedding生成エラー: ${error.message || 'Unknown error'}`);
-    }
+    console.log('=== embedDocuments COMPLETED ===');
+  } catch (error) {
+    console.error('embedDocuments error:', error);
+    throw error;
   }
 };
 
+
 const baseUrl = (): string => {
-  return `https://${process.env.AZURE_SEARCH_NAME}.search.windows.net/indexes`;
+  const endpoint = process.env.AZURE_SEARCH_ENDPOINT;
+  if (!endpoint) {
+    throw new Error('AZURE_SEARCH_ENDPOINT is not configured');
+  }
+  return `${endpoint}/indexes`;
 };
 
 const baseIndexUrl = (): string => {
-  return `https://${process.env.AZURE_SEARCH_NAME}.search.windows.net/indexes/${process.env.AZURE_SEARCH_INDEX_NAME}`;
+  const endpoint = process.env.AZURE_SEARCH_ENDPOINT;
+  const indexName = process.env.AZURE_SEARCH_INDEX_NAME;
+  if (!endpoint || !indexName) {
+    throw new Error('AZURE_SEARCH_ENDPOINT or AZURE_SEARCH_INDEX_NAME is not configured');
+  }
+  return `${endpoint}/indexes/${indexName}`;
 };
 
 const fetcher = async (url: string, init?: RequestInit) => {
   try {
-    console.log('Fetcher request:', { url, method: init?.method });
+    console.log('=== FETCHER REQUEST ===');
+    console.log('URL:', url);
+    console.log('Method:', init?.method || 'GET');
+    console.log('Headers:', {
+      'Content-Type': 'application/json',
+      'api-key': process.env.AZURE_SEARCH_API_KEY || process.env.AZURE_SEARCH_KEY ? 'SET' : 'NOT_SET'
+    });
+    
+    if (init?.body) {
+      console.log('Request body preview:', JSON.stringify(init.body).substring(0, 200) + '...');
+    }
     
     const response = await fetch(url, {
       ...init,
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
-        "api-key": process.env.AZURE_SEARCH_API_KEY,
+        "api-key": process.env.AZURE_SEARCH_API_KEY || process.env.AZURE_SEARCH_KEY || '',
       },
     });
 
-    console.log('Fetcher response status:', response.status);
+    console.log('=== FETCHER RESPONSE ===');
+    console.log('Status:', response.status);
+    console.log('Status Text:', response.statusText);
+    console.log('Headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       let errorMessage = `Azure Cognitive Search Error: ${response.status} ${response.statusText}`;
+      let errorDetails = null;
       
       try {
         const err = await response.json();
+        errorDetails = err;
         if (err.error?.message) {
           errorMessage = `Azure Cognitive Search Error: ${err.error.message}`;
         } else if (err.message) {
           errorMessage = `Azure Cognitive Search Error: ${err.message}`;
         }
       } catch (parseError) {
-        // JSON解析に失敗した場合は、デフォルトのエラーメッセージを使用
+        console.log('Failed to parse error response as JSON');
       }
+      
+      console.error('=== FETCHER ERROR ===');
+      console.error('Error message:', errorMessage);
+      console.error('Error details:', errorDetails);
+      console.error('Response status:', response.status);
+      console.error('Response status text:', response.statusText);
       
       throw new Error(errorMessage);
     }
 
     const result = await response.json();
-    console.log('Fetcher response received successfully');
+    console.log('=== FETCHER SUCCESS ===');
+    console.log('Response received successfully');
     return result;
   } catch (error) {
-    console.error('Fetcher error:', error);
+    console.error('=== FETCHER EXCEPTION ===');
+    console.error('Exception details:', {
+      url,
+      method: init?.method || 'GET',
+      error: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      } : error
+    });
     throw error;
   }
 };
@@ -437,32 +405,126 @@ const fetcher = async (url: string, init?: RequestInit) => {
 export const ensureIndexIsCreated = async (): Promise<void> => {
   try {
     console.log('=== ensureIndexIsCreated START ===');
-    const url = `${baseIndexUrl()}?api-version=${
-      process.env.AZURE_SEARCH_API_VERSION
-    }`;
+    
+    // 環境変数の確認
+    const endpoint = process.env.AZURE_SEARCH_ENDPOINT;
+    const key = process.env.AZURE_SEARCH_API_KEY || process.env.AZURE_SEARCH_KEY;
+    const indexName = process.env.AZURE_SEARCH_INDEX_NAME;
+    const apiVersion = process.env.AZURE_SEARCH_API_VERSION;
+    
+    console.log('Index creation environment check:', {
+      endpoint: endpoint ? 'SET' : 'NOT_SET',
+      key: key ? 'SET' : 'NOT_SET',
+      indexName: indexName || 'NOT_SET',
+      apiVersion: apiVersion || 'NOT_SET'
+    });
 
-    console.log('Checking if index exists...');
-    await fetcher(url);
-    console.log('Index exists, no need to create');
+    if (!endpoint || !key || !indexName || !apiVersion) {
+      throw new Error('AI Search environment variables are not properly configured');
+    }
+
+    // 埋め込みモデルの次元数を事前に確認
+    console.log('Checking embedding model dimensions...');
+    const dimensions = await getEmbeddingDimensions();
+    console.log(`Detected embedding dimensions: ${dimensions}`);
+
+    // 強制的にインデックスを再作成（ベクトル次元の問題を解決するため）
+    console.log('Force recreating index to ensure correct dimensions...');
+    await deleteCogSearchIndex();
+    await createCogSearchIndex();
+    console.log('Index recreated successfully with correct dimensions');
+    
   } catch (e) {
-    console.log('Index does not exist, creating new index...');
+    console.log('Error occurred during index recreation, creating new index...');
+    console.log('Error details:', e);
     await createCogSearchIndex();
     console.log('Index created successfully');
   }
 };
 
 const createCogSearchIndex = async (): Promise<void> => {
-  const url = `${baseUrl()}?api-version=${
-    process.env.AZURE_SEARCH_API_VERSION
-  }`;
-
-  await fetcher(url, {
-    method: "POST",
-    body: JSON.stringify(AZURE_SEARCH_INDEX),
-  });
+  try {
+    console.log('=== createCogSearchIndex START ===');
+    
+    const endpoint = process.env.AZURE_SEARCH_ENDPOINT;
+    const indexName = process.env.AZURE_SEARCH_INDEX_NAME;
+    const apiVersion = process.env.AZURE_SEARCH_API_VERSION;
+    
+    // 埋め込みモデルの次元数を取得
+    const dimensions = await getEmbeddingDimensions();
+    console.log(`Using embedding dimensions: ${dimensions}`);
+    
+    const url = `${baseUrl()}?api-version=${apiVersion}`;
+    console.log('Creating index URL:', url);
+    
+    const indexDefinition = getAzureSearchIndexDefinition(dimensions);
+    
+    console.log('Index definition:', JSON.stringify(indexDefinition, null, 2));
+    
+    await fetcher(url, {
+      method: "POST",
+      body: JSON.stringify(indexDefinition),
+    });
+    
+    console.log('Index creation request sent successfully');
+  } catch (error) {
+    console.error('=== createCogSearchIndex ERROR ===');
+    console.error('Error details:', {
+      endpoint: process.env.AZURE_SEARCH_ENDPOINT,
+      indexName: process.env.AZURE_SEARCH_INDEX_NAME,
+      apiVersion: process.env.AZURE_SEARCH_API_VERSION,
+      error: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      } : error
+    });
+    throw error;
+  }
 };
 
-const AZURE_SEARCH_INDEX = {
+// 埋め込みモデルの次元数を取得する関数
+const getEmbeddingDimensions = async (): Promise<number> => {
+  try {
+    console.log('Getting embedding dimensions for model:', process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME);
+    const openai = OpenAIEmbeddingInstance();
+    const testEmbedding = await openai.embeddings.create({
+      input: "test",
+      model: process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME,
+    });
+    
+    const dimensions = testEmbedding.data[0].embedding.length;
+    console.log(`Detected embedding dimensions: ${dimensions} for model: ${process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME}`);
+    return dimensions;
+  } catch (error) {
+    console.error('Error getting embedding dimensions:', error);
+    // デフォルト値として1536を返す
+    return 1536;
+  }
+};
+
+// インデックス削除関数
+const deleteCogSearchIndex = async (): Promise<void> => {
+  try {
+    const endpoint = process.env.AZURE_SEARCH_ENDPOINT;
+    const indexName = process.env.AZURE_SEARCH_INDEX_NAME;
+    const apiVersion = process.env.AZURE_SEARCH_API_VERSION || '2025-05-01-preview';
+    
+    const url = `${baseUrl()}/${indexName}?api-version=${apiVersion}`;
+    console.log('Deleting index URL:', url);
+    
+    await fetcher(url, {
+      method: "DELETE",
+    });
+    
+    console.log('Index deletion request sent successfully');
+  } catch (error) {
+    console.error('Error deleting index:', error);
+    // 削除エラーは無視（インデックスが存在しない場合など）
+  }
+};
+
+const getAzureSearchIndexDefinition = (dimensions: number = 1536) => ({
   name: process.env.AZURE_SEARCH_INDEX_NAME,
   fields: [
     {
@@ -493,6 +555,15 @@ const AZURE_SEARCH_INDEX = {
       type: "Edm.String",
     },
     {
+      // 元の（タイムスタンプ無しの）ファイル名
+      name: "fileName",
+      type: "Edm.String",
+      searchable: true,
+      filterable: true,
+      sortable: false,
+      facetable: false,
+    },
+    {
       name : "chatType",
       type: "Edm.String",
       searchable: true,
@@ -505,6 +576,38 @@ const AZURE_SEARCH_INDEX = {
       filterable: true,
     },
     {
+      name: "source",
+      type: "Edm.String",
+      searchable: true,
+      filterable: true,
+    },
+    {
+      name: "confidence",
+      type: "Edm.Double",
+      filterable: true,
+      sortable: true,
+    },
+    {
+      name: "reasoning",
+      type: "Edm.String",
+      searchable: true,
+    },
+    {
+      name: "createdAt",
+      type: "Edm.DateTimeOffset",
+      filterable: true,
+      sortable: true,
+    },
+    {
+      name: "sasUrl",
+      type: "Edm.String",
+      searchable: false,
+      filterable: false,
+      sortable: false,
+      facetable: false,
+      retrievable: true,
+    },
+    {
       name: "embedding",
       type: "Collection(Edm.Single)",
       searchable: true,
@@ -512,7 +615,7 @@ const AZURE_SEARCH_INDEX = {
       sortable: false,
       facetable: false,
       retrievable: true,
-      dimensions: 1536,
+      dimensions: dimensions,
       vectorSearchProfile: "default",
     },
   ],
@@ -530,4 +633,4 @@ const AZURE_SEARCH_INDEX = {
       },
     ],
   },
-};
+});

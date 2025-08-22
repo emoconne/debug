@@ -35,6 +35,7 @@ import { useSession } from "next-auth/react";
 import { useGlobalMessageContext } from "@/features/global-message/global-message-context";
 import { Department } from "@/features/documents/cosmos-db-dept-service";
 import { GPTModelData } from "@/features/documents/cosmos-db-gpt-model-service";
+import { DepartmentTable } from "./department-table";
 
 
 interface DepartmentFormData {
@@ -165,7 +166,7 @@ export const SettingsManagement = () => {
   // BLOBコンテナを追加
   const addContainer = async () => {
     if (!newContainerName.trim()) {
-      showError('コンテナ名を入力してください');
+              showError('コンテナ名を入力してください');
       return;
     }
 
@@ -182,18 +183,18 @@ export const SettingsManagement = () => {
 
       if (response.ok) {
         const data = await response.json();
-        showSuccess({
-          title: 'コンテナ作成',
-          description: data.message || 'コンテナが作成されました'
-        });
+                  showSuccess({
+            title: 'コンテナ作成',
+            description: data.message || 'コンテナが作成されました'
+          });
         setNewContainerName('');
         fetchContainers();
       } else {
         const errorData = await response.json();
-        showError(errorData.error || 'コンテナの作成に失敗しました');
-      }
-    } catch (error) {
-      showError('コンテナの作成に失敗しました');
+                  showError(errorData.error || 'コンテナの作成に失敗しました');
+        }
+      } catch (error) {
+        showError('コンテナの作成に失敗しました');
     } finally {
       setIsContainerLoading(false);
     }
@@ -214,17 +215,17 @@ export const SettingsManagement = () => {
 
       if (response.ok) {
         const data = await response.json();
-        showSuccess({
-          title: 'コンテナ削除',
-          description: data.message || 'コンテナが削除されました'
-        });
+                  showSuccess({
+            title: 'コンテナ削除',
+            description: data.message || 'コンテナが削除されました'
+          });
         fetchContainers();
       } else {
         const errorData = await response.json();
-        showError(errorData.error || 'コンテナの削除に失敗しました');
-      }
-    } catch (error) {
-      showError('コンテナの削除に失敗しました');
+                  showError(errorData.error || 'コンテナの削除に失敗しました');
+        }
+      } catch (error) {
+        showError('コンテナの削除に失敗しました');
     } finally {
       setIsContainerLoading(false);
     }
@@ -241,10 +242,10 @@ export const SettingsManagement = () => {
         setHasMoreResults(data.resources && data.resources.length === reportPageSize);
         setReportPageNumber(pageNumber);
       } else {
+                  showError('チャット履歴の取得に失敗しました');
+        }
+      } catch (error) {
         showError('チャット履歴の取得に失敗しました');
-      }
-    } catch (error) {
-      showError('チャット履歴の取得に失敗しました');
     } finally {
       setIsReportLoading(false);
     }
@@ -259,10 +260,10 @@ export const SettingsManagement = () => {
         const data = await response.json();
         setGraphData(data.data || []);
       } else {
+                  showError('利用状況データの取得に失敗しました');
+        }
+      } catch (error) {
         showError('利用状況データの取得に失敗しました');
-      }
-    } catch (error) {
-      showError('利用状況データの取得に失敗しました');
     } finally {
       setIsGraphLoading(false);
     }
@@ -279,10 +280,10 @@ export const SettingsManagement = () => {
         setCurrentModel(data.currentModel || '');
       } else {
         const errorData = await response.json();
-        showError(errorData.error || 'GPTモデル一覧の取得に失敗しました');
-      }
-    } catch (error) {
-      showError('GPTモデル一覧の取得に失敗しました');
+                  showError(errorData.error || 'GPTモデル一覧の取得に失敗しました');
+        }
+      } catch (error) {
+        showError('GPTモデル一覧の取得に失敗しました');
     } finally {
       setIsGptModelLoading(false);
     }
@@ -305,14 +306,17 @@ export const SettingsManagement = () => {
       if (response.ok) {
         const data = await response.json();
         setCurrentModel(data.selectedModel);
-        showSuccess(data.message || 'GPTモデルが選択されました');
+                  showSuccess({
+            title: 'GPTモデル選択',
+            description: data.message || 'GPTモデルが選択されました'
+          });
         fetchGptModels(); // 一覧を再取得
       } else {
         const errorData = await response.json();
-        showError(errorData.error || 'GPTモデルの選択に失敗しました');
-      }
-    } catch (error) {
-      showError('GPTモデルの選択に失敗しました');
+                  showError(errorData.error || 'GPTモデルの選択に失敗しました');
+        }
+      } catch (error) {
+        showError('GPTモデルの選択に失敗しました');
     } finally {
       setIsGptModelLoading(false);
     }
@@ -321,7 +325,7 @@ export const SettingsManagement = () => {
   // GPTモデルを保存
   const handleSaveGptModel = async () => {
     if (!gptModelFormData.name || !gptModelFormData.deploymentName) {
-      showError('モデル名とデプロイ名は必須です');
+              showError('モデル名とデプロイ名は必須です');
       return;
     }
 
@@ -361,10 +365,10 @@ export const SettingsManagement = () => {
         fetchGptModels();
       } else {
         const errorData = await response.json();
-        showError(errorData.error || 'GPTモデルの保存に失敗しました');
-      }
-    } catch (error) {
-      showError('GPTモデルの保存に失敗しました');
+                  showError(errorData.error || 'GPTモデルの保存に失敗しました');
+        }
+      } catch (error) {
+        showError('GPTモデルの保存に失敗しました');
     } finally {
       setIsGptModelLoading(false);
     }
@@ -391,11 +395,11 @@ export const SettingsManagement = () => {
         fetchGptModels();
       } else {
         const errorData = await response.json();
-        showError(errorData.error || 'GPTモデルの削除に失敗しました');
-      }
-    } catch (error) {
-      console.error('Delete GPT model error:', error);
-      showError('GPTモデルの削除に失敗しました');
+                  showError(errorData.error || 'GPTモデルの削除に失敗しました');
+        }
+      } catch (error) {
+        console.error('Delete GPT model error:', error);
+        showError('GPTモデルの削除に失敗しました');
     } finally {
       setIsGptModelLoading(false);
     }
@@ -452,7 +456,7 @@ export const SettingsManagement = () => {
   // 部門を保存
   const handleSaveDepartment = async () => {
     if (!formData.name || !formData.blobContainerName) {
-      showError('部門名とBLOBコンテナ名は必須です');
+              showError('部門名とBLOBコンテナ名は必須です');
       return;
     }
 
@@ -494,10 +498,10 @@ export const SettingsManagement = () => {
         fetchDepartments();
       } else {
         const errorData = await response.json();
-        showError(errorData.error || '部門の保存に失敗しました');
-      }
-    } catch (error) {
-      showError('部門の保存に失敗しました');
+                  showError(errorData.error || '部門の保存に失敗しました');
+        }
+      } catch (error) {
+        showError('部門の保存に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -524,11 +528,11 @@ export const SettingsManagement = () => {
         fetchDepartments();
       } else {
         const errorData = await response.json();
-        showError(errorData.error || '部門の削除に失敗しました');
-      }
-    } catch (error) {
-      console.error('Delete department error:', error);
-      showError('部門の削除に失敗しました');
+                  showError(errorData.error || '部門の削除に失敗しました');
+        }
+      } catch (error) {
+        console.error('Delete department error:', error);
+        showError('部門の削除に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -556,6 +560,37 @@ export const SettingsManagement = () => {
       isActive: true,
     });
     setIsEditing(false);
+  };
+
+  // 部門の並び替え処理
+  const handleDepartmentReorder = async (reorderedDepartments: Department[]) => {
+    try {
+      const response = await fetch('/api/settings/departments/reorder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          departments: reorderedDepartments.map((dept, index) => ({
+            id: dept.id,
+            sortOrder: index + 1
+          }))
+        }),
+      });
+
+      if (response.ok) {
+        setDepartments(reorderedDepartments);
+        showSuccess({
+          title: '並び替え完了',
+          description: '部門の並び替えが完了しました'
+        });
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || '部門の並び替えに失敗しました');
+      }
+    } catch (error) {
+      showError('部門の並び替えに失敗しました');
+    }
   };
 
   useEffect(() => {
@@ -618,12 +653,7 @@ export const SettingsManagement = () => {
             GPTモデル
           </TabsTrigger>
 
-          {process.env.NODE_ENV === 'development' && (
-            <TabsTrigger value="containers" className="flex items-center gap-1 text-xs px-2">
-              <FolderOpen className="w-3 h-3" />
-              BLOBコンテナ
-            </TabsTrigger>
-          )}
+
         </TabsList>
 
         {/* 部門設定タブ */}
@@ -712,226 +742,18 @@ export const SettingsManagement = () => {
                   <p className="mt-2 text-muted-foreground">読み込み中...</p>
                 </div>
               ) : (
-                <div className="border rounded-md">
-                  <Table>
-                    <TableHeader className="bg-background border-b">
-                      <TableRow>
-                        <TableHead className="w-32">部門名</TableHead>
-                        <TableHead className="w-40">BLOBコンテナ名</TableHead>
-                        <TableHead className="w-48">説明</TableHead>
-                        <TableHead className="w-24">ステータス</TableHead>
-                        <TableHead className="w-32">作成日</TableHead>
-                        <TableHead className="w-32">操作</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                  </Table>
-                  <div className="max-h-80 overflow-y-auto">
-                    <Table>
-                      <TableBody>
-                        {departments.map((department) => (
-                          <TableRow key={department.id}>
-                            <TableCell className="font-medium w-32">{department.name}</TableCell>
-                            <TableCell className="w-40">{department.blobContainerName}</TableCell>
-                            <TableCell className="max-w-48 truncate w-48" title={department.description || '-'}>
-                              {department.description || '-'}
-                            </TableCell>
-                            <TableCell className="w-24">
-                              {department.isActive ? (
-                                <Badge variant="default">
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  有効
-                                </Badge>
-                              ) : (
-                                <Badge variant="secondary">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  無効
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="w-32">
-                              {new Date(department.createdAt).toLocaleDateString('ja-JP')}
-                            </TableCell>
-                            <TableCell className="w-32">
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEditDepartment(department)}
-                                  className="flex items-center gap-1"
-                                >
-                                  <Edit className="w-3 h-3" />
-                                  編集
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleDeleteDepartment(department.id)}
-                                  className="flex items-center gap-1"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                  削除
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
+                <DepartmentTable
+                  departments={departments}
+                  onEdit={handleEditDepartment}
+                  onDelete={handleDeleteDepartment}
+                  onReorder={handleDepartmentReorder}
+                />
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* BLOBコンテナタブ */}
-        <TabsContent value="containers" className="space-y-6 pb-20">
-          {/* 接続テストとコンテナ追加 */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="w-5 h-5" />
-                BLOBコンテナ管理
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pb-6">
-              <div className="flex items-center gap-4">
-                <Button 
-                  onClick={testConnection}
-                  disabled={isContainerLoading}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  {connectionStatus === 'testing' ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                  ) : connectionStatus === 'success' ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  ) : connectionStatus === 'error' ? (
-                    <AlertCircle className="w-4 h-4 text-red-500" />
-                  ) : (
-                    <Activity className="w-4 h-4" />
-                  )}
-                  接続テスト
-                </Button>
-                <Button 
-                  onClick={fetchContainers}
-                  disabled={isContainerLoading}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  更新
-                </Button>
-              </div>
-              
-              <div className="flex items-end gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-medium">新しいコンテナ名</label>
-                  <Input
-                    value={newContainerName}
-                    onChange={(e) => setNewContainerName(e.target.value)}
-                    placeholder="コンテナ名を入力"
-                    className="mt-1"
-                    disabled={isContainerLoading}
-                  />
-                </div>
-                <Button 
-                  onClick={addContainer}
-                  disabled={isContainerLoading || !newContainerName.trim()}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  追加
-                </Button>
-              </div>
 
-              {/* 接続テスト結果表示 */}
-              {connectionResult && (
-                <div className={`p-4 rounded-md border ${
-                  connectionStatus === 'success' 
-                    ? 'bg-green-50 border-green-200' 
-                    : 'bg-red-50 border-red-200'
-                }`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    {connectionStatus === 'success' ? (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-red-600" />
-                    )}
-                    <span className={`font-medium ${
-                      connectionStatus === 'success' ? 'text-green-800' : 'text-red-800'
-                    }`}>
-                      接続テスト結果
-                    </span>
-                  </div>
-                  {connectionStatus === 'success' && connectionResult.accountInfo ? (
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">アカウント名:</span> {connectionResult.accountInfo.name}</div>
-                      <div><span className="font-medium">SKU:</span> {connectionResult.accountInfo.skuName}</div>
-                      <div><span className="font-medium">コンテナ数:</span> {connectionResult.accountInfo.containerCount}</div>
-                    </div>
-                  ) : (
-                    <div className="text-sm text-red-700">
-                      {connectionResult.error || '接続テストに失敗しました'}
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* コンテナ一覧 */}
-          <Card className="mb-8">
-            <CardContent className="p-0">
-              {containers.length === 0 ? (
-                <p className="text-muted-foreground p-4">コンテナが見つかりません</p>
-              ) : (
-                <div className="border rounded-md">
-                  <div className="relative">
-                    {/* 固定ヘッダー */}
-                    <div className="sticky top-0 z-10 bg-background border-b">
-                      <div className="grid grid-cols-3 gap-4 p-4 font-medium text-sm">
-                        <div className="w-64">コンテナ名</div>
-                        <div className="w-32">ステータス</div>
-                        <div className="w-32">操作</div>
-                      </div>
-                    </div>
-                    
-                    {/* スクロール可能なコンテンツ */}
-                    <div className="max-h-32 overflow-y-auto">
-                        {containers.map((container) => (
-                        <div key={container} className="grid grid-cols-3 gap-4 p-4 border-b last:border-b-0 hover:bg-muted/50">
-                          <div className="font-medium w-64 truncate">{container}</div>
-                          <div className="w-32">
-                            <Badge variant="default" className="text-xs">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                存在
-                              </Badge>
-                          </div>
-                          <div className="w-32">
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => deleteContainer(container)}
-                                disabled={isContainerLoading}
-                              className="flex items-center gap-1 h-7 px-2"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                削除
-                              </Button>
-                          </div>
-                        </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* メニュー設定タブ */}
         <TabsContent value="menus" className="space-y-6 pb-6">

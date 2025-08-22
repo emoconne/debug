@@ -4,7 +4,7 @@ import ChatStatusDisplay from "@/components/chat/chat-status";
 import { useChatScrollAnchor } from "@/components/hooks/use-chat-scroll-anchor";
 import { AI_NAME } from "@/features/theme/customise";
 import { useSession } from "next-auth/react";
-import { useRef } from "react";
+import { useRef, RefObject } from "react";
 import { useChatContext } from "./chat-context";
 import { ChatHeader } from "./chat-header";
 
@@ -16,7 +16,7 @@ export const ChatMessageContainer = () => {
 
   const { messages, isLoading, status } = useChatContext();
 
-  useChatScrollAnchor(messages, scrollRef);
+  useChatScrollAnchor(messages, scrollRef as RefObject<HTMLDivElement>);
 
   // エラーハンドリング
   if (!messages) {

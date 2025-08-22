@@ -1,6 +1,6 @@
 import Typography from "@/components/typography";
 import { Card } from "@/components/ui/card";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { useChatContext } from "../chat-context";
 import { ChatFileUI } from "../chat-file/chat-file-ui";
 import { ChatFileUI_doc } from "../chat-file/chat-file-ui-doc";
@@ -16,8 +16,26 @@ interface Prop {}
 export const ChatMessageEmptyState: FC<Prop> = (props) => {
   const { fileState, chatBody } = useChatContext();
   const { data: session } = useSession();
+  const [departments, setDepartments] = useState<any[]>([]);
 
   const { showFileUpload } = fileState;
+
+  // 部門一覧を取得
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch('/api/departments');
+        if (response.ok) {
+          const data = await response.json();
+          setDepartments(data.departments || []);
+        }
+      } catch (error) {
+        console.error('部門一覧の取得に失敗しました:', error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 w-full items-center container mx-auto max-w-4xl justify-center h-full gap-9">
@@ -41,16 +59,13 @@ export const ChatMessageEmptyState: FC<Prop> = (props) => {
           </p>
           <ChatTypeSelector disable={false} />
         </div>
-        {chatBody.chatType === "doc" && (
+        {chatBody.chatType === "doc" && departments.length > 1 && (
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-muted-foreground">
-              検索対象の部門を選択してください。
-            </p>
             <DepartmentSelector disable={false} />
           </div>
         )}
         {(showFileUpload === "data") && <ChatFileUI />} 
-        {((showFileUpload === "doc") && session?.user?.isAdmin) && <ChatFileUI_doc />} 
+        {((showFileUpload === "doc") && session?.user?.isAdmin && chatBody.chatType !== "doc") && <ChatFileUI_doc />} 
         
       </Card>
     </div>

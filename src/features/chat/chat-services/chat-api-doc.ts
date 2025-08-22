@@ -8,7 +8,17 @@ import { CosmosDBChatMessageHistory } from "./cosmosdb/cosmosdb";
 import { PromptGPTProps } from "./models";
 import { getDepartment } from "@/features/documents/cosmos-db-dept-service";
 
-const SYSTEM_PROMPT = `あなたは ${AI_NAME}です。ユーザーからの質問に対して日本語で丁寧に回答します。 \n`;
+const SYSTEM_PROMPT = `あなたは ${AI_NAME} です。企業内ドキュメント検索アシスタントとして、以下の指針に従って対応します：
+
+1. 正確性：ドキュメントから得られた情報のみを回答に含め、推測や想像は避けます
+2. 明確性：専門用語を使う場合は解説を付け、分かりやすい表現を心がけます
+3. 構造化：重要な情報から順に論理的に情報を提示します
+4. 透明性：情報源を明示し、複数の文書から情報を取得した場合は出典を区別して示します
+5. 適切な範囲：ユーザーの権限レベルに応じた情報のみを提供します
+6. 丁寧さ：敬語を用い、プロフェッショナルな対応を維持します
+
+回答できない内容については、「その情報は提供されたドキュメントには含まれていません」と率直に伝えてください。
+常に回答の最後には情報源の引用を必ず含めてください。`;
 
 const CONTEXT_PROMPT = ({
   context,
@@ -38,12 +48,7 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
 
   const userId = await userHashedId();
 
-  let chatAPIModel = "";
-  if (props.chatAPIModel === "GPT-3") {
-    chatAPIModel = "gpt-35-turbo-16k";
-  }else{
-    chatAPIModel = "gpt-4o";
-  }
+  let chatAPIModel = process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME || "gpt-4o";
  // console.log("Model_doc: ", process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME);
  // console.log("PromptGPTProps_doc: ", props.chatAPIModel);
 
@@ -60,6 +65,15 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
     id,
     props.selectedDepartmentId
   );
+
+  console.log('Relevant documents found:', relevantDocuments.length);
+  console.log('First document sample:', relevantDocuments[0] ? {
+    id: relevantDocuments[0].id,
+    fileName: relevantDocuments[0].fileName,
+    metadata: relevantDocuments[0].metadata,
+    hasSasUrl: !!relevantDocuments[0].sasUrl,
+    sasUrl: relevantDocuments[0].sasUrl
+  } : 'No documents found');
 
   const context = relevantDocuments
     .map((result, index) => {
@@ -88,24 +102,52 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
       //model: process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME,
       model: chatAPIModel,
       stream: true,
+      max_tokens: 4000,
+      temperature: 0.7
     });
 
-    const stream = OpenAIStream(response, {
-      async onCompletion(completion) {
-        await chatHistory.addMessage({
-          content: lastHumanMessage.content,
-          role: "user",
-        });
+                const stream = OpenAIStream(response as any, {
+              async onCompletion(completion) {
+                try {
+                  console.log('onCompletion started, processing completion...');
+                  let processedCompletion = completion;
+                  
+                  for (const doc of relevantDocuments) {
+                    try {
+                      console.log(`Processing document ${doc.id}, has sasUrl: ${!!doc.sasUrl}`);
+                      
+                      // AI Searchの結果にsasUrlが含まれている場合は直接使用
+                      if (doc.sasUrl) {
+                        const placeholder = `SAS_URL_PLACEHOLDER_${doc.id}`;
+                        processedCompletion = processedCompletion.replace(new RegExp(placeholder, 'g'), doc.sasUrl);
+                        console.log(`Replaced placeholder for ${doc.id} with existing sasUrl`);
+                      } else {
+                        console.log(`No sasUrl found for document ${doc.id}, skipping replacement`);
+                      }
+                    } catch (error) {
+                      console.error(`Failed to process SAS URL for document ${doc.id}:`, error);
+                    }
+                  }
+              
+                  console.log('Adding messages to chat history...');
+                  await chatHistory.addMessage({
+                    content: lastHumanMessage.content,
+                    role: "user",
+                  } as any);
 
-        await chatHistory.addMessage(
-          {
-            content: completion,
-            role: "assistant",
-          },
-          context
-        );
-      },
-    });
+                  await chatHistory.addMessage(
+                    {
+                      content: processedCompletion,
+                      role: "assistant",
+                    } as any,
+                    context
+                  );
+                  console.log('Messages added to chat history successfully');
+                } catch (error) {
+                  console.error('Error in onCompletion callback:', error);
+                }
+              },
+            });
 
     return new StreamingTextResponse(stream);
   } catch (e: unknown) {
@@ -154,6 +196,7 @@ const findRelevantDocuments = async (query: string, chatThreadId: string, select
       chatType: doc.chatType,
       deptName: doc.deptName,
       metadata: doc.metadata,
+      fileName: doc.fileName, // fileNameもログ出力
       pageContentLength: doc.pageContent?.length || 0
     });
   });

@@ -9,6 +9,23 @@ const nextConfig = {
   },
   experimental: {
     esmExternals: 'loose'
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://view.officeapps.live.com https://docs.google.com"
+          }
+        ]
+      }
+    ];
   }
 };
 

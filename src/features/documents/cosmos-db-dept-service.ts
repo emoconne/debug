@@ -8,13 +8,25 @@ export interface Department {
   description?: string;
   blobContainerName: string;
   isActive: boolean;
+  sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 // 部門を保存
 export async function saveDepartment(department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-  const id = await saveSettingsData('department', department);
+  // 既存の部門の最大sortOrderを取得
+  const existingDepartments = await getAllDepartments();
+  const maxSortOrder = existingDepartments.length > 0 
+    ? Math.max(...existingDepartments.map(d => d.sortOrder))
+    : 0;
+  
+  const departmentWithSortOrder = {
+    ...department,
+    sortOrder: maxSortOrder + 1
+  };
+  
+  const id = await saveSettingsData('department', departmentWithSortOrder);
   return id;
 }
 
@@ -50,10 +62,12 @@ export async function getAllDepartments(): Promise<Department[]> {
     .map(item => ({
       id: item.id,
       ...item.data,
+      sortOrder: item.data.sortOrder || 0,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt)
     }))
-    .filter(dept => dept.isActive);
+    .filter(dept => dept.isActive)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 // 特定の部門を取得
@@ -98,4 +112,14 @@ export async function getDepartmentStats(): Promise<{
     active,
     inactive: total - active,
   };
+}
+
+// 部門の並び替えを更新
+export async function updateDepartmentSortOrder(departments: Array<{ id: string; sortOrder: number }>): Promise<void> {
+  for (const dept of departments) {
+    await updateSettingsData(dept.id, 'department', {
+      sortOrder: dept.sortOrder,
+      updatedAt: new Date()
+    });
+  }
 }

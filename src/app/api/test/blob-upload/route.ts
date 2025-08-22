@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
-import { uploadFileToDepartment } from "@/features/documents/document-management-service";
+// import 文のパスエラーを修正（相対パスに変更）
+import { uploadFileToTestContainer } from "../../../../features/documents/test-document-management-service";
 
 export async function POST(request: NextRequest) {
-  console.log('=== UPLOAD ROUTE START ===');
+  console.log('=== TEST UPLOAD ROUTE START ===');
   try {
     const session = await getServerSession(authOptions);
     
@@ -21,35 +22,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
     }
 
-    if (!session.user.isAdmin) {
-      console.log('Debug: User is not admin:', session.user.email);
-      return NextResponse.json({ error: "管理者権限が必要です" }, { status: 403 });
-    }
-
     console.log('Debug: Starting file upload process');
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const departmentId = formData.get('departmentId') as string;
 
     if (!file) {
       console.log('Debug: No file found in form data');
       return NextResponse.json({ error: "ファイルが選択されていません" }, { status: 400 });
     }
 
-    if (!departmentId) {
-      console.log('Debug: No department ID found in form data');
-      return NextResponse.json({ error: "部門が選択されていません" }, { status: 400 });
-    }
-
     console.log('Debug: File details:', {
       name: file.name,
       type: file.type,
-      size: file.size,
-      departmentId
+      size: file.size
     });
 
-    // 新しいアップロード関数を使用
-    const result = await uploadFileToDepartment(file, departmentId);
+    // テスト用アップロード関数を使用
+    const result = await uploadFileToTestContainer(file);
     
     if (result.success) {
       return NextResponse.json({
@@ -66,10 +55,12 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error("ファイルアップロードエラー:", error);
+    console.error("テストファイルアップロードエラー:", error);
     return NextResponse.json(
       { error: "ファイルアップロードに失敗しました" },
       { status: 500 }
     );
   }
-} 
+}
+
+
