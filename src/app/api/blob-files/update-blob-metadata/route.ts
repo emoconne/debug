@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/src/features/auth/auth-api';
-import { BlobFileManagementService } from '@/src/features/documents/blob-file-management-service';
+import { options as authOptions } from '@/features/auth/auth-api';
+import { BlobFileManagementService } from '@/features/documents/blob-file-management-service';
 
 export async function POST(request: NextRequest) {
   try {

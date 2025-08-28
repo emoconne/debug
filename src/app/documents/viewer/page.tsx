@@ -16,9 +16,12 @@ const PDFPage = dynamic(() => import('react-pdf').then(mod => ({ default: mod.Pa
   ssr: false
 });
 
-// PDF.jsワーカーの設定
-const pdfjs = require('pdfjs-dist');
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// PDF.jsワーカーの設定（SSR対応）
+let pdfjs: any;
+if (typeof window !== 'undefined') {
+  pdfjs = require('pdfjs-dist');
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+}
 
 // react-pdfのCSSを動的にインポート
 const loadReactPdfCSS = async () => {
