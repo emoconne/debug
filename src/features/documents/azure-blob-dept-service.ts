@@ -9,8 +9,17 @@ function getBlobServiceClient(): BlobServiceClient {
   if (!blobServiceClient) {
     const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
     if (!connectionString) {
-      throw new Error('Azure Storage connection string is not configured');
+      console.log("Azure Blob Storage Config:", {
+        connectionString: "未設定",
+        accountName: "不明"
+      });
+      throw new Error('AZURE_STORAGE_CONNECTION_STRING environment variable is not set');
     }
+    
+    console.log("Azure Blob Storage Config:", {
+      connectionString: "設定済み",
+      accountName: connectionString.match(/AccountName=([^;]+)/)?.[1] || "不明"
+    });
     
     // Azure Blob Storage SDKの設定を改善（日本語ファイル名サポート強化）
     blobServiceClient = BlobServiceClient.fromConnectionString(connectionString, {
@@ -22,14 +31,7 @@ function getBlobServiceClient(): BlobServiceClient {
   return blobServiceClient;
 }
 
-console.log("Azure Blob Storage Config:", {
-  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING ? "設定済み" : "未設定",
-  accountName: process.env.AZURE_STORAGE_CONNECTION_STRING ? process.env.AZURE_STORAGE_CONNECTION_STRING.match(/AccountName=([^;]+)/)?.[1] : "不明"
-});
-
-if (!process.env.AZURE_STORAGE_CONNECTION_STRING) {
-  throw new Error("AZURE_STORAGE_CONNECTION_STRING environment variable is not set");
-}
+// 環境変数のチェックは関数内で行う
 
 // コンテナを作成（存在しない場合）
 export async function createContainerIfNotExists(containerName: string): Promise<void> {

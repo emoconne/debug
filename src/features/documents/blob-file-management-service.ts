@@ -38,45 +38,7 @@ export class BlobFileManagementService {
 
   constructor() {
     console.log('BlobFileManagementService constructor - Starting initialization');
-    
-    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-    if (!connectionString) {
-      console.error('BlobFileManagementService constructor - AZURE_STORAGE_CONNECTION_STRING is not configured');
-      throw new Error('AZURE_STORAGE_CONNECTION_STRING is not configured');
-    }
-
-    console.log('BlobFileManagementService constructor - Creating BlobServiceClient');
-    this.blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-    
-    // CosmosDB接続
-    const cosmosUrl = process.env.AZURE_COSMOSDB_URI;
-    const cosmosKey = process.env.AZURE_COSMOSDB_KEY;
-    const databaseName = process.env.AZURE_COSMOSDB_DB_NAME || 'chat';
-    
-    console.log('BlobFileManagementService constructor - Environment variables:', {
-      cosmosUrl: cosmosUrl ? '設定済み' : '未設定',
-      cosmosKey: cosmosKey ? '設定済み' : '未設定',
-      databaseName
-    });
-    
-    if (!cosmosUrl || !cosmosKey) {
-      console.error('BlobFileManagementService constructor - AZURE_COSMOSDB_URI or AZURE_COSMOSDB_KEY is not configured');
-      throw new Error('AZURE_COSMOSDB_URI or AZURE_COSMOSDB_KEY is not configured');
-    }
-
-    console.log('BlobFileManagementService constructor - Creating CosmosClient');
-    this.cosmosClient = new CosmosClient({
-      endpoint: cosmosUrl,
-      key: cosmosKey,
-    });
-
-    console.log('BlobFileManagementService constructor - Getting database:', databaseName);
-    const database = this.cosmosClient.database(databaseName);
-    this.database = database;
-    
-    console.log('BlobFileManagementService constructor - Getting container: blob-files');
-    this.cosmosContainer = database.container('blob-files');
-    
+    // 環境変数のチェックは実際に使用する時に行う
     console.log('BlobFileManagementService constructor - Initialization completed');
   }
 
