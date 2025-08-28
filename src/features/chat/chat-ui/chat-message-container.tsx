@@ -51,7 +51,7 @@ export const ChatMessageContainer = () => {
             />
           );
         })}
-        {isLoading && <ChatLoading />}
+        {isLoading && status === 'idle' && <ChatLoading />}
         {status !== 'idle' && <ChatStatusDisplay status={status} />}
       </div>
     </div>

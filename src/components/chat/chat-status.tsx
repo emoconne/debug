@@ -44,7 +44,7 @@ const ChatStatusDisplay: FC<ChatStatusProps> = ({ status }) => {
   const Icon = config.icon;
 
   return (
-    <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
+    <div className="flex items-center gap-2 justify-center py-4">
       <Icon className={`h-4 w-4 animate-spin ${config.color}`} />
       <span className={`text-sm ${config.color}`}>
         {config.text}
