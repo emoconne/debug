@@ -46,6 +46,7 @@ export class CosmosDBChatMessageHistory {
       userId: this.userId,
       context: citations,
       searchResults: (message as any).searchResults,
+      imageUrl: (message as any).imageUrl,
     };
 
 
@@ -62,6 +63,7 @@ function mapOpenAIChatMessages(
       role: message.role,
       content: message.content,
       searchResults: message.searchResults,
+      imageUrl: message.imageUrl,
     };
   });
 }

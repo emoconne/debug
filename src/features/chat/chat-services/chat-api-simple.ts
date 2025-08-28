@@ -5,6 +5,7 @@ import { OpenAIStream, StreamingTextResponse } from "ai";
 import { initAndGuardChatSession } from "./chat-thread-service";
 import { CosmosDBChatMessageHistory } from "./cosmosdb/cosmosdb";
 import { PromptGPTProps } from "./models";
+import { DalleImageService } from "./dalle-image-service";
 
 export const ChatAPISimple = async (props: PromptGPTProps) => {
   const { lastHumanMessage, chatThread } = await initAndGuardChatSession(props);
@@ -48,6 +49,62 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
   const history = await chatHistory.getMessages();
   const topHistory = history.slice(history.length - 30, history.length);
 
+  // 画像生成要求かどうかをチェック
+  const isImageRequest = DalleImageService.isImageGenerationRequest(lastHumanMessage.content);
+  
+  if (isImageRequest) {
+    try {
+      console.log('DALL-E: Image generation request detected');
+      
+      // DALL-Eを使用して画像を生成
+      const dalleService = new DalleImageService();
+      const optimizedPrompt = DalleImageService.optimizePromptForImage(lastHumanMessage.content);
+      
+      const imageResult = await dalleService.generateImage(optimizedPrompt);
+      
+      // 画像生成の結果をメッセージとして保存
+      const imageMessage = `画像を生成しました。\n\n**生成された画像:**\n![Generated Image](${imageResult.url})\n\n**使用されたプロンプト:** ${imageResult.revisedPrompt || optimizedPrompt}`;
+      
+      await chatHistory.addMessage({
+        content: imageMessage,
+        role: "assistant",
+        imageUrl: imageResult.url,
+      });
+      
+      // ストリーミングレスポンスとして返す
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(imageMessage));
+          controller.close();
+        },
+      });
+      
+      return new StreamingTextResponse(stream);
+      
+    } catch (error) {
+      console.error('DALL-E: Image generation failed:', error);
+      
+      const errorMessage = `画像生成に失敗しました: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      
+      await chatHistory.addMessage({
+        content: errorMessage,
+        role: "assistant",
+      });
+      
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(errorMessage));
+          controller.close();
+        },
+      });
+      
+      return new StreamingTextResponse(stream);
+    }
+  }
+
+  // 通常のテキストチャット
   try {
     const response = await openAI.chat.completions.create({
       messages: [
@@ -55,7 +112,8 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
           role: "system",
           content: `あなたは ${AI_NAME} です。ユーザーからの質問に対して日本語で丁寧に回答します。
           - 明確かつ簡潔な質問をし、丁寧かつ専門的な回答を返します。
-          - 質問には正直かつ正確に答えます。`,
+          - 質問には正直かつ正確に答えます。
+          - 絵を描くような要求があった場合は、DALL-Eを使用して画像を生成することを提案してください。`,
         },
         ...topHistory,
       ],

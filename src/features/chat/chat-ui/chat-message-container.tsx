@@ -50,6 +50,7 @@ export const ChatMessageContainer = () => {
               message={message.content}
               type={message.role}
               searchResults={(message as any).searchResults}
+              imageUrl={(message as any).imageUrl}
               key={index}
             />
           );

@@ -22,6 +22,7 @@ export interface ChatMessageModel {
   context: string;
   type: "CHAT_MESSAGE";
   searchResults?: SearchResult[];
+  imageUrl?: string; // DALL-Eで生成された画像のURL
 }
 
 export type ConversationStyle = "creative" | "balanced" | "precise";
