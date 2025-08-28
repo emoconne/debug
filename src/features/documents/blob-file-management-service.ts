@@ -31,10 +31,10 @@ export interface UploadResult {
 
 export class BlobFileManagementService {
 
-  private blobServiceClient: BlobServiceClient;
-  private cosmosClient: CosmosClient;
-  private cosmosContainer: Container;
-  private database: any;
+  private blobServiceClient!: BlobServiceClient;
+  private cosmosClient!: CosmosClient;
+  private cosmosContainer!: Container;
+  private database!: any;
 
   constructor() {
     console.log('BlobFileManagementService constructor - Starting initialization');
