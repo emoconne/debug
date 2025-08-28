@@ -13,6 +13,7 @@ import ChatInput from "./chat-input/chat-input";
 export const ChatMessageContainer = () => {
   const { data: session } = useSession();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isDevMode = process.env.NODE_ENV === 'development';
 
   const { messages, isLoading, status } = useChatContext();
 
@@ -31,12 +32,14 @@ export const ChatMessageContainer = () => {
       </div>
       <div className=" pb-[80px] flex flex-col justify-end flex-1">
                 {messages.map((message, index) => {
-          // デバッグ用ログ
-          console.log(`Message ${index}:`, {
-            role: message.role,
-            content: message.content?.substring(0, 100) + '...',
-            searchResults: (message as any).searchResults
-          });
+          // デバッグ用ログ（devモードのみ）
+          if (isDevMode) {
+            console.log(`Message ${index}:`, {
+              role: message.role,
+              content: message.content?.substring(0, 100) + '...',
+              searchResults: (message as any).searchResults
+            });
+          }
           
           return (
             <ChatRow
