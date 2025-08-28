@@ -10,6 +10,15 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose'
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'node-fetch': 'commonjs node-fetch'
+      });
+    }
+    return config;
+  },
   async headers() {
     return [
       {

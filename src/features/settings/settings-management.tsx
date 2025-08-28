@@ -27,8 +27,16 @@ import {
   Download,
   Bot,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Database,
+  Eye,
+  EyeOff,
+  File,
+  Folder,
+  FolderPlus
 } from "lucide-react";
+import { DropboxExplorer } from "@/components/dropbox-explorer";
+import { DropboxFileInfo } from "@/features/documents/dropbox-file-service";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useSession } from "next-auth/react";
@@ -91,6 +99,15 @@ export const SettingsManagement = () => {
     isAvailable: true,
     isDefault: false,
   });
+
+  // Dropbox連携用の状態
+  const [dropboxToken, setDropboxToken] = useState<string>('');
+  const [dropboxFolderPath, setDropboxFolderPath] = useState<string>('');
+  const [dropboxFiles, setDropboxFiles] = useState<DropboxFileInfo[]>([]);
+  const [isDropboxLoading, setIsDropboxLoading] = useState(false);
+  const [autoSync, setAutoSync] = useState<boolean>(false);
+  const [syncInterval, setSyncInterval] = useState<string>('15分');
+  const [showDropboxToken, setShowDropboxToken] = useState<boolean>(false);
 
 
 
@@ -593,12 +610,201 @@ export const SettingsManagement = () => {
     }
   };
 
+  // Dropbox連携機能
+  const testDropboxConnection = async () => {
+    if (!dropboxToken.trim()) {
+      showError('アクセストークンを入力してください');
+      return;
+    }
+
+    // 基本的な形式チェック
+    if (!dropboxToken.startsWith('sl.')) {
+      showError('アクセストークンの形式が正しくありません。Dropboxアクセストークンは "sl." で始まる必要があります。');
+      return;
+    }
+
+    try {
+      setIsDropboxLoading(true);
+      console.log('接続テスト開始:', dropboxToken.substring(0, 10) + '...');
+      
+      const response = await fetch('/api/settings/dropbox/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken: dropboxToken }),
+      });
+
+      const data = await response.json();
+      console.log('接続テストレスポンス:', response.status, data);
+
+      if (response.ok) {
+        showSuccess({
+          title: '接続テスト',
+          description: `Dropboxへの接続が成功しました。アカウント: ${data.accountInfo.name}`
+        });
+      } else {
+        showError(data.error || 'Dropboxへの接続に失敗しました');
+      }
+    } catch (error) {
+      console.error('接続テストエラー:', error);
+      showError('Dropboxへの接続に失敗しました');
+    } finally {
+      setIsDropboxLoading(false);
+    }
+  };
+
+  const saveDropboxSettings = async () => {
+    if (!dropboxToken.trim()) {
+      showError('アクセストークンを入力してください');
+      return;
+    }
+
+    try {
+      setIsDropboxLoading(true);
+      const response = await fetch('/api/settings/dropbox', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken: dropboxToken,
+          folderPath: dropboxFolderPath,
+          autoSync: autoSync,
+          syncInterval: syncInterval,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showSuccess({
+          title: '設定保存',
+          description: data.message || 'Dropbox設定が保存されました'
+        });
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'Dropbox設定の保存に失敗しました');
+      }
+    } catch (error) {
+      showError('Dropbox設定の保存に失敗しました');
+    } finally {
+      setIsDropboxLoading(false);
+    }
+  };
+
+  const fetchDropboxFiles = async () => {
+    try {
+      setIsDropboxLoading(true);
+      const response = await fetch('/api/settings/dropbox/files');
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success === false && data.warning) {
+          // 権限不足の場合
+          showError(data.error);
+          // Dropbox設定ページへのリンクを表示
+          alert('Dropboxアプリの設定で権限を有効にしてください: https://www.dropbox.com/developers/apps');
+          setDropboxFiles([]);
+        } else {
+          setDropboxFiles(data.files || []);
+          const folderCount = data.folderCount || 0;
+          const fileCount = data.fileCount || 0;
+          showSuccess({
+            title: 'ファイル一覧更新',
+            description: `フォルダ: ${folderCount}件、ファイル: ${fileCount}件を取得しました（再帰検索）`
+          });
+        }
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'Dropboxファイル一覧の取得に失敗しました');
+      }
+    } catch (error) {
+      showError('Dropboxファイル一覧の取得に失敗しました');
+    } finally {
+      setIsDropboxLoading(false);
+    }
+  };
+
+  // Dropbox OAuth2認証を開始
+  const startDropboxOAuth = async () => {
+    try {
+      setIsDropboxLoading(true);
+      const response = await fetch('/api/auth/dropbox');
+      if (response.ok) {
+        const data = await response.json();
+        // OAuth2認証URLにリダイレクト
+        window.location.href = data.authUrl;
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'Dropbox OAuth2認証の開始に失敗しました');
+      }
+    } catch (error) {
+      console.error('Start Dropbox OAuth error:', error);
+      showError('Dropbox OAuth2認証の開始に失敗しました');
+    } finally {
+      setIsDropboxLoading(false);
+    }
+  };
+
+  // 初期化時にDropbox設定を読み込み
+  const loadDropboxSettings = async () => {
+    try {
+      const response = await fetch('/api/settings/dropbox');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.settings) {
+          setDropboxToken(data.settings.accessToken);
+          setDropboxFolderPath(data.settings.folderPath);
+          setAutoSync(data.settings.autoSync);
+          setSyncInterval(data.settings.syncInterval);
+          // 保存されたトークンがある場合は非表示状態にする
+          if (data.settings.accessToken) {
+            setShowDropboxToken(false);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Dropbox設定の読み込みに失敗しました:', error);
+    }
+  };
+
   useEffect(() => {
     fetchDepartments();
     fetchContainers();
     fetchChatThreads();
     fetchGraphData();
     fetchGptModels();
+    loadDropboxSettings();
+    
+    // URLパラメータからDropbox認証結果を確認
+    const urlParams = new URLSearchParams(window.location.search);
+    const dropboxSuccess = urlParams.get('dropbox_success');
+    const dropboxError = urlParams.get('dropbox_error');
+    const accountName = urlParams.get('account_name');
+    
+    if (dropboxSuccess === 'true') {
+      showSuccess({
+        title: 'Dropbox認証成功',
+        description: `アカウント "${accountName}" で認証が完了しました`
+      });
+      // URLパラメータをクリア
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // 設定を再読み込み
+      loadDropboxSettings();
+    } else if (dropboxError) {
+      const errorMessages: { [key: string]: string } = {
+        'no_code': '認証コードが取得できませんでした',
+        'missing_config': 'Dropbox設定が不足しています',
+        'token_exchange_failed': 'アクセストークンの取得に失敗しました',
+        'account_info_failed': 'アカウント情報の取得に失敗しました',
+        'token_exchange_exception': 'トークン交換でエラーが発生しました',
+        'callback_exception': 'コールバック処理でエラーが発生しました'
+      };
+      showError(errorMessages[dropboxError] || `認証エラー: ${dropboxError}`);
+      // URLパラメータをクリア
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   useEffect(() => {
@@ -643,6 +849,10 @@ export const SettingsManagement = () => {
           <TabsTrigger value="departments" className="flex items-center gap-1 text-xs px-2">
             <Building2 className="w-3 h-3" />
             部門設定
+          </TabsTrigger>
+          <TabsTrigger value="external-storage" className="flex items-center gap-1 text-xs px-2">
+            <Database className="w-3 h-3" />
+            外部ストレージ
           </TabsTrigger>
           <TabsTrigger value="menus" className="flex items-center gap-1 text-xs px-2">
             <Menu className="w-3 h-3" />
@@ -1046,7 +1256,162 @@ export const SettingsManagement = () => {
           </Card>
         </TabsContent>
 
+        {/* 外部ストレージタブ */}
+        <TabsContent value="external-storage" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                Dropbox連携設定
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Dropbox連携設定 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Dropbox連携</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">アクセストークン</label>
+                    <div className="relative mt-1">
+                      <Input
+                        type={showDropboxToken ? "text" : "password"}
+                        placeholder="Dropboxアクセストークンを入力"
+                        className="pr-10"
+                        value={dropboxToken}
+                        onChange={(e) => setDropboxToken(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowDropboxToken(!showDropboxToken)}
+                        title={showDropboxToken ? "トークンを隠す" : "トークンを表示"}
+                      >
+                        {showDropboxToken ? (
+                          <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">フォルダパス</label>
+                    <Input
+                      placeholder="ルートフォルダの場合は空白、または /フォルダ名/サブフォルダ名"
+                      className="mt-1"
+                      value={dropboxFolderPath}
+                      onChange={(e) => setDropboxFolderPath(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ルートフォルダの場合は空白のままにしてください
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={testDropboxConnection}
+                    disabled={isDropboxLoading}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    接続テスト
+                  </Button>
+                  <Button 
+                    size="sm"
+                    onClick={saveDropboxSettings}
+                    disabled={isDropboxLoading}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    保存
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={startDropboxOAuth}
+                    disabled={isDropboxLoading}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    OAuth2認証
+                  </Button>
+                </div>
+              </div>
 
+              {/* Dropboxファイル一覧 */}
+              {/* ファイルエクスプローラーと同期設定を横並びに配置 */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* ファイルエクスプローラー（左側2/3） */}
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Dropboxファイル一覧</h3>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={fetchDropboxFiles}
+                        disabled={isDropboxLoading}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        ファイル一覧更新
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4 mr-2" />
+                        ファイルダウンロード
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <DropboxExplorer
+                    files={dropboxFiles}
+                    loading={isDropboxLoading}
+                    onFileSelect={(file: DropboxFileInfo) => {
+                      console.log('ファイル選択:', file);
+                      // ファイル選択時の処理をここに追加
+                    }}
+                    onFolderSelect={(folder: DropboxFileInfo) => {
+                      console.log('フォルダ選択:', folder);
+                      // フォルダ選択時の処理をここに追加
+                    }}
+                  />
+                </div>
+
+                {/* 同期設定（右側1/3） */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">同期設定</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">自動同期</label>
+                      <div className="mt-1">
+                        <input 
+                          type="checkbox" 
+                          className="mr-2" 
+                          id="auto-sync"
+                          checked={autoSync}
+                          onChange={(e) => setAutoSync(e.target.checked)}
+                        />
+                        <label htmlFor="auto-sync" className="text-sm">ファイルの変更を自動同期する</label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">同期間隔</label>
+                      <select 
+                        className="mt-1 w-full p-2 border rounded" 
+                        aria-label="同期間隔を選択"
+                        value={syncInterval}
+                        onChange={(e) => setSyncInterval(e.target.value)}
+                      >
+                        <option>5分</option>
+                        <option>15分</option>
+                        <option>30分</option>
+                        <option>1時間</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* 利用状況グラフタブ */}
         <TabsContent value="graph" className="space-y-6 pb-6">

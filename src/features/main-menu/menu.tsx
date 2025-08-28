@@ -10,6 +10,7 @@ import {
   FileText,
   Settings,
   TestTube,
+  FolderOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "../theme/theme-toggle";
@@ -19,9 +20,20 @@ import { useSession } from "next-auth/react";
 import { UpdateIndicator } from "../change-log/update-indicator";
 import { useMenuContext } from "./menu-context";
 
+// GPTアイコンコンポーネント
+const GptIcon = () => (
+  <div className="w-4 h-4 flex flex-wrap gap-0.5">
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+  </div>
+);
+
 export const MainMenu = () => {
   const { data: session } = useSession();
   const { isMenuOpen, toggleMenu } = useMenuContext();
+  const isDevMode = process.env.NODE_ENV === 'development';
   return (
     <div className="flex flex-col justify-between p-2">
       <div className="flex gap-5  flex-col  items-center">
@@ -34,12 +46,6 @@ export const MainMenu = () => {
         </Button>
         <Button
           asChild
-          className="rounded-full w-[40px] h-[40px] p-1 text-primary"
-          variant={"outline"}
-        >
-        </Button>
-        <Button
-          asChild
           className="rounded-full w-[40px] h-[40px] p-2 text-primary"
           variant={"outline"}
         >
@@ -47,6 +53,17 @@ export const MainMenu = () => {
             <Home />
           </Link>
         </Button>
+        {isDevMode && (
+          <Button
+            asChild
+            className="rounded-full w-[40px] h-[40px] p-2 text-primary"
+            variant={"outline"}
+          >
+            <Link href="/gpt" title="GPT">
+              <GptIcon />
+            </Link>
+          </Button>
+        )}
         {session?.user?.isAdmin ? (
           <>
             <Button
@@ -76,6 +93,17 @@ export const MainMenu = () => {
                 <TestTube />
               </Link>
             </Button>
+            {isDevMode && (
+              <Button
+                asChild
+                className="rounded-full w-[40px] h-[40px] p-2 text-primary"
+                variant={"outline"}
+              >
+                <Link href="/blob-files" title="BLOBファイル管理">
+                  <FolderOpen />
+                </Link>
+              </Button>
+            )}
           </>
         ) : (
           <></>

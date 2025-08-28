@@ -69,3 +69,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* MUI Tree View カスタムスタイル */
+.MuiTreeView-root {
+  background: transparent;
+  font-size: 14px;
+}
+
+.MuiTreeItem-root {
+  padding: 0;
+}
+
+.MuiTreeItem-content {
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: 1px 0;
+  transition: background-color 0.2s;
+}
+
+.MuiTreeItem-content:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.MuiTreeItem-content.Mui-selected {
+  background-color: rgba(25, 118, 210, 0.08);
+}
+
+.MuiTreeItem-content.Mui-selected:hover {
+  background-color: rgba(25, 118, 210, 0.12);
+}
+
+.MuiTreeItem-iconContainer {
+  margin-right: 4px;
+}
+
+.MuiTreeItem-label {
+  padding: 0;
+  font-size: 14px;
+}
+
+/* ダークモード対応 */
+.dark .MuiTreeItem-content:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .MuiTreeItem-content.Mui-selected {
+  background-color: rgba(25, 118, 210, 0.16);
+}
+
+.dark .MuiTreeItem-content.Mui-selected:hover {
+  background-color: rgba(25, 118, 210, 0.24);
+}

@@ -3,25 +3,39 @@
 import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 
 // Azure Blob Storage接続設定
-const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+let blobServiceClient: BlobServiceClient;
 
-console.log("Azure Blob Storage Config:", {
-  connectionString: connectionString ? "設定済み" : "未設定",
-  accountName: connectionString ? connectionString.match(/AccountName=([^;]+)/)?.[1] : "不明"
-});
-
-if (!connectionString) {
-  throw new Error("AZURE_STORAGE_CONNECTION_STRING environment variable is not set");
+function getBlobServiceClient(): BlobServiceClient {
+  if (!blobServiceClient) {
+    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+    if (!connectionString) {
+      throw new Error('Azure Storage connection string is not configured');
+    }
+    
+    // Azure Blob Storage SDKの設定を改善（日本語ファイル名サポート強化）
+    blobServiceClient = BlobServiceClient.fromConnectionString(connectionString, {
+      userAgentOptions: {
+        userAgentPrefix: "Azure-Blob-Storage-Japanese-Support"
+      }
+    });
+  }
+  return blobServiceClient;
 }
 
-const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-console.log("BlobServiceClient initialized successfully");
+console.log("Azure Blob Storage Config:", {
+  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING ? "設定済み" : "未設定",
+  accountName: process.env.AZURE_STORAGE_CONNECTION_STRING ? process.env.AZURE_STORAGE_CONNECTION_STRING.match(/AccountName=([^;]+)/)?.[1] : "不明"
+});
+
+if (!process.env.AZURE_STORAGE_CONNECTION_STRING) {
+  throw new Error("AZURE_STORAGE_CONNECTION_STRING environment variable is not set");
+}
 
 // コンテナを作成（存在しない場合）
 export async function createContainerIfNotExists(containerName: string): Promise<void> {
   try {
     console.log(`Attempting to create container: ${containerName}`);
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const containerClient = getBlobServiceClient().getContainerClient(containerName);
     
     // コンテナの存在確認
     const exists = await containerClient.exists();
@@ -43,7 +57,7 @@ export async function createContainerIfNotExists(containerName: string): Promise
 // コンテナの存在確認
 export async function containerExists(containerName: string): Promise<boolean> {
   try {
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const containerClient = getBlobServiceClient().getContainerClient(containerName);
     const exists = await containerClient.exists();
     return exists;
   } catch (error) {
@@ -56,7 +70,7 @@ export async function containerExists(containerName: string): Promise<boolean> {
 export async function listContainers(): Promise<string[]> {
   try {
     const containers: string[] = [];
-    for await (const container of blobServiceClient.listContainers()) {
+    for await (const container of getBlobServiceClient().listContainers()) {
       containers.push(container.name);
     }
     return containers;
@@ -64,6 +78,17 @@ export async function listContainers(): Promise<string[]> {
     console.error("Error listing containers:", error);
     throw new Error("コンテナ一覧の取得に失敗しました");
   }
+}
+
+// ファイル名を安全な形式に変換する関数（日本語対応）
+function sanitizeFileNameForBlob(fileName: string): string {
+  // 日本語文字を保持し、危険な文字のみを除去
+  return fileName
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_') // 危険な文字をアンダースコアに変換
+    .replace(/[()&]/g, '_') // 括弧とアンパサンドもアンダースコアに変換（Azure Blob Storageで問題になる可能性があるため）
+    .replace(/_{2,}/g, '_') // 連続するアンダースコアを1つに
+    .replace(/^_+|_+$/g, '') // 先頭と末尾のアンダースコアを除去
+    .trim(); // 前後の空白を除去
 }
 
 // ファイルをアップロード（エイリアス関数）
@@ -89,16 +114,25 @@ export async function uploadFile(
     // コンテナが存在しない場合は作成
     await createContainerIfNotExists(containerName);
     
-    const containerClient = blobServiceClient.getContainerClient(containerName);
-    const blobName = `${Date.now()}_${fileName}`;
+    const containerClient = getBlobServiceClient().getContainerClient(containerName);
+    // ファイル名を安全な形式に変換（日本語文字を保持）
+    const safeFileName = sanitizeFileNameForBlob(fileName);
+    const blobName = `${Date.now()}_${safeFileName}`;
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     
     console.log(`Uploading file as blob: ${blobName}, size: ${fileData.byteLength} bytes`);
+    console.log(`Original file name: ${fileName}`);
+    console.log(`Safe file name: ${safeFileName}`);
     
     // ファイルをアップロード
     await blockBlobClient.upload(fileData, fileData.byteLength, {
       blobHTTPHeaders: {
         blobContentType: contentType || 'application/octet-stream',
+      },
+      metadata: {
+        originalName: Buffer.from(fileName, 'utf-8').toString('base64'), // 元のファイル名をBase64エンコードして保存
+        uploadedAt: new Date().toISOString(),
+        fileSize: fileData.byteLength.toString(),
       },
     });
     
@@ -122,14 +156,40 @@ export async function downloadFile(containerName: string, blobName: string): Pro
   originalName: string;
 }> {
   try {
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const containerClient = getBlobServiceClient().getContainerClient(containerName);
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     
     const downloadResponse = await blockBlobClient.download();
     const arrayBuffer = await streamToArrayBuffer(downloadResponse.readableStreamBody!);
     
-    // blobNameからタイムスタンプを除去して元のファイル名を取得
-    const originalName = blobName.replace(/^\d+_/, '');
+    // メタデータから元のファイル名を取得
+    const properties = await blockBlobClient.getProperties();
+    let originalName = properties.metadata?.originalName;
+    
+    // メタデータに元のファイル名がない場合は、blobNameから復元を試行
+    if (!originalName) {
+      // blobNameがBase64エンコードされている場合の復元
+      const parts = blobName.split('_');
+      if (parts.length > 1) {
+        try {
+          const encodedFileName = parts.slice(1).join('_'); // タイムスタンプ以降を取得
+          originalName = Buffer.from(encodedFileName, 'base64').toString('utf-8');
+        } catch (error) {
+          // Base64デコードに失敗した場合は、blobNameからタイムスタンプを除去
+          originalName = blobName.replace(/^\d+_/, '');
+        }
+      } else {
+        originalName = blobName;
+      }
+    } else {
+      // メタデータのoriginalNameがBase64エンコードされている場合の復元
+      try {
+        originalName = Buffer.from(originalName, 'base64').toString('utf-8');
+      } catch (error) {
+        // Base64デコードに失敗した場合は、そのまま使用
+        console.warn('Failed to decode originalName from base64:', originalName);
+      }
+    }
     
     return {
       data: arrayBuffer,
@@ -145,7 +205,7 @@ export async function downloadFile(containerName: string, blobName: string): Pro
 // ファイルを削除
 export async function deleteFile(containerName: string, blobName: string): Promise<void> {
   try {
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const containerClient = getBlobServiceClient().getContainerClient(containerName);
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     
     await blockBlobClient.delete();
@@ -164,7 +224,7 @@ export async function listFiles(containerName: string): Promise<Array<{
   contentType: string;
 }>> {
   try {
-    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const containerClient = getBlobServiceClient().getContainerClient(containerName);
     const files: Array<{
       name: string;
       url: string;

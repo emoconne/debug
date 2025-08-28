@@ -25,8 +25,13 @@ import {
   Eye,
   Upload,
   Download,
-  Globe
+  Globe,
+  FileUp,
+  AlertCircle
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { CardDescription } from "@/components/ui/card";
 
 interface TestResult {
   timestamp: string;

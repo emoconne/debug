@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useGlobalMessageContext } from "@/features/global-message/global-message-context";
+import { DropboxExplorer } from "@/components/dropbox-explorer";
+import { DropboxFileInfo } from "@/features/documents/dropbox-file-service";
 
 interface Document {
   id: string;
@@ -87,6 +89,8 @@ export const DocumentsManagement = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [errorDetails, setErrorDetails] = useState<{[key: string]: any}>({});
   const [showErrorDetails, setShowErrorDetails] = useState<string | null>(null);
+  const [dropboxFiles, setDropboxFiles] = useState<DropboxFileInfo[]>([]);
+  const [isDropboxLoading, setIsDropboxLoading] = useState(false);
 
   // ドキュメント一覧を取得
   const fetchDocuments = async () => {
@@ -292,6 +296,25 @@ export const DocumentsManagement = () => {
     }
   };
 
+  // Dropboxファイル一覧を取得
+  const fetchDropboxFiles = async () => {
+    try {
+      setIsDropboxLoading(true);
+      const response = await fetch('/api/settings/dropbox/files');
+      if (response.ok) {
+        const data = await response.json();
+        setDropboxFiles(data.files || []);
+      } else {
+        const errorData = await response.json();
+        showError(errorData.error || 'Dropboxファイル一覧の取得に失敗しました');
+      }
+    } catch (error) {
+      showError('Dropboxファイル一覧の取得に失敗しました');
+    } finally {
+      setIsDropboxLoading(false);
+    }
+  };
+
 
 
   // ファイルサイズを人間が読みやすい形式に変換
@@ -327,6 +350,7 @@ export const DocumentsManagement = () => {
   useEffect(() => {
     fetchDocuments();
     fetchDepartments();
+    fetchDropboxFiles();
   }, []);
 
   // 定期的にステータスのみを更新（処理中のドキュメントのステータス変更を反映）
@@ -698,22 +722,41 @@ export const DocumentsManagement = () => {
         <TabsContent value="dropbox">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cloud className="w-5 h-5" />
-                Dropbox連携
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Cloud className="w-5 h-5" />
+                  Dropboxファイル一覧
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={fetchDropboxFiles}
+                    disabled={isDropboxLoading}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    ファイル一覧更新
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    ファイルダウンロード
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <Cloud className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">準備中</h3>
-                <p className="text-muted-foreground mb-4">
-                  Dropboxとの連携機能は現在開発中です。
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  近日中にリリース予定です。
-                </p>
-              </div>
+              <DropboxExplorer
+                files={dropboxFiles}
+                loading={isDropboxLoading}
+                onFileSelect={(file: DropboxFileInfo) => {
+                  console.log('ファイル選択:', file);
+                  // ファイル選択時の処理をここに追加
+                }}
+                onFolderSelect={(folder: DropboxFileInfo) => {
+                  console.log('フォルダ選択:', folder);
+                  // フォルダ選択時の処理をここに追加
+                }}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -730,12 +773,12 @@ export const DocumentsManagement = () => {
             <CardContent>
               <div className="text-center py-12">
                 <Share2 className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">準備中</h3>
+                <h3 className="text-lg font-semibold mb-2"></h3>
                 <p className="text-muted-foreground mb-4">
-                  SharePointとの連携機能は現在開発中です。
+                  SharePointとの連携機能は未設定です。
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  近日中にリリース予定です。
+                  
                 </p>
               </div>
             </CardContent>
@@ -754,12 +797,12 @@ export const DocumentsManagement = () => {
             <CardContent>
               <div className="text-center py-12">
                 <Database className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">準備中</h3>
+                <h3 className="text-lg font-semibold mb-2"></h3>
                 <p className="text-muted-foreground mb-4">
-                  kintoneとの連携機能は現在開発中です。
+                  kintoneとの連携機能は未設定です。
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  近日中にリリース予定です。
+                  
                 </p>
               </div>
             </CardContent>
@@ -778,12 +821,12 @@ export const DocumentsManagement = () => {
             <CardContent>
               <div className="text-center py-12">
                 <CalendarDays className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">準備中</h3>
+                <h3 className="text-lg font-semibold mb-2"></h3>
                 <p className="text-muted-foreground mb-4">
-                  Garoonとの連携機能は現在開発中です。
+                  Garoonとの連携機能は未設定です。
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  近日中にリリース予定です。
+                  
                 </p>
               </div>
             </CardContent>

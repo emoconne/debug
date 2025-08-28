@@ -4,10 +4,10 @@ import { Container, CosmosClient } from "@azure/cosmos";
 
 // 統合されたCosmos DB設定
 const DB_NAME = process.env.AZURE_COSMOSDB_DB_NAME || "chat";
-const CONTAINER_NAME = "settings"; // 固定値
+const CONTAINER_NAME = "storage"; // storageコンテナを使用
 
 // データタイプの定義
-export type DataType = 'prompt' | 'document' | 'department' | 'user';
+export type DataType = 'prompt' | 'document' | 'department' | 'user' | 'dropbox-settings';
 
 export interface SettingsData {
   id: string;

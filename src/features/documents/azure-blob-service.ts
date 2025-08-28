@@ -22,17 +22,43 @@ function createBlobService() {
     throw new Error('Azure Storage connection string is not configured');
   }
 
-  const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+  // Azure Blob Storage SDKの設定を改善（日本語ファイル名サポート強化）
+  const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString, {
+    // 日本語ファイル名のサポートを強化
+    userAgentOptions: {
+      userAgentPrefix: "Azure-Blob-Storage-Japanese-Support"
+    }
+  });
   const containerClient = blobServiceClient.getContainerClient(containerName);
   
   return { blobServiceClient, containerClient };
+}
+
+// ファイル名を安全な形式に変換する関数（日本語対応）
+function sanitizeFileNameForBlob(fileName: string): string {
+  // 日本語文字を保持し、危険な文字のみを除去
+  return fileName
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_') // 危険な文字をアンダースコアに変換
+    .replace(/[()&]/g, '_') // 括弧とアンパサンドもアンダースコアに変換（Azure Blob Storageで問題になる可能性があるため）
+    .replace(/_{2,}/g, '_') // 連続するアンダースコアを1つに
+    .replace(/^_+|_+$/g, '') // 先頭と末尾のアンダースコアを除去
+    .trim(); // 前後の空白を除去
+}
+
+// URLエンコーディングを安全に行う関数
+function encodeBlobName(blobName: string): string {
+  // Azure Blob Storageでは、URLエンコーディングされたファイル名が使用される
+  // 日本語文字はUTF-8でエンコードされる
+  return encodeURIComponent(blobName);
 }
 
 // ファイルをアップロード
 export async function uploadFile(file: File, userId: string): Promise<{ url: string; blobName: string }> {
   const { containerClient } = createBlobService();
   const timestamp = Date.now();
-  const blobName = `${userId}/${timestamp}_${file.name}`;
+  // ファイル名を安全な形式に変換（日本語文字を保持）
+  const safeFileName = sanitizeFileNameForBlob(file.name);
+  const blobName = `${userId}/${timestamp}_${safeFileName}`;
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
   const arrayBuffer = await file.arrayBuffer();
@@ -41,7 +67,7 @@ export async function uploadFile(file: File, userId: string): Promise<{ url: str
       blobContentType: file.type,
     },
     metadata: {
-      originalName: file.name,
+      originalName: Buffer.from(file.name, 'utf-8').toString('base64'), // 元のファイル名をBase64エンコードして保存
       uploadedBy: userId,
       uploadedAt: new Date().toISOString(),
       fileSize: file.size.toString(),
@@ -86,7 +112,38 @@ export async function downloadFile(blobName: string): Promise<{ data: ArrayBuffe
   }
 
   const properties = await blockBlobClient.getProperties();
-  const originalName = properties.metadata?.originalName || blobName.split('/').pop() || 'unknown';
+  let originalName = properties.metadata?.originalName;
+  
+  // メタデータに元のファイル名がない場合は、blobNameから復元を試行
+  if (!originalName) {
+    // blobNameがBase64エンコードされている場合の復元
+    const parts = blobName.split('/');
+    if (parts.length > 1) {
+      const fileNamePart = parts[parts.length - 1]; // 最後の部分（ファイル名部分）
+      const fileNameParts = fileNamePart.split('_');
+      if (fileNameParts.length > 1) {
+        try {
+          const encodedFileName = fileNameParts.slice(1).join('_'); // タイムスタンプ以降を取得
+          originalName = Buffer.from(encodedFileName, 'base64').toString('utf-8');
+        } catch (error) {
+          // Base64デコードに失敗した場合は、blobNameからタイムスタンプを除去
+          originalName = blobName.split('/').pop() || 'unknown';
+        }
+      } else {
+        originalName = fileNamePart;
+      }
+    } else {
+      originalName = blobName.split('/').pop() || 'unknown';
+    }
+  } else {
+    // メタデータのoriginalNameがBase64エンコードされている場合の復元
+    try {
+      originalName = Buffer.from(originalName, 'base64').toString('utf-8');
+    } catch (error) {
+      // Base64デコードに失敗した場合は、そのまま使用
+      console.warn('Failed to decode originalName from base64:', originalName);
+    }
+  }
 
   return {
     data: data.buffer,
@@ -507,15 +564,6 @@ export async function uploadFileToBlobWithArrayBuffer(
   }
 }
 
-// ファイル名を安全な形式に変換する関数（日本語対応）
-function sanitizeFileName(fileName: string): string {
-  // 日本語文字を保持し、危険な文字のみを除去
-  return fileName
-    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_') // 危険な文字をアンダースコアに変換
-    .replace(/_{2,}/g, '_') // 連続するアンダースコアを1つに
-    .replace(/^_+|_+$/g, ''); // 先頭と末尾のアンダースコアを除去
-}
-
 // 元のファイルをBLOBにアップロード
 export async function uploadOriginalFileToBlob(containerName: string, blobName: string, file: File): Promise<void> {
   try {
@@ -524,7 +572,12 @@ export async function uploadOriginalFileToBlob(containerName: string, blobName: 
       throw new Error('Azure Storage connection string is not configured');
     }
 
-    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+    // Azure Blob Storage SDKの設定を改善（日本語ファイル名サポート強化）
+    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString, {
+      userAgentOptions: {
+        userAgentPrefix: "Azure-Blob-Storage-Japanese-Support"
+      }
+    });
     const containerClient = blobServiceClient.getContainerClient(containerName);
     
     // コンテナの存在確認（作成はスキップ）
@@ -540,12 +593,12 @@ export async function uploadOriginalFileToBlob(containerName: string, blobName: 
       throw containerError;
     }
     
-    // blobNameを安全な形式に変換
-    const safeBlobName = sanitizeFileName(blobName);
+    // blobNameが既にBase64エンコードされている場合はそのまま使用
+    const finalBlobName = blobName;
     console.log(`Original blob name: ${blobName}`);
-    console.log(`Safe blob name: ${safeBlobName}`);
+    console.log(`Final blob name: ${finalBlobName}`);
     
-    const blockBlobClient = containerClient.getBlockBlobClient(safeBlobName);
+    const blockBlobClient = containerClient.getBlockBlobClient(finalBlobName);
 
     // ファイルサイズのチェック（Azure Blob Storageの制限: 4.75TB）
     if (file.size > 4.75 * 1024 * 1024 * 1024 * 1024) {
@@ -556,7 +609,7 @@ export async function uploadOriginalFileToBlob(containerName: string, blobName: 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
     
-    console.log(`Uploading original file ${file.name} (${buffer.length} bytes) to ${containerName}/${blobName}`);
+    console.log(`Uploading original file ${file.name} (${buffer.length} bytes) to ${containerName}/${finalBlobName}`);
     console.log(`Block blob client URL: ${blockBlobClient.url}`);
     
     try {
@@ -565,12 +618,12 @@ export async function uploadOriginalFileToBlob(containerName: string, blobName: 
           blobContentType: file.type || 'application/octet-stream',
         },
         metadata: {
-          originalName: file.name,
+          originalName: Buffer.from(file.name, 'utf-8').toString('base64'), // 元のファイル名をBase64エンコードして保存
           uploadedAt: new Date().toISOString(),
           fileSize: file.size.toString(),
         },
       });
-      console.log(`Original file uploaded successfully to ${containerName}/${blobName}`);
+      console.log(`Original file uploaded successfully to ${containerName}/${finalBlobName}`);
     } catch (uploadError) {
       console.error('Upload error details:', {
         error: uploadError instanceof Error ? {
@@ -579,7 +632,7 @@ export async function uploadOriginalFileToBlob(containerName: string, blobName: 
           stack: uploadError.stack
         } : uploadError,
         containerName,
-        blobName,
+        blobName: finalBlobName,
         fileSize: buffer.length,
         contentType: file.type
       });

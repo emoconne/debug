@@ -18,6 +18,16 @@ import { useSession } from "next-auth/react";
 import { UpdateIndicator } from "../change-log/update-indicator";
 import { usePromptContext } from "./prompt-context";
 
+// GPTアイコンコンポーネント
+const GptIcon = () => (
+  <div className="w-4 h-4 flex flex-wrap gap-0.5">
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+    <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+  </div>
+);
+
 export const MainPrompt = () => {
   const { data: session } = useSession();
   const { isPromptOpen, togglePrompt } = usePromptContext();
@@ -33,17 +43,20 @@ export const MainPrompt = () => {
         </Button>
         <Button
           asChild
-          className="rounded-full w-[40px] h-[40px] p-1 text-primary"
+          className="rounded-full w-[40px] h-[40px] p-2 text-primary"
           variant={"outline"}
         >
+          <Link href="/chat" title="新しく会話を始める">
+            <Home />
+          </Link>
         </Button>
         <Button
           asChild
           className="rounded-full w-[40px] h-[40px] p-2 text-primary"
           variant={"outline"}
         >
-          <Link href="/chat" title="新しく会話を始める">
-            <Home />
+          <Link href="/chat" title="GPT">
+            <GptIcon />
           </Link>
         </Button>
         {session?.user?.isAdmin ? (

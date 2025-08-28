@@ -413,12 +413,12 @@ export const BlobFileManagement = () => {
   }
 
     return (
-    <div className="p-6 space-y-6 w-full">
+    <div className="space-y-6 w-full">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold mb-2">BLOBファイル管理</h1>
+          <h1 className="text-2xl font-bold mb-2">Dropboxファイル一覧</h1>
           <p className="text-muted-foreground">
-            Azure BLOBストレージのファイルを管理します
+            Dropboxファイルの管理を行います
           </p>
         </div>
         <div className="flex gap-2">
