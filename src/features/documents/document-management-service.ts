@@ -31,7 +31,7 @@ export interface UploadResult {
 
 // ファイルをアップロード（BLOBコンテナのみ）
 export async function uploadFileToDepartment(
-  file: File, 
+  file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> }, 
   departmentId: string
 ): Promise<UploadResult> {
   console.log('=== UPLOAD FILE TO DEPARTMENT START ===');

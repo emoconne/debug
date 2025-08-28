@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     console.log('=== File Upload Debug API ===');
     
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file') as { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } | null;
 
     if (!file) {
       return NextResponse.json(

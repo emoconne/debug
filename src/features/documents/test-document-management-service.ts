@@ -24,7 +24,7 @@ export interface TestUploadResult {
 
 // テスト用：ファイルをアップロード（testコンテナ）
 export async function uploadFileToTestContainer(
-  file: File
+  file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> }
 ): Promise<TestUploadResult> {
   console.log('=== UPLOAD FILE TO TEST CONTAINER START ===');
   try {

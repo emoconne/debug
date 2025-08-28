@@ -4,7 +4,7 @@ import { testDocumentIntelligence } from '@/features/documents/document-intellig
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file') as { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } | null;
 
     if (!file) {
       return NextResponse.json(

@@ -55,7 +55,7 @@ export const UploadDocument_doc = async (
 const LoadFile = async (formData: FormData) => {
   try {
     console.log('=== LoadFile_doc START ===');
-    const file: File | null = formData.get("file") as unknown as File;
+    const file = formData.get("file") as { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } | null;
 
     if (!file) {
       throw new Error('ファイルが選択されていません');

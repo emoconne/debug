@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Debug: Starting file upload process');
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file') as { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } | null;
     const departmentId = formData.get('departmentId') as string;
 
     if (!file) {

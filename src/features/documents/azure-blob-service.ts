@@ -565,7 +565,7 @@ export async function uploadFileToBlobWithArrayBuffer(
 }
 
 // 元のファイルをBLOBにアップロード
-export async function uploadOriginalFileToBlob(containerName: string, blobName: string, file: File): Promise<void> {
+export async function uploadOriginalFileToBlob(containerName: string, blobName: string, file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> }): Promise<void> {
   try {
     const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
     if (!connectionString) {

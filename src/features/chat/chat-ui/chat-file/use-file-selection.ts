@@ -29,7 +29,7 @@ export const useFileSelection = (props: Props) => {
       setIsUploadingFile(true);
       setUploadButtonLabel("Uploading document...");
       formData.append("id", props.id);
-      const file: File | null = formData.get("file") as unknown as File;
+      const file = formData.get("file") as { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } | null;
       
       console.log('File details:', {
         name: file?.name,

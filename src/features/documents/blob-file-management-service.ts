@@ -76,7 +76,7 @@ export class BlobFileManagementService {
 
   // ファイルをアップロード
   async uploadFile(
-    file: any, // サーバーサイドでのFile型の問題を回避
+    file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> }, // サーバーサイドでのFile型の問題を回避
     containerName: string,
     uploadedBy: string
   ): Promise<UploadResult> {
