@@ -47,12 +47,15 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const fileData = formData.get('file');
     const containerName = formData.get('containerName') as string;
 
-    if (!file) {
+    if (!fileData) {
       return NextResponse.json({ error: 'ファイルが選択されていません' }, { status: 400 });
     }
+
+    // サーバーサイドではFileオブジェクトの型チェックを避ける
+    const file = fileData as any;
 
     if (!containerName) {
       return NextResponse.json({ error: 'コンテナ名が指定されていません' }, { status: 400 });

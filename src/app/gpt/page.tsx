@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Trash2, Edit, MoreHorizontal, Lock, Cube } from "lucide-react";
+import { Plus, Trash2, Edit, MoreHorizontal, Lock, Bot } from "lucide-react";
 import Link from "next/link";
 import { getGpts, deleteGpt, GptItem } from "@/features/gpt/gpt-service";
 
@@ -100,7 +100,7 @@ export default function GptPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Cube className="w-5 h-5 text-gray-600" />
+                        <Bot className="w-5 h-5 text-gray-600" />
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-gray-900">{gpt.name}</span>
