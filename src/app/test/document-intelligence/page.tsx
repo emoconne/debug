@@ -121,6 +121,7 @@ export default function DocumentIntelligenceTestPage() {
                   onChange={handleFileChange}
                   className="flex-1"
                   disabled={isLoading}
+                  aria-label="テスト用ファイルを選択"
                 />
                 <Button 
                   onClick={handleTest} 
