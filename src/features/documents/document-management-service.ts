@@ -79,7 +79,7 @@ export async function uploadFileToDepartment(
       blobName: uploadResult.blobName,
       departmentId: departmentId,
       departmentName: department.name,
-      containerName: department.blobContainerName,
+      containerName: department.name, // 部門名を保存（BLOBコンテナ名ではなく）
       status: 'uploaded', // 初期ステータス
       isDeleted: false,
     });

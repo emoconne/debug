@@ -1,8 +1,19 @@
 "use server";
 
-import { uploadOriginalFileToBlob } from "./azure-blob-service";
-import { saveDocument } from "./cosmos-db-document-service";
 import { userHashedId } from "@/features/auth/helpers";
+import { saveDocument } from "@/features/documents/cosmos-db-document-service";
+import { uploadOriginalFileToBlob } from "@/features/documents/azure-blob-service";
+
+// ファイル名を安全な形式に変換する関数（日本語対応）
+function sanitizeFileNameForBlob(fileName: string): string {
+  // 日本語文字を保持し、危険な文字のみを除去
+  return fileName
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_') // 危険な文字をアンダースコアに変換
+    .replace(/[()&]/g, '_') // 括弧とアンパサンドもアンダースコアに変換（Azure Blob Storageで問題になる可能性があるため）
+    .replace(/_{2,}/g, '_') // 連続するアンダースコアを1つに
+    .replace(/^_+|_+$/g, '') // 先頭と末尾のアンダースコアを除去
+    .trim(); // 前後の空白を除去
+}
 
 export interface TestUploadResult {
   success: boolean;
@@ -44,12 +55,15 @@ export async function uploadFileToTestContainer(
     console.log('Debug: Uploading to blob container:', containerName);
     const timestamp = Date.now();
     
-    // ファイル名を安全な形式に変換
-    const safeFileName = file.name.replace(/[^\w\-\.]/g, '_').replace(/_{2,}/g, '_').replace(/^_+|_+$/g, '');
-    const blobName = `${timestamp}_${safeFileName}`;
+    // ファイル名を安全な形式に変換（日本語文字を保持）
+    const safeFileName = sanitizeFileNameForBlob(file.name);
+    // 日本語ファイル名をBase64エンコードして安全に保存
+    const encodedFileName = Buffer.from(file.name, 'utf-8').toString('base64');
+    const blobName = `${timestamp}_${encodedFileName}`;
     
     console.log('Debug: Original file name:', file.name);
     console.log('Debug: Safe file name:', safeFileName);
+    console.log('Debug: Encoded file name:', encodedFileName);
     console.log('Debug: Blob name:', blobName);
     
     try {
@@ -61,6 +75,18 @@ export async function uploadFileToTestContainer(
       console.log('Debug: File uploaded successfully to blob storage');
     } catch (uploadError) {
       console.error('Debug: Blob upload failed:', uploadError);
+      console.error('Debug: Upload error details:', {
+        error: uploadError instanceof Error ? {
+          name: uploadError.name,
+          message: uploadError.message,
+          stack: uploadError.stack
+        } : uploadError,
+        fileName: file.name,
+        safeFileName,
+        blobName,
+        fileSize: file.size,
+        fileType: file.type
+      });
       return {
         success: false,
         message: "ファイルのアップロードに失敗しました",
@@ -93,7 +119,7 @@ export async function uploadFileToTestContainer(
         blobName: uploadResult.blobName,
         departmentId: 'test',
         departmentName: 'Test Department',
-        containerName: containerName,
+        containerName: 'Test Department', // 部門名を保存（BLOBコンテナ名ではなく）
         status: 'uploaded', // 初期ステータス
         isDeleted: false,
         pages: 0, // 初期値
