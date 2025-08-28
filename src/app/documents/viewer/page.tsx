@@ -181,12 +181,26 @@ export default function DocumentViewer({ searchParams }: ViewerProps) {
         const result = await mammoth.default.convertToHtml({ arrayBuffer: arrayBuffer as ArrayBuffer });
         setOfficeContent({ html: result.value });
       } else if (fileType.includes('spreadsheetml')) {
-        // XLSXファイルの処理
-        const XLSX = await import('xlsx');
-        const workbook = XLSX.read(arrayBuffer as ArrayBuffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // Excelファイルの処理
+        const ExcelJS = await import('exceljs');
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(arrayBuffer as ArrayBuffer);
+        
+        const worksheet = workbook.getWorksheet(1);
+        if (!worksheet) {
+          setOfficeContent({ text: 'ワークシートが見つかりません。' });
+          return;
+        }
+        
+        const jsonData: any[][] = [];
+        worksheet.eachRow((row, rowNumber) => {
+          const rowData: any[] = [];
+          row.eachCell((cell, colNumber) => {
+            rowData.push(cell.value);
+          });
+          jsonData.push(rowData);
+        });
+        
         setOfficeContent({ tables: jsonData });
       } else if (fileType.includes('presentationml')) {
         // PPTXファイルの処理（簡易表示）
