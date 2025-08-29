@@ -39,7 +39,27 @@ export class BlobFileManagementService {
   constructor() {
     console.log('BlobFileManagementService constructor - Starting initialization');
     // 環境変数のチェックは実際に使用する時に行う
+    this.initializeClients();
     console.log('BlobFileManagementService constructor - Initialization completed');
+  }
+
+  private initializeClients() {
+    // Azure Blob Storage クライアントの初期化
+    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+    if (!connectionString) {
+      throw new Error('AZURE_STORAGE_CONNECTION_STRING environment variable is not set');
+    }
+    this.blobServiceClient = new BlobServiceClient(connectionString);
+
+    // Cosmos DB クライアントの初期化
+    const cosmosConnectionString = process.env.AZURE_COSMOSDB_CONNECTION_STRING;
+    const databaseName = process.env.AZURE_COSMOSDB_DATABASE_NAME;
+    if (!cosmosConnectionString || !databaseName) {
+      throw new Error('Cosmos DB environment variables are not set');
+    }
+    this.cosmosClient = new CosmosClient(cosmosConnectionString);
+    this.database = this.cosmosClient.database(databaseName);
+    this.cosmosContainer = this.database.container('blob-files');
   }
 
   // コンテナの初期化（存在しない場合は作成）
