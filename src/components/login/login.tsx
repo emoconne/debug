@@ -27,10 +27,10 @@ export const LogIn = () => {
       </CardHeader>
       <CardContent className="grid gap-4">
         <Button onClick={() => signIn("azure-ad")}> Azure Entraでログイン</Button>
-        {process.env.NODE_ENV === "development" && (
-          <Button onClick={() => signIn("localdev")}>Basic Auth (DEV ONLY)</Button>
+        {process.env.NEXT_PUBLIC_DEBUG === "true" && (
+          <Button onClick={() => signIn("localdev")}>Basic Auth (DEBUG ONLY)</Button>
           )}
-        {process.env.NODE_ENV === "development" && (
+        {process.env.NEXT_PUBLIC_DEBUG === "true" && (
           <Button onClick={() => signIn("github")}>GitHub</Button>
           )}
 

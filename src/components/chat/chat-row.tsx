@@ -23,10 +23,10 @@ interface ChatRowProps {
 const ChatRow: FC<ChatRowProps> = (props) => {
   const [isIconChecked, setIsIconChecked] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(true);
-  const isDevMode = process.env.NODE_ENV === 'development';
+  const isDebugMode = process.env.NEXT_PUBLIC_DEBUG === 'true';
   
-  // デバッグ用ログ（devモードのみ）
-  if (isDevMode) {
+  // デバッグ用ログ（NEXT_PUBLIC_DEBUG=trueの場合のみ）
+  if (isDebugMode) {
     console.log('ChatRow props:', {
       type: props.type,
       searchResults: props.searchResults,
@@ -106,8 +106,8 @@ const ChatRow: FC<ChatRowProps> = (props) => {
               : "bg-primary text-white"
           )}
         >
-          {/* デバッグ用: Citationのテスト（devモードのみ） */}
-          {isDevMode && props.type === "assistant" && (
+          {/* デバッグ用: Citationのテスト（NEXT_PUBLIC_DEBUG=trueの場合のみ） */}
+          {isDebugMode && props.type === "assistant" && (
             <div className="mb-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-xs">
               <div>Debug: Message content preview</div>
               <div>Length: {props.message?.length || 0}</div>

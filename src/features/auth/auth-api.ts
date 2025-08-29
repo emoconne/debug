@@ -51,11 +51,11 @@ const configureIdentityProvider = () => {
     );
   }
 
-  // If we're in local dev, add a basic credential provider option as well
+  // If NEXT_PUBLIC_DEBUG is true, add a basic credential provider option as well
   // (Useful when a dev doesn't have access to create app registration in their tenant)
   // This currently takes any username and makes a user with it, ignores password
   // Refer to: https://next-auth.js.org/configuration/providers/credentials
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NEXT_PUBLIC_DEBUG === "true") {
     providers.push(
       CredentialsProvider({
         name: "localdev",

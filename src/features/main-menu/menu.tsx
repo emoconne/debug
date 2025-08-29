@@ -33,7 +33,7 @@ const GptIcon = () => (
 export const MainMenu = () => {
   const { data: session } = useSession();
   const { isMenuOpen, toggleMenu } = useMenuContext();
-  const isDevMode = process.env.NODE_ENV === 'development';
+  const isDebugMode = process.env.NEXT_PUBLIC_DEBUG === 'true';
   return (
     <div className="flex flex-col justify-between p-2">
       <div className="flex gap-5  flex-col  items-center">
@@ -53,7 +53,7 @@ export const MainMenu = () => {
             <Home />
           </Link>
         </Button>
-        {isDevMode && (
+        {isDebugMode && (
           <Button
             asChild
             className="rounded-full w-[40px] h-[40px] p-2 text-primary"
@@ -93,7 +93,7 @@ export const MainMenu = () => {
                 <TestTube />
               </Link>
             </Button>
-            {isDevMode && (
+            {isDebugMode && (
               <Button
                 asChild
                 className="rounded-full w-[40px] h-[40px] p-2 text-primary"

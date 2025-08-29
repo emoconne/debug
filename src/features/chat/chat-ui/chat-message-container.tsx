@@ -13,7 +13,7 @@ import ChatInput from "./chat-input/chat-input";
 export const ChatMessageContainer = () => {
   const { data: session } = useSession();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const isDevMode = process.env.NODE_ENV === 'development';
+  const isDebugMode = process.env.NEXT_PUBLIC_DEBUG === 'true';
 
   const { messages, isLoading, status } = useChatContext();
 
@@ -32,8 +32,8 @@ export const ChatMessageContainer = () => {
       </div>
       <div className=" pb-[80px] flex flex-col justify-end flex-1">
                 {messages.map((message, index) => {
-          // デバッグ用ログ（devモードのみ）
-          if (isDevMode) {
+          // デバッグ用ログ（NEXT_PUBLIC_DEBUG=trueの場合のみ）
+          if (isDebugMode) {
             console.log(`Message ${index}:`, {
               role: message.role,
               content: message.content?.substring(0, 100) + '...',
