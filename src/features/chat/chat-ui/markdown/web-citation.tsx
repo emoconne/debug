@@ -76,14 +76,7 @@ const WebCitationButton: FC<WebCitationButtonProps> = (props) => {
     }
   };
 
-  const getFaviconUrl = (url: string) => {
-    try {
-      const domain = new URL(url).hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-    } catch {
-      return '/ai-icon.png';
-    }
-  };
+
 
   return (
     <div className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer min-w-[200px] max-w-[280px]">
@@ -101,16 +94,7 @@ const WebCitationButton: FC<WebCitationButtonProps> = (props) => {
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <img
-                src={getFaviconUrl(props.url)}
-                alt=""
-                className="w-4 h-4 rounded"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/ai-icon.png';
-                }}
-              />
-            </div>
+
             <div className="text-sm font-medium text-gray-900 truncate mb-1">
               {props.name}
             </div>
