@@ -25,36 +25,38 @@ export const webCitation = {
 };
 
 export const WebCitation: FC<Props> = (props: Props) => {
-  // group citations by name
-  const citations = props.items.reduce((acc, citation) => {
-    const { name } = citation;
-    if (!acc[name]) {
-      acc[name] = [];
+  // 無効なURLをフィルタリング（example.comなど）
+  const validCitations = props.items.filter(citation => {
+    try {
+      const url = new URL(citation.id);
+      const domain = url.hostname.toLowerCase();
+      // example.com、localhost、無効なドメインを除外
+      return !domain.includes('example.com') && 
+             !domain.includes('localhost') && 
+             !domain.includes('127.0.0.1') &&
+             domain !== 'example.org' &&
+             domain !== 'test.com';
+    } catch {
+      return false; // 無効なURLは除外
     }
-    acc[name].push(citation);
-    return acc;
-  }, {} as Record<string, WebCitation[]>);
+  });
 
-    return (
+  return (
     <div className="interactive-citation p-4 border mt-4 rounded-md">
-      {Object.entries(citations).map(([name, items], index: number) => {
-        return (
-          <div key={index} className="flex flex-wrap gap-3">
-            {items.map((item, index: number) => {
-              return (
-                <div key={index}>
-                  <WebCitationButton
-                    index={index + 1}
-                    name={item.name}
-                    url={item.id}
-                    snippet={item.snippet}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+      <div className="flex flex-wrap gap-3">
+        {validCitations.map((item, index: number) => {
+          return (
+            <div key={index}>
+              <WebCitationButton
+                index={index + 1}
+                name={item.name}
+                url={item.id}
+                snippet={item.snippet}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -79,7 +81,7 @@ const WebCitationButton: FC<WebCitationButtonProps> = (props) => {
 
 
   return (
-    <div className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer min-w-[200px] max-w-[280px]">
+    <div className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer min-w-[300px] max-w-[400px]">
       <a 
         href={props.url} 
         target="_blank" 

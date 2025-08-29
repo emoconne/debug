@@ -160,14 +160,7 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
 文字数制限: 800文字程度
 
 回答の最後には必ず以下の形式でWebCitationを含めてください：
-{% webCitation items=[{name:"${citationItems[0]?.name || ''}",id:"${citationItems[0]?.id || ''}"}`;
-  if (citationItems.length > 1) {
-    Prompt += `, {name:"${citationItems[1]?.name || ''}",id:"${citationItems[1]?.id || ''}"}`;
-  }
-  if (citationItems.length > 2) {
-    Prompt += `, {name:"${citationItems[2]?.name || ''}",id:"${citationItems[2]?.id || ''}"}`;
-  }
-  Prompt += `] /%}
+{% webCitation items=[${citationItems.map((item: any) => `{name:"${item.name || ''}",id:"${item.id || ''}"}`).join(', ')}] /%}
 
 【質問】${lastHumanMessage.content}
 【Web検索結果とWebページの内容】${context}`;
