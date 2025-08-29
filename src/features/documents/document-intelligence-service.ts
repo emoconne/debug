@@ -36,7 +36,7 @@ export const initDocumentIntelligence = async () => {
 
 // ファイルをDocument Intelligenceで処理
 export const processFileWithDocumentIntelligence = async (
-  file: File
+  file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> }
 ): Promise<string[]> => {
   try {
     console.log('=== PROCESS FILE WITH DOCUMENT INTELLIGENCE START ===');
@@ -60,13 +60,13 @@ export const processFileWithDocumentIntelligence = async (
     }
 
     const client = await initDocumentIntelligence();
-    const blob = new Blob([file], { type: file.type });
+    const arrayBuffer = await file.arrayBuffer();
 
     console.log('Starting Document Intelligence analysis...');
-    const poller = await client.beginAnalyzeDocument(
-      "prebuilt-document",
-      await blob.arrayBuffer()
-    );
+          const poller = await client.beginAnalyzeDocument(
+        "prebuilt-document",
+        arrayBuffer
+      );
     
     console.log('Waiting for analysis to complete...');
     const { paragraphs } = await poller.pollUntilDone();
@@ -283,7 +283,7 @@ export const ensureSearchIsConfigured = async (): Promise<void> => {
 
 // 非同期でドキュメント処理を実行
 export const processDocumentAsync = async (
-  file: File,
+  file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> },
   documentId: string,
   departmentName: string
 ): Promise<void> => {

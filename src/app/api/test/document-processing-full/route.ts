@@ -35,8 +35,13 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(fileData, 'base64');
       const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
       
-      // Fileオブジェクトを作成
-      const file = new File([arrayBuffer], fileName, { type: fileType || 'application/octet-stream' });
+      // ファイルオブジェクトを作成（サーバーサイド対応）
+      const file = {
+        name: fileName,
+        type: fileType || 'application/octet-stream',
+        size: arrayBuffer.byteLength,
+        arrayBuffer: async () => arrayBuffer
+      };
       console.log('File object created:', { name: file.name, size: file.size, type: file.type });
 
       // テスト用ドキュメントIDを生成

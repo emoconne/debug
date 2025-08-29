@@ -53,7 +53,7 @@ function encodeBlobName(blobName: string): string {
 }
 
 // ファイルをアップロード
-export async function uploadFile(file: File, userId: string): Promise<{ url: string; blobName: string }> {
+export async function uploadFile(file: { name: string; type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> }, userId: string): Promise<{ url: string; blobName: string }> {
   const { containerClient } = createBlobService();
   const timestamp = Date.now();
   // ファイル名を安全な形式に変換（日本語文字を保持）

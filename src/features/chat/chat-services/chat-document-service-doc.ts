@@ -79,12 +79,12 @@ const LoadFile = async (formData: FormData) => {
     if (file.size < MAX_DOCUMENT_SIZE) {
       const client = await initDocumentIntelligence_doc();
 
-      const blob = new Blob([file], { type: file.type });
+      const arrayBuffer = await file.arrayBuffer();
 
-      const poller = await client.beginAnalyzeDocument(
-        "prebuilt-document",
-        await blob.arrayBuffer()
-      );
+              const poller = await client.beginAnalyzeDocument(
+          "prebuilt-document",
+          arrayBuffer
+        );
       const { paragraphs } = await poller.pollUntilDone();
 
       const docs: Array<string> = [];

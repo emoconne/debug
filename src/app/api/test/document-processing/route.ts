@@ -43,8 +43,13 @@ export async function POST(request: NextRequest) {
       // ステータスをリセット
       await updateDocument(documentId, { status: 'uploaded' });
       
-      // ファイルオブジェクトを作成（実際のファイルはBLOBから取得する必要があります）
-      const file = new File([], document.fileName, { type: document.fileType });
+      // ファイルオブジェクトを作成（サーバーサイド対応）
+      const file = {
+        name: document.fileName,
+        type: document.fileType,
+        size: document.fileSize || 0,
+        arrayBuffer: async () => new ArrayBuffer(0) // 空のArrayBuffer
+      };
       
       // 非同期処理を開始
       processDocumentAsync(file, documentId, document.departmentName || 'Unknown').catch(error => {
