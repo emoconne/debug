@@ -40,3 +40,11 @@ declare global {
 }
 
 export {};
+
+// サーバーサイド対応のFile型を定義
+export type ServerSideFileType = {
+  name: string;
+  type: string;
+  size: number;
+  arrayBuffer: () => Promise<ArrayBuffer>;
+};
