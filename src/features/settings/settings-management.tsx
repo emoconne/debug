@@ -33,7 +33,8 @@ import {
   EyeOff,
   File,
   Folder,
-  FolderPlus
+  FolderPlus,
+  Users
 } from "lucide-react";
 import { DropboxExplorer } from "@/components/dropbox-explorer";
 import { DropboxFileInfo } from "@/features/documents/dropbox-file-service";
@@ -45,6 +46,7 @@ import { Department } from "@/features/documents/cosmos-db-dept-service";
 import { GPTModelData } from "@/features/documents/cosmos-db-gpt-model-service";
 import { DepartmentTable } from "./department-table";
 import { DropboxTokenDisplay } from "./dropbox-token-display";
+import { UserSettingsTable } from "./user-settings-table";
 
 
 interface DepartmentFormData {
@@ -838,7 +840,7 @@ export const SettingsManagement = () => {
       </div>
 
       <Tabs defaultValue="logs" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="logs" className="flex items-center gap-1 text-xs px-2">
             <Activity className="w-3 h-3" />
             利用ログ
@@ -862,6 +864,10 @@ export const SettingsManagement = () => {
           <TabsTrigger value="gpt-models" className="flex items-center gap-1 text-xs px-2">
             <Bot className="w-3 h-3" />
             GPTモデル
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-1 text-xs px-2">
+            <Users className="w-3 h-3" />
+            ユーザー設定
           </TabsTrigger>
 
 
@@ -1255,6 +1261,11 @@ export const SettingsManagement = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ユーザー設定タブ */}
+        <TabsContent value="users" className="space-y-6 pb-6">
+          <UserSettingsTable />
         </TabsContent>
 
         {/* 外部ストレージタブ */}
