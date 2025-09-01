@@ -92,6 +92,10 @@ export const options: NextAuthOptions = {
   providers: [...configureIdentityProvider()],
   callbacks: {
     async jwt({token, user, account, profile, isNewUser, session}) {
+      // ADMIN_EMAIL_ADDRESSに登録されているメールアドレスに無条件でadmin権限を与える
+      const adminEmails = process.env.ADMIN_EMAIL_ADDRESS?.split(",").map(email => email.toLowerCase().trim());
+      const isAdminFromEmail = token.email && adminEmails?.includes(token.email.toLowerCase());
+      
       if (user?.isAdmin) {
         token.isAdmin = user.isAdmin;
       }
@@ -118,19 +122,21 @@ export const options: NextAuthOptions = {
             token.jobTitle = userProfile.jobTitle;
           }
           
-          // 管理者権限をチェック（既存のADMIN_EMAIL_ADDRESSと新しいadminRoleの両方を考慮）
-          token.isAdmin = user?.isAdmin || isAdminFromSettings;
+          // 管理者権限をチェック（ADMIN_EMAIL_ADDRESSを最優先、次にCosmosDBのadminRole）
+          token.isAdmin = isAdminFromEmail || user?.isAdmin || isAdminFromSettings;
           
           console.log('認証デバッグ:', {
             tokenSub: token.sub,
             tokenEmail: token.email,
+            isAdminFromEmail,
             userProfile: userProfile ? 'found' : 'not found',
             isAdminFromSettings,
             finalIsAdmin: token.isAdmin
           });
         } catch (error) {
           console.error('ユーザープロファイル取得エラー:', error);
-          // エラーが発生した場合は既存のisAdminのみを使用
+          // エラーが発生した場合はADMIN_EMAIL_ADDRESSの権限のみを使用
+          token.isAdmin = isAdminFromEmail || user?.isAdmin;
         }
       }
       
