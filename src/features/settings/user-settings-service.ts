@@ -76,6 +76,17 @@ export async function getUserSettingsByUserId(userId: string): Promise<UserSetti
   }
 }
 
+// メールアドレスでユーザー設定を取得
+export async function getUserSettingsByEmail(email: string): Promise<UserSettings | null> {
+  try {
+    const settings = await getUserSettings();
+    return settings.find(setting => setting.email === email) || null;
+  } catch (error) {
+    console.error('ユーザー設定の取得に失敗しました:', error);
+    return null;
+  }
+}
+
 // ユーザー設定を更新
 export async function updateUserSettings(id: string, updates: Partial<Omit<UserSettings, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void> {
   const now = new Date();
@@ -133,6 +144,17 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
   }
 }
 
+// メールアドレスでユーザーが管理者かどうかをチェック
+export async function isUserAdminByEmail(email: string): Promise<boolean> {
+  try {
+    const userSettings = await getUserSettingsByEmail(email);
+    return userSettings?.adminRole === 'admin';
+  } catch (error) {
+    console.error('管理者権限チェックに失敗しました:', error);
+    return false;
+  }
+}
+
 // ユーザーの設定情報を取得（ログイン時用）
 export async function getUserProfile(userId: string): Promise<{
   userType: UserType;
@@ -144,6 +166,35 @@ export async function getUserProfile(userId: string): Promise<{
 } | null> {
   try {
     const userSettings = await getUserSettingsByUserId(userId);
+    if (!userSettings) {
+      return null;
+    }
+
+    return {
+      userType: userSettings.userType,
+      adminRole: userSettings.adminRole,
+      displayName: userSettings.displayName,
+      email: userSettings.email,
+      department: userSettings.department,
+      jobTitle: userSettings.jobTitle,
+    };
+  } catch (error) {
+    console.error('ユーザープロファイルの取得に失敗しました:', error);
+    return null;
+  }
+}
+
+// メールアドレスでユーザーの設定情報を取得（ログイン時用）
+export async function getUserProfileByEmail(email: string): Promise<{
+  userType: UserType;
+  adminRole: AdminRole;
+  displayName: string;
+  email: string;
+  department?: string;
+  jobTitle?: string;
+} | null> {
+  try {
+    const userSettings = await getUserSettingsByEmail(email);
     if (!userSettings) {
       return null;
     }

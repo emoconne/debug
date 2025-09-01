@@ -4,7 +4,7 @@ import AzureADProvider from "next-auth/providers/azure-ad";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { hashValue } from "./helpers";
-import { getUserProfile, isUserAdmin } from "@/features/settings/user-settings-service";
+import { getUserProfile, getUserProfileByEmail, isUserAdmin, isUserAdminByEmail } from "@/features/settings/user-settings-service";
 
 const configureIdentityProvider = () => {
   const providers: Array<Provider> = [];
@@ -99,7 +99,17 @@ export const options: NextAuthOptions = {
       // ユーザーIDが設定されている場合、CosmosDBからユーザー情報を取得
       if (token.sub) {
         try {
-          const userProfile = await getUserProfile(token.sub);
+          // まずユーザーIDで検索
+          let userProfile = await getUserProfile(token.sub);
+          let isAdminFromSettings = await isUserAdmin(token.sub);
+          
+          // ユーザーIDで見つからない場合、メールアドレスで検索
+          if (!userProfile && token.email) {
+            console.log('ユーザーIDで見つからないため、メールアドレスで検索:', token.email);
+            userProfile = await getUserProfileByEmail(token.email);
+            isAdminFromSettings = await isUserAdminByEmail(token.email);
+          }
+          
           if (userProfile) {
             token.userType = userProfile.userType;
             token.adminRole = userProfile.adminRole;
@@ -109,8 +119,15 @@ export const options: NextAuthOptions = {
           }
           
           // 管理者権限をチェック（既存のADMIN_EMAIL_ADDRESSと新しいadminRoleの両方を考慮）
-          const isAdminFromSettings = await isUserAdmin(token.sub);
           token.isAdmin = user?.isAdmin || isAdminFromSettings;
+          
+          console.log('認証デバッグ:', {
+            tokenSub: token.sub,
+            tokenEmail: token.email,
+            userProfile: userProfile ? 'found' : 'not found',
+            isAdminFromSettings,
+            finalIsAdmin: token.isAdmin
+          });
         } catch (error) {
           console.error('ユーザープロファイル取得エラー:', error);
           // エラーが発生した場合は既存のisAdminのみを使用
