@@ -6,6 +6,7 @@
     "@azure/storage-blob": "^12.28.0",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-switch": "^1.2.6",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.542.0",
     "mammoth": "^1.10.0",
