@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Dropbox App Keyが設定されていません" }, { status: 500 });
     }
 
-    // OAuth2認証URLを生成
+    // OAuth2認証URLを生成（リフレッシュトークンも取得）
     const authUrl = `https://www.dropbox.com/oauth2/authorize?` +
       `client_id=${DROPBOX_APP_KEY}&` +
       `response_type=code&` +

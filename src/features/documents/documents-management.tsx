@@ -44,6 +44,7 @@ import { useSession } from "next-auth/react";
 import { useGlobalMessageContext } from "@/features/global-message/global-message-context";
 import { DropboxExplorer } from "@/components/dropbox-explorer";
 import { DropboxFileInfo } from "@/features/documents/dropbox-file-service";
+import { DropboxTokenDisplay } from "@/features/settings/dropbox-token-display";
 
 interface Document {
   id: string;
@@ -725,45 +726,51 @@ export const DocumentsManagement = () => {
 
         {/* Dropboxタブ */}
         <TabsContent value="dropbox">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Cloud className="w-5 h-5" />
-                  Dropboxファイル一覧
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={fetchDropboxFiles}
-                    disabled={isDropboxLoading}
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    ファイル一覧更新
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    ファイルダウンロード
-                  </Button>
+          <div className="space-y-6">
+            {/* トークン情報表示 */}
+            <DropboxTokenDisplay onRefresh={fetchDropboxFiles} />
+            
+            {/* ファイル一覧 */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Cloud className="w-5 h-5" />
+                    Dropboxファイル一覧
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={fetchDropboxFiles}
+                      disabled={isDropboxLoading}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      ファイル一覧更新
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      ファイルダウンロード
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <DropboxExplorer
-                files={dropboxFiles}
-                loading={isDropboxLoading}
-                onFileSelect={(file: DropboxFileInfo) => {
-                  console.log('ファイル選択:', file);
-                  // ファイル選択時の処理をここに追加
-                }}
-                onFolderSelect={(folder: DropboxFileInfo) => {
-                  console.log('フォルダ選択:', folder);
-                  // フォルダ選択時の処理をここに追加
-                }}
-              />
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <DropboxExplorer
+                  files={dropboxFiles}
+                  loading={isDropboxLoading}
+                  onFileSelect={(file: DropboxFileInfo) => {
+                    console.log('ファイル選択:', file);
+                    // ファイル選択時の処理をここに追加
+                  }}
+                  onFolderSelect={(folder: DropboxFileInfo) => {
+                    console.log('フォルダ選択:', folder);
+                    // フォルダ選択時の処理をここに追加
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* SharePointタブ */}

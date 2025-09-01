@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
 import { Dropbox } from "dropbox";
-import { getDropboxSettings } from "@/features/settings/dropbox-settings-service";
+import { getDropboxSettings, refreshDropboxAccessToken } from "@/features/settings/dropbox-settings-service";
 import { DropboxFileService, DropboxFileInfo } from "@/features/documents/dropbox-file-service";
 
 // Node.js環境でfetchが利用可能でない場合の対応
@@ -111,10 +111,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Dropbox設定が有効ではありません" }, { status: 400 });
     }
 
+    // トークンの有効期限をチェック
+    let accessToken = settings.accessToken;
+    const now = new Date();
+    const isTokenExpired = settings.tokenExpiresAt ? now > settings.tokenExpiresAt : false;
+    const isTokenExpiringSoon = settings.tokenExpiresAt ? 
+      (settings.tokenExpiresAt.getTime() - now.getTime()) < (60 * 60 * 1000) : false; // 1時間以内
+
+    // トークンが期限切れまたは期限切れ間近の場合は更新を試行
+    if ((isTokenExpired || isTokenExpiringSoon) && settings.refreshToken) {
+      console.log('Dropbox token is expired or expiring soon, attempting refresh...');
+      const refreshResult = await refreshDropboxAccessToken();
+      if (refreshResult.success && refreshResult.newAccessToken) {
+        accessToken = refreshResult.newAccessToken;
+        console.log('Dropbox token refreshed successfully');
+      } else {
+        console.warn('Failed to refresh Dropbox token:', refreshResult.error);
+      }
+    }
+
     try {
       // Dropbox APIクライアントを初期化
       const dbx = new Dropbox({ 
-        accessToken: settings.accessToken,
+        accessToken: accessToken,
         fetch: fetchFunction
       });
 

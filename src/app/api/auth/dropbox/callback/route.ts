@@ -61,6 +61,14 @@ export async function GET(request: NextRequest) {
 
       const tokenData = await tokenResponse.json();
       const accessToken = tokenData.access_token;
+      const refreshToken = tokenData.refresh_token;
+      const expiresIn = tokenData.expires_in;
+      
+      console.log('Dropbox token data received:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        expiresIn: expiresIn
+      });
 
       // アカウント情報を取得
       const accountResponse = await fetch('https://api.dropboxapi.com/2/users/get_current_account', {
@@ -77,9 +85,11 @@ export async function GET(request: NextRequest) {
 
       const accountData = await accountResponse.json();
 
-      // 設定を保存
+      // 設定を保存（リフレッシュトークンも含む）
       await saveDropboxSettings({
         accessToken,
+        refreshToken,
+        expiresIn,
         folderPath: '', // ルートフォルダは空文字列で指定
         autoSync: false,
         syncInterval: '15分',
