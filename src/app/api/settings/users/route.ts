@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
 import { getUserSettings, saveUserSettings, updateUserSettings } from "@/features/settings/user-settings-service";
 import { UserType } from "@/features/settings/user-types";
+import { getMicrosoftGraphService } from "@/features/settings/microsoft-graph-service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,9 +20,16 @@ export async function GET(request: NextRequest) {
     // 既存のユーザー設定を取得
     const existingSettings = await getUserSettings();
     
-    // Azure Entraからユーザー一覧を取得（ここではダミーデータを使用）
-    // 実際の実装では、Microsoft Graph APIを使用してユーザー一覧を取得
-    const entraUsers = await getEntraUsers();
+    // Azure Entraからユーザー一覧を取得
+    let entraUsers;
+    try {
+      const graphService = getMicrosoftGraphService();
+      entraUsers = await graphService.getUsers();
+    } catch (error) {
+      console.error("Microsoft Graph API エラー、ダミーデータを使用:", error);
+      // エラーが発生した場合はダミーデータを使用
+      entraUsers = getFallbackUsers();
+    }
     
     // 既存設定とEntraユーザーをマージ
     const mergedUsers = entraUsers.map(entraUser => {
@@ -86,8 +94,14 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // 新規設定を保存（Entraユーザー情報が必要）
-      const entraUsers = await getEntraUsers();
-      const entraUser = entraUsers.find(user => user.id === userId);
+      let entraUser;
+      try {
+        const graphService = getMicrosoftGraphService();
+        entraUser = await graphService.getUserById(userId);
+      } catch (error) {
+        console.error("Microsoft Graph API エラー:", error);
+        return NextResponse.json({ error: "ユーザー情報の取得に失敗しました" }, { status: 500 });
+      }
       
       if (!entraUser) {
         return NextResponse.json({ error: "ユーザーが見つかりません" }, { status: 404 });
@@ -120,10 +134,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Azure Entraからユーザー一覧を取得する関数（ダミー実装）
-async function getEntraUsers() {
-  // 実際の実装では、Microsoft Graph APIを使用
-  // ここではダミーデータを返す
+// フォールバック用のダミーデータ
+function getFallbackUsers() {
   return [
     {
       id: "1",
