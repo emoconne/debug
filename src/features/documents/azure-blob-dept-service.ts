@@ -207,13 +207,32 @@ export async function downloadFile(containerName: string, blobName: string): Pro
 // ファイルを削除
 export async function deleteFile(containerName: string, blobName: string): Promise<void> {
   try {
+    console.log(`Deleting file from container: ${containerName}, blob: ${blobName}`);
+    
     const containerClient = getBlobServiceClient().getContainerClient(containerName);
+    
+    // コンテナの存在確認
+    const containerExists = await containerClient.exists();
+    if (!containerExists) {
+      console.warn(`Container '${containerName}' does not exist`);
+      return; // コンテナが存在しない場合は削除をスキップ
+    }
+    
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     
+    // ファイルの存在確認
+    const blobExists = await blockBlobClient.exists();
+    if (!blobExists) {
+      console.warn(`Blob '${blobName}' does not exist in container '${containerName}'`);
+      return; // ファイルが存在しない場合は削除をスキップ
+    }
+    
     await blockBlobClient.delete();
+    console.log(`File '${blobName}' deleted successfully from container '${containerName}'`);
   } catch (error) {
     console.error("Error deleting file:", error);
-    throw new Error("ファイルの削除に失敗しました");
+    // ファイルが存在しない場合やアクセス権限の問題の場合は警告として扱い、処理を続行
+    console.warn("File deletion failed, but continuing with other deletion steps:", error);
   }
 }
 

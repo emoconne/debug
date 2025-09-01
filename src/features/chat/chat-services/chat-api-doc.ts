@@ -7,6 +7,7 @@ import { initAndGuardChatSession } from "./chat-thread-service";
 import { CosmosDBChatMessageHistory } from "./cosmosdb/cosmosdb";
 import { PromptGPTProps } from "./models";
 import { getDepartment } from "@/features/documents/cosmos-db-dept-service";
+import { CitationItem } from "@/features/chat/chat-ui/citation-panel";
 
 const SYSTEM_PROMPT = `あなたは ${AI_NAME} です。企業内ドキュメント検索アシスタントとして、以下の指針に従って対応します：
 
@@ -60,6 +61,13 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
   const history = await chatHistory.getMessages();
   const topHistory = history.slice(history.length - 30, history.length);
 
+  // デバッグ用：チャット履歴の情報を出力
+  console.log('=== DEBUG: Chat History Information ===');
+  console.log('Total messages in history:', history.length);
+  console.log('Top history messages:', topHistory.length);
+  console.log('Current user message:', lastHumanMessage.content);
+  console.log('Chat thread ID:', id);
+
   const relevantDocuments = await findRelevantDocuments(
     lastHumanMessage.content,
     id,
@@ -67,6 +75,16 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
   );
 
   console.log('Relevant documents found:', relevantDocuments.length);
+  console.log('=== DEBUG: Search Results Details ===');
+  relevantDocuments.forEach((doc, index) => {
+    console.log(`Document ${index}:`, {
+      id: doc.id,
+      metadata: doc.metadata,
+      score: doc['@search.score'],
+      pageContentLength: doc.pageContent?.length || 0,
+      hasSasUrl: !!doc.sasUrl
+    });
+  });
   console.log('First document sample:', relevantDocuments[0] ? {
     id: relevantDocuments[0].id,
     fileName: relevantDocuments[0].fileName,
@@ -166,6 +184,11 @@ export const ChatAPIDoc = async (props: PromptGPTProps) => {
 };
 
 const findRelevantDocuments = async (query: string, chatThreadId: string, selectedDepartmentId?: string) => {
+  console.log('=== DEBUG: findRelevantDocuments called ===');
+  console.log('Query:', query);
+  console.log('ChatThreadId:', chatThreadId);
+  console.log('SelectedDepartmentId:', selectedDepartmentId);
+  
   let filter = `chatType eq 'doc'`;
   
   // 部門が選択されている場合は、その部門のドキュメントのみを検索
@@ -218,6 +241,29 @@ const findRelevantDocuments = async (query: string, chatThreadId: string, select
   });
   
   console.log('Filtered documents found:', relevantDocuments.length);
+  console.log('=== DEBUG: Final Search Results ===');
+  relevantDocuments.forEach((doc, index) => {
+    console.log(`Final Result ${index}:`, {
+      id: doc.id,
+      metadata: doc.metadata,
+      score: doc['@search.score'],
+      chatType: doc.chatType,
+      deptName: doc.deptName
+    });
+  });
   return relevantDocuments;
+};
+
+// AI Searchの結果をCitationItemに変換
+const convertToCitationItems = (documents: any[]): CitationItem[] => {
+  return documents.map((doc) => ({
+    id: doc.id,
+    metadata: doc.metadata || doc.fileName || '不明なファイル',
+    pageContent: doc.pageContent || '',
+    sasUrl: doc.sasUrl,
+    score: doc['@search.score'],
+    deptName: doc.deptName,
+    documentId: doc.chatThreadId, // chatThreadIdがdocumentIdとして使用されている
+  }));
 };
 

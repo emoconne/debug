@@ -37,10 +37,13 @@ export const UploadDocument = async (
     const splitDocuments = chunkDocumentWithOverlap(docs.join("\n"));
     console.log('Chunking completed, chunks count:', splitDocuments.length);
 
+    // TextChunk[]をstring[]に変換
+    const response = splitDocuments.map(chunk => chunk.content);
+
     return {
       success: true,
       error: "",
-      response: splitDocuments,
+      response: response,
     };
   } catch (e) {
     console.error('UploadDocument error:', e);
@@ -64,14 +67,43 @@ const LoadFile = async (formData: FormData) => {
     console.log('File details:', {
       name: file.name,
       type: file.type,
-      size: file.size
+      size: file.size,
+      lastModified: (file as any).lastModified
     });
 
+    // ファイル名のエンコーディングを修正
+    let fileName = file.name;
+    try {
+      // ファイル名が破損している場合の修正
+      if (fileName.includes('\\x')) {
+        fileName = decodeURIComponent(escape(fileName));
+      }
+    } catch (encodingError) {
+      console.warn('File name encoding fix failed:', encodingError);
+    }
+
     // ファイル形式のチェック
-    const supportedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.heic', '.heif', '.webp', '.gif'];
-    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    const supportedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.heic', '.heif', '.webp', '.gif', '.pptx', '.ppt', '.docx', '.doc', '.xlsx', '.xls', '.txt'];
+    const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
     if (!supportedExtensions.includes(extension)) {
       throw new Error(`サポートされていないファイル形式です: ${extension}`);
+    }
+    
+    // MIMEタイプの検証
+    const expectedMimeTypes = {
+      '.pdf': 'application/pdf',
+      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.doc': 'application/msword',
+      '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      '.ppt': 'application/vnd.ms-powerpoint',
+      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      '.xls': 'application/vnd.ms-excel',
+      '.txt': 'text/plain'
+    };
+    
+    const expectedMimeType = expectedMimeTypes[extension as keyof typeof expectedMimeTypes];
+    if (expectedMimeType && file.type !== expectedMimeType) {
+      console.warn(`MIME type mismatch for ${extension}: expected ${expectedMimeType}, got ${file.type}`);
     }
 
     console.log('File format check passed:', extension);
@@ -81,11 +113,88 @@ const LoadFile = async (formData: FormData) => {
 
       const arrayBuffer = await file.arrayBuffer();
 
-              const poller = await client.beginAnalyzeDocument(
-          "prebuilt-document",
-          arrayBuffer
-        );
-      const { paragraphs } = await poller.pollUntilDone();
+      // ファイルの内容を検証
+      console.log(`File size: ${arrayBuffer.byteLength} bytes`);
+      if (arrayBuffer.byteLength === 0) {
+        throw new Error('ファイルが空です');
+      }
+
+      // ファイル形式に応じた処理
+      let paragraphs: any[] = [];
+      let processingError: any = null;
+      
+      console.log(`File extension: ${extension}, File name: ${fileName}`);
+      
+      // 参考ソースに基づいてモデル選択を修正
+      let modelToUse: string;
+      let useContentInsteadOfParagraphs = false;
+      
+      if (extension === '.txt') {
+        // テキストファイルは prebuilt-read を使用
+        modelToUse = "prebuilt-read";
+        useContentInsteadOfParagraphs = true;
+        console.log('Text file detected, using prebuilt-read model');
+      } else {
+        // その他のファイルは prebuilt-layout を優先
+        modelToUse = "prebuilt-layout";
+        console.log(`${extension} file detected, using prebuilt-layout model`);
+      }
+      
+      try {
+        console.log(`Processing file: ${fileName} with model: ${modelToUse}`);
+        
+        const poller = await client.beginAnalyzeDocument(modelToUse, arrayBuffer);
+        const result = await poller.pollUntilDone();
+        
+        if (useContentInsteadOfParagraphs) {
+          // テキストファイルの場合、contentを使用
+          if (result.content) {
+            paragraphs = [{ content: result.content }];
+          }
+        } else {
+          // その他のファイルの場合、paragraphsを使用
+          paragraphs = result.paragraphs || [];
+          
+          // テーブル情報も追加
+          if (result.tables && result.tables.length > 0) {
+            console.log(`Found ${result.tables.length} tables`);
+            for (const table of result.tables) {
+              if (table.cells) {
+                const tableText = table.cells.map(cell => cell.content).join(' | ');
+                paragraphs.push({ content: `[TABLE] ${tableText}` });
+              }
+            }
+          }
+        }
+        
+        console.log(`Successfully processed with model: ${modelToUse}, content length: ${paragraphs.length}`);
+      } catch (modelError) {
+        console.error(`Model ${modelToUse} failed for file ${fileName}:`, modelError);
+        processingError = modelError;
+      }
+      
+      // すべてのモデルが失敗した場合
+      if (paragraphs.length === 0) {
+        console.error('All Document Intelligence models failed for file:', fileName);
+        console.error('Last error:', processingError);
+        
+        // ファイルが破損している可能性がある場合の詳細なエラーメッセージ
+        if (processingError?.details?.error?.innererror?.message?.includes('corrupted') || 
+            processingError?.details?.error?.innererror?.message?.includes('unsupported')) {
+          
+          // 代替処理として、ファイル名のみを返す
+          console.log('Attempting fallback processing for corrupted file');
+          const fallbackText = `[ファイル処理エラー] ${fileName} - このファイルは破損しているか、サポートされていない形式のため、Document Intelligenceで処理できませんでした。`;
+          paragraphs = [{ content: fallbackText }];
+          
+        } else if (processingError?.details?.error?.innererror?.message) {
+          throw new Error(`Document Intelligence エラー: ${processingError.details.error.innererror.message}`);
+        } else if (processingError?.message) {
+          throw new Error(`Document Intelligence エラー: ${processingError.message}`);
+        } else {
+          throw new Error(`ファイルの処理に失敗しました: ${fileName}`);
+        }
+      }
 
       const docs: Array<string> = [];
 
@@ -134,7 +243,7 @@ const LoadFile = async (formData: FormData) => {
 
 export const IndexDocuments = async (
   fileName: string,
-  docs: string[],
+  docs: any[],
   chatThreadId: string
 ): Promise<ServerActionResponse<AzureCogDocumentIndex[]>> => {
   try {
@@ -203,6 +312,10 @@ export const initDocumentIntelligence = async () => {
   const endpoint = process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT;
   const key = process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY;
 
+  console.log('Document Intelligence configuration:');
+  console.log('Endpoint:', endpoint ? 'Set' : 'Missing');
+  console.log('Key:', key ? 'Set' : 'Missing');
+
   if (!endpoint || !key) {
     throw new Error('Azure Document Intelligence configuration is missing');
   }
@@ -212,6 +325,7 @@ export const initDocumentIntelligence = async () => {
     new AzureKeyCredential(key)
   );
 
+  console.log('Document Intelligence client created successfully');
   return client;
 };
 

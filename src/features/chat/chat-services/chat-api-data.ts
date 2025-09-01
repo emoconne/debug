@@ -6,6 +6,7 @@ import { similaritySearchVectorWithScore } from "./azure-cog-search/azure-cog-ve
 import { initAndGuardChatSession } from "./chat-thread-service";
 import { CosmosDBChatMessageHistory } from "./cosmosdb/cosmosdb";
 import { PromptGPTProps } from "./models";
+import { CitationItem } from "@/features/chat/chat-ui/citation-panel";
 
 const SYSTEM_PROMPT = `あなたは ${AI_NAME}です。ユーザーからの質問に対して日本語で丁寧に回答します。 \n`;
 
@@ -127,4 +128,17 @@ const findRelevantDocuments = async (query: string, chatThreadId: string) => {
     filter: `user eq '${await userHashedId()}' and chatThreadId eq '${chatThreadId}' and chatType eq 'data'`,
   });
   return relevantDocuments;
+};
+
+// AI Searchの結果をCitationItemに変換
+const convertToCitationItems = (documents: any[]): CitationItem[] => {
+  return documents.map((doc) => ({
+    id: doc.id,
+    metadata: doc.metadata || doc.fileName || '不明なファイル',
+    pageContent: doc.pageContent || '',
+    sasUrl: doc.sasUrl,
+    score: doc['@search.score'],
+    deptName: doc.deptName,
+    documentId: doc.chatThreadId, // chatThreadIdがdocumentIdとして使用されている
+  }));
 };

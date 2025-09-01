@@ -24,6 +24,7 @@ export async function DELETE(
       return NextResponse.json({ error: "ドキュメントIDが必要です" }, { status: 400 });
     }
 
+    console.log('API: Deleting document:', documentId);
     await deleteDocument(documentId);
 
     return NextResponse.json({
@@ -34,8 +35,15 @@ export async function DELETE(
 
   } catch (error) {
     console.error("ドキュメント削除エラー:", error);
+    
+    // エラーメッセージを詳細に返す
+    const errorMessage = error instanceof Error ? error.message : "ドキュメントの削除に失敗しました";
+    
     return NextResponse.json(
-      { error: "ドキュメントの削除に失敗しました" },
+      { 
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

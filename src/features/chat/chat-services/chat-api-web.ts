@@ -13,17 +13,73 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
   var BingResult = "";
   const { lastHumanMessage, chatThread } = await initAndGuardChatSession(props);
 
+  // デバッグ情報を収集
+  const debugInfo = {
+    query: lastHumanMessage.content,
+    searchResults: [] as any[],
+    processedSnippet: '',
+    bingResult: '',
+    prompt: '',
+    assistantResponse: '',
+    timestamp: new Date().toISOString()
+  };
+
   const openAI = OpenAIInstance();
-
   const userId = await userHashedId();
-
   let chatAPIModel = process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME || "gpt-4o";
+
+  // スレッドベースのメモリ機能を実装
+  // チャットスレッドIDを基にスレッドを取得または作成
+  let threadId = chatThread.id;
+  
+  // スレッドIDをグローバルに保存（セッション間で継続）
+  if (!(global as any).webSearchThreads) {
+    (global as any).webSearchThreads = new Map();
+  }
+  
+  // ユーザーIDとチャットスレッドIDの組み合わせでスレッドを管理
+  const threadKey = `${userId}_${chatThread.id}`;
+  
+  if (!(global as any).webSearchThreads.has(threadKey)) {
+    // 新しいスレッドを作成
+    console.log('Creating new thread for web search conversation');
+    (global as any).webSearchThreads.set(threadKey, null); // スレッドIDは後で設定
+  }
+  
+  // 現在のスレッドIDを取得
+  const currentThreadId = (global as any).webSearchThreads.get(threadKey);
+  console.log('Current thread ID:', currentThreadId);
+  
+  // コンテキスト付きのクエリを作成（前の会話を考慮）
+  let contextQuery = lastHumanMessage.content;
+
+
 
   const bing = new BingSearchResult();
   let searchResult: any;
+  let assistantResponse: string = '';
   
   try {
-    searchResult = await bing.SearchWeb(lastHumanMessage.content);
+    // 検索結果とAssistantの回答を取得（スレッドID付きで実行）
+    const searchResponse = await bing.SearchWeb(contextQuery, currentThreadId) as any;
+    searchResult = searchResponse.searchResults || searchResponse;
+    assistantResponse = searchResponse.assistantResponse || '';
+    
+    // スレッドIDを保存（次回の検索で使用）
+    if (searchResponse.threadId) {
+      (global as any).webSearchThreads.set(threadKey, searchResponse.threadId);
+      console.log('Thread ID saved:', searchResponse.threadId);
+    }
+    
+    // デバッグ情報を更新
+    debugInfo.assistantResponse = assistantResponse;
+    
+    console.log('Search completed:', {
+      searchResultsCount: searchResult?.webPages?.value?.length || 0,
+      assistantResponseLength: assistantResponse.length,
+      searchResponseKeys: Object.keys(searchResponse),
+      threadId: searchResponse.threadId
+    });
   } catch (error) {
     console.error('Search API error:', error);
     // 検索エラーの場合、デフォルトの結果を設定
@@ -76,6 +132,28 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
     url: page.url || '#',
     sortOrder: index + 1
   }));
+
+  // デバッグ情報を更新
+  debugInfo.searchResults = searchResults;
+  debugInfo.processedSnippet = snippet;
+  debugInfo.bingResult = BingResult;
+  
+  console.log('Search results processed:', {
+    webPagesCount: webPages.length,
+    searchResultsCount: searchResults.length,
+    snippetLength: snippet.length,
+    bingResultLength: BingResult.length
+  });
+
+  // デバッグ用の詳細ログ出力
+  if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+    console.log('=== SEARCH RESULTS DETAILS ===');
+    console.log('Raw webPages count:', webPages.length);
+    console.log('Processed searchResults count:', searchResults.length);
+    console.log('Snippet preview:', snippet.substring(0, 200) + '...');
+    console.log('BingResult preview:', BingResult.substring(0, 200) + '...');
+    console.log('=== END SEARCH RESULTS ===');
+  }
   
   // 検索結果からCitation用のデータを準備
   const citationItems = searchResults.map((result: any, index: number) => ({
@@ -101,6 +179,10 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
 【質問】${lastHumanMessage.content}
 【Web検索結果】${snippet}`;
 
+  // デバッグ情報を更新
+  debugInfo.prompt = Prompt;
+
+  // チャット履歴にメッセージを追加
   const chatHistory = new CosmosDBChatMessageHistory({
     sessionId: chatThread.id,
     userId: userId,
@@ -111,63 +193,111 @@ export const ChatAPIWeb = async (props: PromptGPTProps) => {
     role: "user",
   } as any);
 
-  const history = await chatHistory.getMessages();
-  const topHistory = history.slice(history.length - 30, history.length);
-
-  try {
-    const response = await openAI.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: `あなたは ${AI_NAME} です。ユーザーからの質問に対して日本語で丁寧に回答します。
-
-回答の指針：
-1. **明確で簡潔な回答**: 要点を絞って、分かりやすく説明してください
-2. **構造化された情報**: 箇条書きや段落分けを活用して情報を整理してください
-3. **具体的な情報**: 数字、日付、場所など具体的な情報を優先的に含めてください
-4. **信頼性の高い情報**: 複数の情報源で確認できる情報を重視してください
-5. **ユーザーの視点**: 質問者の立場に立って、実用的で価値のある情報を提供してください
-6. **最新情報の優先**: 最新の情報を優先し、古い情報は明示してください
-
-回答形式：
-- 重要な情報から順に記載
-- 必要に応じて箇条書きを使用
-- 関連する追加情報があれば補足として記載
-- 情報の信頼性について言及（可能な場合）
-
-質問には正直かつ正確に答えます。`,
-        },
-        {
-          role: "user",
-          content: Prompt,
-        }
-      ],
-      model: chatAPIModel,
-      stream: true,
-    });
-
-    const stream = OpenAIStream(response as any, {
-      async onCompletion(completion) {
-        console.log('Chat completion finished:', {
-          contentLength: completion.length,
-          searchResultsCount: searchResults.length
-        });
-      },
-    });
+  // Assistantの回答が既に取得されている場合は、それを直接使用
+  if (assistantResponse && assistantResponse.trim()) {
+    console.log('Using pre-generated Assistant response');
     
-    return new StreamingTextResponse(stream);
+    // Citationを生成
+    const citationItems = searchResults.map((result: any, index: number) => ({
+      name: result.name,
+      id: result.url,
+      snippet: result.snippet
+    }));
     
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      return new Response(e.message, {
-        status: 500,
-        statusText: e.toString(),
-      });
-    } else {
-      return new Response("An unknown error occurred.", {
-        status: 500,
-        statusText: "Unknown Error",
-      });
+    // Assistantの回答からソース情報を除去
+    let cleanResponse = assistantResponse;
+    
+    // 【3:2†source】形式のソース情報を除去
+    cleanResponse = cleanResponse.replace(/【\d+:\d+†source】/g, '');
+    
+    // 連続する句読点を整理
+    cleanResponse = cleanResponse.replace(/[。、]+/g, '。');
+    cleanResponse = cleanResponse.replace(/。+/g, '。');
+    
+    // 前後の空白を除去
+    cleanResponse = cleanResponse.trim();
+    
+    // Citationを含む回答を生成
+    let finalResponse = cleanResponse;
+    
+    // WebCitationを追加
+    if (citationItems.length > 0) {
+      const webCitation = `{% webCitation items=[${citationItems.map((item: any) => `{name:"${item.name || ''}",id:"${item.id || ''}"}`).join(', ')}] /%}`;
+      finalResponse += '\n\n' + webCitation;
     }
+    
+    // ストリーミングレスポンスを模擬
+    const stream = new ReadableStream({
+      start(controller) {
+        // 回答を文字単位でストリーミング
+        const text = finalResponse;
+        let index = 0;
+        
+        const sendChunk = () => {
+          if (index < text.length) {
+            const chunk = text.slice(index, Math.min(index + 10, text.length));
+            controller.enqueue(new TextEncoder().encode(chunk));
+            index += 10;
+            setTimeout(sendChunk, 50);
+          } else {
+            controller.close();
+          }
+        };
+        
+        sendChunk();
+      }
+    });
+
+    const streamingResponse = new StreamingTextResponse(stream);
+    
+    // Assistantの回答をCosmosDBに保存
+    try {
+      await chatHistory.addMessage({
+        content: finalResponse,
+        role: "assistant",
+        metadata: {
+          chatType: 'web',
+          searchResults: searchResults,
+          citationItems: citationItems,
+          threadId: (global as any).webSearchThreads?.get(threadKey) || null
+        }
+      } as any);
+      console.log('Assistant response saved to CosmosDB with metadata');
+    } catch (error) {
+      console.error('Error saving assistant response to CosmosDB:', error);
+    }
+    
+    // デバッグ情報を更新
+    debugInfo.assistantResponse = finalResponse;
+    
+    // デバッグ情報をグローバルに保存（NEXT_PUBLIC_DEBUG=trueの場合のみ）
+    if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+      (global as any).lastWebSearchDebugInfo = debugInfo;
+      console.log('=== WEB SEARCH DEBUG INFO ===');
+      console.log('Query:', debugInfo.query);
+      console.log('Search Results Count:', debugInfo.searchResults.length);
+      console.log('Processed Snippet Length:', debugInfo.processedSnippet.length);
+      console.log('BingResult Length:', debugInfo.bingResult.length);
+      console.log('Prompt Length:', debugInfo.prompt.length);
+      console.log('Assistant Response Length:', debugInfo.assistantResponse.length);
+      console.log('Citation Items Count:', citationItems.length);
+      console.log('Timestamp:', debugInfo.timestamp);
+      console.log('=== END DEBUG INFO ===');
+    }
+    
+    return streamingResponse;
   }
+
+  // Assistantの回答がない場合は、エラーメッセージを返す
+  console.log('No Assistant response available, returning error');
+  console.log('Debug info:', {
+    assistantResponse: assistantResponse,
+    assistantResponseLength: assistantResponse?.length || 0,
+    searchResult: searchResult,
+    searchResultKeys: Object.keys(searchResult || {})
+  });
+  return new Response("検索結果を取得できませんでした。しばらく時間をおいて再度お試しください。", {
+    status: 500,
+    statusText: "No Assistant Response",
+  });
 };

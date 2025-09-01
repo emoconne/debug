@@ -256,20 +256,25 @@ export const DocumentsManagement = () => {
     }
 
     try {
+      console.log('Deleting document:', documentId);
       const response = await fetch(`/api/documents/${documentId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        const result = await response.json();
         showSuccess({ 
           title: '削除完了',
-          description: 'ドキュメントが削除されました'
+          description: result.message || 'ドキュメントが削除されました'
         });
         fetchDocuments(); // 一覧を更新
       } else {
-        showError('削除に失敗しました');
+        const errorData = await response.json();
+        console.error('Delete failed:', errorData);
+        showError(errorData.error || '削除に失敗しました');
       }
     } catch (error) {
+      console.error('Delete error:', error);
       showError('削除中にエラーが発生しました');
     }
   };

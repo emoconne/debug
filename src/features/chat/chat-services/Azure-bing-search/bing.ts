@@ -1,6 +1,6 @@
 // Azure AI Projects SDK経由でのWeb検索
 export class BingSearchResult {
-  async SearchWeb(searchText: string) {
+  async SearchWeb(searchText: string, threadId?: string) {
     const projectEndpoint = process.env.AZURE_AI_FOUNDRY_ENDPOINT || "https://tutorialjbdemoai3fkg2gu-resource.services.ai.azure.com/api/projects/tutorialjbdemoai3fkg2gu-project";
     const agentId = process.env.AZURE_AI_FOUNDRY_AGENT_ID || "asst_MCLyvD44JpMKO8WZIHeWnRyZ";
     
@@ -42,7 +42,7 @@ export class BingSearchResult {
 
       // タイムアウト付きでAzure AI Projects SDKを実行
       const result = await Promise.race([
-        this.executeAzureAISearch(projectEndpoint, agentId, searchText),
+        this.executeAzureAISearch(projectEndpoint, agentId, searchText, threadId),
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Azure AI Projects SDK timeout (60秒)')), 60000)
         )
@@ -95,7 +95,7 @@ export class BingSearchResult {
     }
   }
 
-  private async executeAzureAISearch(projectEndpoint: string, agentId: string, searchText: string) {
+  private async executeAzureAISearch(projectEndpoint: string, agentId: string, searchText: string, threadId?: string) {
     // Azure AI Projects SDKの動的インポート
     const { AIProjectClient } = await import("@azure/ai-projects");
     const { DefaultAzureCredential } = await import("@azure/identity");
@@ -110,9 +110,23 @@ export class BingSearchResult {
     const agent = await project.agents.getAgent(agentId);
     console.log(`Retrieved agent: ${agent.name}`);
 
-    // スレッドを作成
-    const thread = await project.agents.threads.create();
-    console.log(`Created thread, ID: ${thread.id}`);
+    // スレッドを取得または作成
+    let thread;
+    if (threadId) {
+      try {
+        // 既存のスレッドを使用
+        thread = await project.agents.threads.get(threadId);
+        console.log(`Using existing thread, ID: ${thread.id}`);
+      } catch (error) {
+        console.log('Existing thread not found, creating new thread');
+        thread = await project.agents.threads.create();
+        console.log(`Created new thread, ID: ${thread.id}`);
+      }
+    } else {
+      // 新しいスレッドを作成
+      thread = await project.agents.threads.create();
+      console.log(`Created new thread, ID: ${thread.id}`);
+    }
 
     // メッセージを作成（検索クエリを文字列として明示的に送信）
     const searchMessage = `Search for: "${searchText}"`;
@@ -248,11 +262,15 @@ export class BingSearchResult {
       url: string;
       sortOrder: number;
     }> = [];
+    let assistantResponseText = '';
     for await (const m of messages) {
       const content = m.content.find((c: any) => c.type === "text" && "text" in c);
       if (content && m.role === "assistant" && "text" in content) {
         const textValue = (content as any).text.value;
         console.log(`Assistant response: ${textValue}`);
+        
+        // Assistantの回答テキストを保存
+        assistantResponseText = textValue;
         
         // メタデータから取得したURLを優先し、テキストからも抽出
         let urls = metadataUrls.length > 0 ? metadataUrls : this.extractUrls(textValue);
@@ -296,26 +314,32 @@ export class BingSearchResult {
       }
     }
 
-    // スレッドを削除（クリーンアップ）
-    try {
-      await project.agents.threads.delete(thread.id);
-      console.log(`Deleted thread: ${thread.id}`);
-    } catch (cleanupError) {
-      console.warn('Failed to cleanup thread:', cleanupError);
-    }
+    // スレッドを削除しない（メモリ機能のため保持）
+    console.log(`Keeping thread for memory: ${thread.id}`);
     
+    // スレッドIDを返す（後で使用するため）
     return {
-      webPages: {
-        value: searchResults.length > 0 ? searchResults : [
-          {
-            name: '検索結果',
-            snippet: '検索結果が見つかりませんでした。',
-            url: '#',
-            sortOrder: 0
-          }
-        ]
-      }
+      searchResults: {
+        webPages: {
+          value: searchResults.length > 0 ? searchResults : [
+            {
+              name: '検索結果',
+              snippet: '検索結果が見つかりませんでした。',
+              url: '#',
+              sortOrder: 0
+            }
+          ]
+        }
+      },
+      assistantResponse: assistantResponseText,
+      threadId: thread.id
     };
+    
+    // Assistantの回答がない場合はエラーを投げる
+    if (!assistantResponseText || assistantResponseText.trim() === '') {
+      console.error('No Assistant response received');
+      throw new Error('Assistantの回答を取得できませんでした。');
+    }
   }
 
   private extractUrls(text: string): string[] {

@@ -7,6 +7,8 @@ import { ChatMessageEmptyState } from "./chat-empty-state/chat-message-empty-sta
 import ChatPromptEmptyState from "./chat-prompt/chat-prompt-empty-state";
 import ChatInput from "./chat-input/chat-input";
 import { ChatMessageContainer } from "./chat-message-container";
+import { CitationPanel } from "./citation-panel";
+import { WebSearchDebugPanel } from "./web-search-debug-panel";
 interface Prop {}
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -46,8 +48,24 @@ function a11yProps(index: number) {
 }
 
 export const ChatUI: FC<Prop> = () => {
-  const { messages } = useChatContext();
+  const { 
+    messages, 
+    isCitationPanelOpen, 
+    setIsCitationPanelOpen,
+    selectedCitation,
+    setSelectedCitation,
+    isWebSearchDebugPanelOpen,
+    setIsWebSearchDebugPanelOpen,
+    webSearchDebugInfo,
+    chatBody
+  } = useChatContext();
   const [value, setValue] = useState(0);
+
+  // チャットタイプを取得
+  const chatType = chatBody?.chatType || 'normal';
+  
+  // 参考資料ボタンを表示するチャットタイプ
+  const showCitationPanel = chatType === 'doc' || chatType === 'data';
   
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -126,6 +144,26 @@ export const ChatUI: FC<Prop> = () => {
       <CustomTabPanel value={value} index={1}>
         <ChatPromptEmptyState />
       </CustomTabPanel>
+
+               {/* Citation Panel（社内FAQとファイル読み込みのみ表示） */}
+         {showCitationPanel && (
+           <CitationPanel
+             citations={[]}
+             isOpen={isCitationPanelOpen}
+             onClose={() => {
+               setIsCitationPanelOpen(false);
+               setSelectedCitation(null);
+             }}
+             selectedCitation={selectedCitation}
+           />
+         )}
+
+      {/* Web Search Debug Panel */}
+      <WebSearchDebugPanel
+        isOpen={isWebSearchDebugPanelOpen}
+        onClose={() => setIsWebSearchDebugPanelOpen(false)}
+        debugInfo={webSearchDebugInfo || undefined}
+      />
     </div>
   );
 };

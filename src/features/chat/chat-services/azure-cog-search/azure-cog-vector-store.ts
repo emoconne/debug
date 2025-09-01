@@ -207,9 +207,9 @@ export const deleteDocumentsByDocumentId = async (documentId: string): Promise<v
     console.log('=== DELETE DOCUMENTS BY DOCUMENT ID START ===');
     console.log('Deleting documents for documentId:', documentId);
 
-    // documentIdでAI Searchからドキュメントを検索
+    // documentIdでAI Searchからドキュメントを検索（chatType: "doc"のドキュメントのみ）
     const documentsInSearch = await simpleSearch({
-      filter: `chatThreadId eq '${documentId}'`,
+      filter: `chatThreadId eq '${documentId}' and chatType eq 'doc'`,
     });
 
     console.log(`Found ${documentsInSearch.length} documents in AI Search to delete`);

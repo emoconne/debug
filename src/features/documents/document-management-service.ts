@@ -156,6 +156,14 @@ export async function deleteDocument(documentId: string): Promise<void> {
       throw new Error("ドキュメントが見つかりません");
     }
 
+    console.log('Document found:', {
+      id: document.id,
+      fileName: document.fileName,
+      containerName: document.containerName,
+      blobName: document.blobName,
+      status: document.status
+    });
+
     // 1. AI Searchから削除
     try {
       console.log('Deleting from AI Search...');
@@ -169,14 +177,26 @@ export async function deleteDocument(documentId: string): Promise<void> {
     // 2. Azure Blob Storageから削除
     if (document.containerName && document.blobName) {
       console.log('Deleting from Azure Blob Storage...');
-      await deleteFile(document.containerName, document.blobName);
-      console.log('Azure Blob Storage deletion completed');
+      try {
+        await deleteFile(document.containerName, document.blobName);
+        console.log('Azure Blob Storage deletion completed');
+      } catch (blobError) {
+        console.error('Azure Blob Storage deletion error:', blobError);
+        // Blob Storageの削除に失敗しても処理を続行
+      }
+    } else {
+      console.log('No blob information found, skipping blob deletion');
     }
 
     // 3. Cosmos DBから論理削除
     console.log('Deleting from Cosmos DB...');
-    await deleteCosmosDocument(documentId);
-    console.log('Cosmos DB deletion completed');
+    try {
+      await deleteCosmosDocument(documentId);
+      console.log('Cosmos DB deletion completed');
+    } catch (cosmosError) {
+      console.error('Cosmos DB deletion error:', cosmosError);
+      throw new Error("Cosmos DBからの削除に失敗しました");
+    }
 
     console.log('=== DELETE DOCUMENT COMPLETED ===');
 

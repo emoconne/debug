@@ -23,6 +23,8 @@ import {
   TextToSpeechProps,
   useTextToSpeech,
 } from "./chat-speech/use-text-to-speech";
+import { CitationItem } from "./citation-panel";
+import { WebSearchDebugInfo } from "./web-search-debug-panel";
 export type ChatStatus = 'idle' | 'searching' | 'processing' | 'generating';
 
 interface ChatContextProps extends UseChatHelpers {
@@ -40,6 +42,16 @@ interface ChatContextProps extends UseChatHelpers {
   setStatus: (status: ChatStatus) => void;
   messages: Message[];
   isLoading: boolean;
+  // Citation Panel
+  isCitationPanelOpen: boolean;
+  setIsCitationPanelOpen: (open: boolean) => void;
+  selectedCitation: CitationItem | null;
+  setSelectedCitation: (citation: CitationItem | null) => void;
+  // Web Search Debug Panel
+  isWebSearchDebugPanelOpen: boolean;
+  setIsWebSearchDebugPanelOpen: (open: boolean) => void;
+  webSearchDebugInfo: WebSearchDebugInfo | null;
+  setWebSearchDebugInfo: (info: WebSearchDebugInfo | null) => void;
 }
 const ChatContext = createContext<ChatContextProps | null>(null);
 interface Prop {
@@ -67,8 +79,19 @@ export const ChatProvider: FC<Prop> = (props) => {
     chatOverFileName: props.chatThread.chatOverFileName,
     selectedDepartmentId: "all",
   });
+  // Citation Panel state
+  const [isCitationPanelOpen, setIsCitationPanelOpen] = useState(false);
+  const [selectedCitation, setSelectedCitation] = useState<CitationItem | null>(null);
+  // Web Search Debug Panel state
+  const [isWebSearchDebugPanelOpen, setIsWebSearchDebugPanelOpen] = useState(false);
+  const [webSearchDebugInfo, setWebSearchDebugInfo] = useState<WebSearchDebugInfo | null>(null);
   const { textToSpeech } = speechSynthesizer;
   const { isMicrophoneUsed, resetMicrophoneUsed } = speechRecognizer;
+  // デバッグ用：chatBodyの変更を監視
+  console.log('=== DEBUG: ChatContext chatBody ===');
+  console.log('Current chatBody:', chatBody);
+  console.log('ChatThread chatType:', props.chatThread.chatType);
+  
   const response = useChat({
     onError,
     id: props.id,
@@ -86,14 +109,23 @@ export const ChatProvider: FC<Prop> = (props) => {
       setStatus('idle');
       showError(error.message, response.reload);
     },
+    onResponse: (response) => {
+      // Citationデータの処理は削除（ボタンクリック時に取得）
+    },
   });
   const setChatBody = (body: PromptGPTBody) => {
     setBody(body);
   };
   const onChatTypeChange = (value: ChatType) => {
+    console.log('=== DEBUG: onChatTypeChange called ===');
+    console.log('New chatType:', value);
+    console.log('Previous chatBody:', chatBody);
+    
     fileState.setShowFileUpload(value);
     fileState.setIsFileNull(true);
     setChatBody({ ...chatBody, chatType: value });
+    
+    console.log('Updated chatBody:', { ...chatBody, chatType: value });
   };
   const onChatDocChange = (value: ChatDoc) => {
     setChatBody({ ...chatBody, chatDoc: value });
@@ -131,6 +163,16 @@ export const ChatProvider: FC<Prop> = (props) => {
           ...speechSynthesizer,
           ...speechRecognizer,
         },
+        // Citation Panel
+        isCitationPanelOpen,
+        setIsCitationPanelOpen,
+        selectedCitation,
+        setSelectedCitation,
+        // Web Search Debug Panel
+        isWebSearchDebugPanelOpen,
+        setIsWebSearchDebugPanelOpen,
+        webSearchDebugInfo,
+        setWebSearchDebugInfo,
       }}
     >
       {props.children}
