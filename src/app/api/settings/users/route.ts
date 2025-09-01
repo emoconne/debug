@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
 import { getUserSettings, saveUserSettings, updateUserSettings } from "@/features/settings/user-settings-service";
-import { UserType } from "@/features/settings/user-types";
+import { UserType, AdminRole } from "@/features/settings/user-types";
 import { getMicrosoftGraphService } from "@/features/settings/microsoft-graph-service";
 
 export async function GET(request: NextRequest) {
@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
       return {
         ...entraUser,
         userType: existingSetting?.userType || 'other' as UserType,
+        adminRole: existingSetting?.adminRole || 'user' as AdminRole,
         isActive: existingSetting?.isActive ?? true,
         settingsId: existingSetting?.id
       };
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { userId, userType, isActive } = body;
+    const { userId, userType, adminRole, isActive } = body;
 
     if (!userId || !userType) {
       return NextResponse.json({ error: "ユーザーIDとユーザータイプは必須です" }, { status: 400 });
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
       // 既存設定を更新
       await updateUserSettings(existingSetting.id, {
         userType,
+        adminRole: adminRole || existingSetting.adminRole,
         isActive: isActive !== undefined ? isActive : existingSetting.isActive,
       });
 
@@ -113,6 +115,7 @@ export async function POST(request: NextRequest) {
         displayName: entraUser.displayName,
         email: entraUser.mail || '',
         userType,
+        adminRole: adminRole || 'user',
         department: entraUser.department,
         jobTitle: entraUser.jobTitle,
         isActive: isActive !== undefined ? isActive : true,

@@ -16,7 +16,7 @@ import {
   Briefcase
 } from "lucide-react";
 import { useGlobalMessageContext } from "@/features/global-message/global-message-context";
-import { UserType, USER_TYPES, getUserTypeInfo } from "./user-types";
+import { UserType, AdminRole, USER_TYPES, ADMIN_ROLES, getUserTypeInfo, getAdminRoleInfo } from "./user-types";
 
 interface UserData {
   id: string;
@@ -27,6 +27,7 @@ interface UserData {
   department?: string;
   accountEnabled?: boolean;
   userType: UserType;
+  adminRole: AdminRole;
   isActive: boolean;
   settingsId?: string;
 }
@@ -36,7 +37,7 @@ export const UserSettingsTable = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [changes, setChanges] = useState<Map<string, { userType?: UserType; isActive?: boolean }>>(new Map());
+  const [changes, setChanges] = useState<Map<string, { userType?: UserType; adminRole?: AdminRole; isActive?: boolean }>>(new Map());
 
   const fetchUsers = async () => {
     try {
@@ -75,6 +76,7 @@ export const UserSettingsTable = () => {
           body: JSON.stringify({
             userId,
             userType: changes.userType,
+            adminRole: changes.adminRole,
             isActive: changes.isActive,
           }),
         });
@@ -104,6 +106,13 @@ export const UserSettingsTable = () => {
     setChanges(newChanges);
   };
 
+  const handleAdminRoleChange = (userId: string, adminRole: AdminRole) => {
+    const newChanges = new Map(changes);
+    const currentChanges = newChanges.get(userId) || {};
+    newChanges.set(userId, { ...currentChanges, adminRole });
+    setChanges(newChanges);
+  };
+
   const handleActiveChange = (userId: string, isActive: boolean) => {
     const newChanges = new Map(changes);
     const currentChanges = newChanges.get(userId) || {};
@@ -114,6 +123,11 @@ export const UserSettingsTable = () => {
   const getEffectiveUserType = (user: UserData): UserType => {
     const change = changes.get(user.id);
     return change?.userType || user.userType;
+  };
+
+  const getEffectiveAdminRole = (user: UserData): AdminRole => {
+    const change = changes.get(user.id);
+    return change?.adminRole || user.adminRole;
   };
 
   const getEffectiveIsActive = (user: UserData): boolean => {
@@ -173,14 +187,17 @@ export const UserSettingsTable = () => {
                     <TableHead>部署</TableHead>
                     <TableHead>役職</TableHead>
                     <TableHead>ユーザータイプ</TableHead>
+                    <TableHead>管理者区分</TableHead>
                     <TableHead>有効</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.map((user) => {
                     const effectiveUserType = getEffectiveUserType(user);
+                    const effectiveAdminRole = getEffectiveAdminRole(user);
                     const effectiveIsActive = getEffectiveIsActive(user);
                     const userTypeInfo = getUserTypeInfo(effectiveUserType);
+                    const adminRoleInfo = getAdminRoleInfo(effectiveAdminRole);
                     const hasUserChanges = changes.has(user.id);
 
                     return (
@@ -225,6 +242,27 @@ export const UserSettingsTable = () => {
                                   <div className="flex items-center gap-2">
                                     <Badge variant="outline" className={type.color}>
                                       {type.name}
+                                    </Badge>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={effectiveAdminRole}
+                            onValueChange={(value: AdminRole) => handleAdminRoleChange(user.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(ADMIN_ROLES).map(([key, role]) => (
+                                <SelectItem key={key} value={key}>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className={role.color}>
+                                      {role.name}
                                     </Badge>
                                   </div>
                                 </SelectItem>

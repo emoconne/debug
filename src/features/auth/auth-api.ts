@@ -4,6 +4,7 @@ import AzureADProvider from "next-auth/providers/azure-ad";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { hashValue } from "./helpers";
+import { getUserProfile, isUserAdmin } from "@/features/settings/user-settings-service";
 
 const configureIdentityProvider = () => {
   const providers: Array<Provider> = [];
@@ -92,13 +93,40 @@ export const options: NextAuthOptions = {
   callbacks: {
     async jwt({token, user, account, profile, isNewUser, session}) {
       if (user?.isAdmin) {
-       token.isAdmin = user.isAdmin
+        token.isAdmin = user.isAdmin;
       }
-      return token
+      
+      // ユーザーIDが設定されている場合、CosmosDBからユーザー情報を取得
+      if (token.sub) {
+        try {
+          const userProfile = await getUserProfile(token.sub);
+          if (userProfile) {
+            token.userType = userProfile.userType;
+            token.adminRole = userProfile.adminRole;
+            token.displayName = userProfile.displayName;
+            token.department = userProfile.department;
+            token.jobTitle = userProfile.jobTitle;
+          }
+          
+          // 管理者権限をチェック（既存のADMIN_EMAIL_ADDRESSと新しいadminRoleの両方を考慮）
+          const isAdminFromSettings = await isUserAdmin(token.sub);
+          token.isAdmin = user?.isAdmin || isAdminFromSettings;
+        } catch (error) {
+          console.error('ユーザープロファイル取得エラー:', error);
+          // エラーが発生した場合は既存のisAdminのみを使用
+        }
+      }
+      
+      return token;
     },
     async session({session, token, user }) {
-      session.user.isAdmin = token.isAdmin as string
-      return session
+      session.user.isAdmin = token.isAdmin as boolean;
+      session.user.userType = token.userType as string;
+      session.user.adminRole = token.adminRole as string;
+      session.user.displayName = token.displayName as string;
+      session.user.department = token.department as string;
+      session.user.jobTitle = token.jobTitle as string;
+      return session;
     }
   },
   session: {

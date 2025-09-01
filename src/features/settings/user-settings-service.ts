@@ -1,7 +1,7 @@
 "use server";
 
 import { saveSettingsData, getSettingsDataByType, updateSettingsData, deleteSettingsData, DataType } from "@/features/common/cosmos-settings";
-import { UserType } from "./user-types";
+import { UserType, AdminRole } from "./user-types";
 
 export interface UserSettings {
   id: string;
@@ -10,6 +10,7 @@ export interface UserSettings {
   displayName: string;
   email: string;
   userType: UserType;
+  adminRole: AdminRole;
   department?: string;
   jobTitle?: string;
   isActive: boolean;
@@ -51,6 +52,7 @@ export async function getUserSettings(): Promise<UserSettings[]> {
       displayName: setting.data.displayName,
       email: setting.data.email,
       userType: setting.data.userType,
+      adminRole: setting.data.adminRole || 'user',
       department: setting.data.department,
       jobTitle: setting.data.jobTitle,
       isActive: setting.data.isActive,
@@ -117,5 +119,45 @@ export async function getUserTypeStats(): Promise<Record<UserType, number>> {
       general: 0,
       other: 0
     };
+  }
+}
+
+// ユーザーが管理者かどうかをチェック
+export async function isUserAdmin(userId: string): Promise<boolean> {
+  try {
+    const userSettings = await getUserSettingsByUserId(userId);
+    return userSettings?.adminRole === 'admin';
+  } catch (error) {
+    console.error('管理者権限チェックに失敗しました:', error);
+    return false;
+  }
+}
+
+// ユーザーの設定情報を取得（ログイン時用）
+export async function getUserProfile(userId: string): Promise<{
+  userType: UserType;
+  adminRole: AdminRole;
+  displayName: string;
+  email: string;
+  department?: string;
+  jobTitle?: string;
+} | null> {
+  try {
+    const userSettings = await getUserSettingsByUserId(userId);
+    if (!userSettings) {
+      return null;
+    }
+
+    return {
+      userType: userSettings.userType,
+      adminRole: userSettings.adminRole,
+      displayName: userSettings.displayName,
+      email: userSettings.email,
+      department: userSettings.department,
+      jobTitle: userSettings.jobTitle,
+    };
+  } catch (error) {
+    console.error('ユーザープロファイルの取得に失敗しました:', error);
+    return null;
   }
 }
