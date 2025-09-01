@@ -9,11 +9,25 @@ export class DalleImageService {
   private client: OpenAI;
 
   constructor() {
+    // エンドポイントの構築（AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEから）
+    let endpoint = process.env.AZURE_OPENAI_ENDPOINT?.replace(/\/$/, '');
+    
+    if (!endpoint && process.env.AZURE_OPENAI_API_INSTANCE_NAME) {
+      // AZURE_OPENAI_API_INSTANCE_NAMEからエンドポイントを構築
+      endpoint = `https://${process.env.AZURE_OPENAI_API_INSTANCE_NAME}.openai.azure.com`;
+    }
+    
+    if (!endpoint) {
+      throw new Error('AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEが設定されていません');
+    }
+    
+    const baseURL = `${endpoint}/openai/deployments/${process.env.AZURE_OPENAI_DALLE_DEPLOYMENT_NAME}`;
+    
     this.client = new OpenAI({
-      apiKey: process.env.AZURE_OPENAI_DALLE_API_KEY,
-      baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DALLE_DEPLOYMENT_NAME}`,
+      apiKey: process.env.AZURE_OPENAI_DALLE_API_KEY || process.env.OPENAI_API_KEY,
+      baseURL: baseURL,
       defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview' },
-      defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_DALLE_API_KEY || '' },
+      defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_DALLE_API_KEY || process.env.OPENAI_API_KEY || '' },
     });
   }
 

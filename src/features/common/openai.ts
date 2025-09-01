@@ -3,8 +3,18 @@ import { OpenAI } from "openai";
 import { PromptGPTProps } from "../chat/chat-services/models";
 
 export const OpenAIInstance = () => {
-  // エンドポイントの末尾のスラッシュを除去してから結合
-  const endpoint = process.env.AZURE_OPENAI_ENDPOINT?.replace(/\/$/, '') || '';
+  // エンドポイントの構築（AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEから）
+  let endpoint = process.env.AZURE_OPENAI_ENDPOINT?.replace(/\/$/, '');
+  
+  if (!endpoint && process.env.AZURE_OPENAI_API_INSTANCE_NAME) {
+    // AZURE_OPENAI_API_INSTANCE_NAMEからエンドポイントを構築
+    endpoint = `https://${process.env.AZURE_OPENAI_API_INSTANCE_NAME}.openai.azure.com`;
+  }
+  
+  if (!endpoint) {
+    throw new Error('AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEが設定されていません');
+  }
+  
   const baseURL = `${endpoint}/openai/deployments/${process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME}`;
   
   console.log('OpenAIInstance baseURL:', baseURL);
@@ -19,8 +29,18 @@ export const OpenAIInstance = () => {
 };
 
 export const OpenAIEmbeddingInstance = () => {
-  // エンドポイントの末尾のスラッシュを除去してから結合
-  const endpoint = process.env.AZURE_OPENAI_ENDPOINT?.replace(/\/$/, '') || '';
+  // エンドポイントの構築（AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEから）
+  let endpoint = process.env.AZURE_OPENAI_ENDPOINT?.replace(/\/$/, '');
+  
+  if (!endpoint && process.env.AZURE_OPENAI_API_INSTANCE_NAME) {
+    // AZURE_OPENAI_API_INSTANCE_NAMEからエンドポイントを構築
+    endpoint = `https://${process.env.AZURE_OPENAI_API_INSTANCE_NAME}.openai.azure.com`;
+  }
+  
+  if (!endpoint) {
+    throw new Error('AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEが設定されていません');
+  }
+  
   const baseURL = `${endpoint}/openai/deployments/${process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME}`;
   
   console.log('OpenAIEmbeddingInstance baseURL:', baseURL);

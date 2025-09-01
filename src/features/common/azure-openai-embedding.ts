@@ -42,18 +42,34 @@ export async function generateEmbeddings(text: any): Promise<number[]> {
     const cleanText = textStr.trim();
     console.log('Clean text for embedding:', cleanText);
 
+    // エンドポイントの構築（AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEから）
+    let endpoint = process.env.AZURE_OPENAI_ENDPOINT?.replace(/\/$/, '');
+    
+    if (!endpoint && process.env.AZURE_OPENAI_API_INSTANCE_NAME) {
+      // AZURE_OPENAI_API_INSTANCE_NAMEからエンドポイントを構築
+      endpoint = `https://${process.env.AZURE_OPENAI_API_INSTANCE_NAME}.openai.azure.com`;
+    }
+    
+    if (!endpoint) {
+      throw new Error('AZURE_OPENAI_ENDPOINTまたはAZURE_OPENAI_API_INSTANCE_NAMEが設定されていません');
+    }
+    
+    const baseURL = `${endpoint}/openai/deployments/${process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME}`;
+    
+    console.log('Debug: OpenAI client baseURL:', baseURL);
+    console.log('Debug: Model name:', process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME || "text-embedding-ada-002");
+
     const client = new OpenAI({
-      apiKey: process.env.AZURE_OPENAI_KEY,
-      baseURL: process.env.AZURE_OPENAI_ENDPOINT,
-      defaultQuery: { 'api-version': '2024-02-15-preview' },
-      defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_KEY }
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: baseURL,
+      defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview' },
+      defaultHeaders: { 'api-key': process.env.OPENAI_API_KEY }
     });
 
     console.log('Debug: OpenAI client created');
-    console.log('Debug: Model name:', process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "text-embedding-ada-002");
 
     const result = await client.embeddings.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "text-embedding-ada-002",
+      model: process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME || "text-embedding-ada-002",
       input: cleanText,
     });
 
