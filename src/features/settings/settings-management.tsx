@@ -47,6 +47,7 @@ import { GPTModelData } from "@/features/documents/cosmos-db-gpt-model-service";
 import { DepartmentTable } from "./department-table";
 import { DropboxTokenDisplay } from "./dropbox-token-display";
 import { UserSettingsTable } from "./user-settings-table";
+import { DropboxAppConfig } from "./dropbox-app-config";
 
 
 interface DepartmentFormData {
@@ -831,7 +832,7 @@ export const SettingsManagement = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl p-6 pb-12 space-y-6">
+    <div className="container mx-auto max-w-6xl p-6 pb-12 space-y-6 h-screen">
       <div>
         <h1 className="text-3xl font-bold mb-2">システム設定</h1>
         <p className="text-muted-foreground">
@@ -839,7 +840,7 @@ export const SettingsManagement = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="logs" className="space-y-6">
+      <Tabs defaultValue="logs" className="space-y-6 h-[calc(100vh-200px)] overflow-y-auto">
         <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="logs" className="flex items-center gap-1 text-xs px-2">
             <Activity className="w-3 h-3" />
@@ -1269,7 +1270,10 @@ export const SettingsManagement = () => {
         </TabsContent>
 
         {/* 外部ストレージタブ */}
-        <TabsContent value="external-storage" className="space-y-6">
+        <TabsContent value="external-storage" className="space-y-6 pb-6 max-h-[calc(100vh-300px)] overflow-y-auto">
+          {/* Dropbox App設定 */}
+          <DropboxAppConfig />
+          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

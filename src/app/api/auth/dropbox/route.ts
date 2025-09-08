@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
+import { getDropboxAppConfig } from "@/app/api/settings/dropbox/app-config/route";
 
-// Dropbox OAuth2設定
-const DROPBOX_APP_KEY = process.env.DROPBOX_APP_KEY || '';
 const REDIRECT_URI = 'http://localhost:3000/api/auth/dropbox/callback';
 
 export async function GET(request: NextRequest) {
@@ -18,13 +17,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "管理者権限が必要です" }, { status: 403 });
     }
 
-    if (!DROPBOX_APP_KEY) {
-      return NextResponse.json({ error: "Dropbox App Keyが設定されていません" }, { status: 500 });
+    // 保存されたApp設定を取得
+    const appConfig = await getDropboxAppConfig();
+    
+    if (!appConfig || !appConfig.appKey) {
+      return NextResponse.json({ 
+        error: "Dropbox App設定が完了していません。App KeyとApp Secretを設定してください。" 
+      }, { status: 500 });
     }
 
     // OAuth2認証URLを生成（リフレッシュトークンも取得）
     const authUrl = `https://www.dropbox.com/oauth2/authorize?` +
-      `client_id=${DROPBOX_APP_KEY}&` +
+      `client_id=${appConfig.appKey}&` +
       `response_type=code&` +
       `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
       `token_access_type=offline&` +

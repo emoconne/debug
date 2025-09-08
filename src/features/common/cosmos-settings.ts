@@ -7,7 +7,7 @@ const DB_NAME = process.env.AZURE_COSMOSDB_DB_NAME || "chat";
 const CONTAINER_NAME = "storage"; // storageコンテナを使用
 
 // データタイプの定義
-export type DataType = 'prompt' | 'document' | 'department' | 'user' | 'dropbox-settings';
+export type DataType = 'prompt' | 'document' | 'department' | 'user' | 'dropbox-settings' | 'dropbox-app-config';
 
 export interface SettingsData {
   id: string;

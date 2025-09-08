@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options as authOptions } from "@/features/auth/auth-api";
 import { saveDropboxSettings } from "@/features/settings/dropbox-settings-service";
+import { getDropboxAppConfig } from "@/app/api/settings/dropbox/app-config/route";
 
-// Dropbox OAuth2設定
-const DROPBOX_APP_KEY = process.env.DROPBOX_APP_KEY || '';
-const DROPBOX_APP_SECRET = process.env.DROPBOX_APP_SECRET || '';
 const REDIRECT_URI = 'http://localhost:3000/api/auth/dropbox/callback';
 
 export async function GET(request: NextRequest) {
@@ -33,7 +31,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/settings?dropbox_error=no_code', request.url));
     }
 
-    if (!DROPBOX_APP_KEY || !DROPBOX_APP_SECRET) {
+    // 保存されたApp設定を取得
+    const appConfig = await getDropboxAppConfig();
+    
+    if (!appConfig || !appConfig.appKey || !appConfig.appSecret) {
       return NextResponse.redirect(new URL('/settings?dropbox_error=missing_config', request.url));
     }
 
@@ -47,8 +48,8 @@ export async function GET(request: NextRequest) {
         body: new URLSearchParams({
           code: code,
           grant_type: 'authorization_code',
-          client_id: DROPBOX_APP_KEY,
-          client_secret: DROPBOX_APP_SECRET,
+          client_id: appConfig.appKey,
+          client_secret: appConfig.appSecret,
           redirect_uri: REDIRECT_URI,
         }),
       });

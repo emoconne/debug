@@ -44,7 +44,7 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
   await chatHistory.addMessage({
     content: lastHumanMessage.content,
     role: "user",
-  });
+  } as any);
 
   const history = await chatHistory.getMessages();
   const topHistory = history.slice(history.length - 30, history.length);
@@ -53,8 +53,32 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
   const isImageRequest = DalleImageService.isImageGenerationRequest(lastHumanMessage.content);
   
   if (isImageRequest) {
-    try {
-      console.log('DALL-E: Image generation request detected');
+    // DALL-Eの設定が有効かどうかをチェック
+    const configValidation = DalleImageService.validateConfiguration();
+    if (!configValidation.isValid) {
+      // DALL-Eの設定が不完全な場合、通常のテキストチャットにフォールバック
+      console.log('DALL-E: Configuration invalid, falling back to text chat');
+      
+      // ユーザーに画像生成機能が利用できないことを通知
+      const fallbackMessage = `申し訳ございませんが、現在画像生成機能は利用できません。\n\nDALL-E画像生成機能を使用するには、以下の環境変数を設定してください：\n\n**必要な環境変数：**\n- AZURE_OPENAI_DALLE_ENDPOINT: DALL-E専用のエンドポイントURL\n- AZURE_OPENAI_DALLE_DEPLOYMENT_NAME: DALL-Eデプロイメントの名前（例：dall-e-3）\n- AZURE_OPENAI_DALLE_API_KEY: DALL-E専用のAPIキー\n\n**設定手順：**\n1. Azure Cognitive ServicesでDALL-Eデプロイメントを作成\n2. エンドポイントURL、デプロイメント名、APIキーを環境変数に設定\n3. アプリケーションを再起動\n\n代わりに、テキストでの回答をお試しください。`;
+      
+      await chatHistory.addMessage({
+        content: fallbackMessage,
+        role: "assistant",
+      } as any);
+      
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(fallbackMessage));
+          controller.close();
+        },
+      });
+      
+      return new StreamingTextResponse(stream);
+    }
+          try {
+        console.log('DALL-E: Image generation request detected');
       
       // DALL-Eを使用して画像を生成
       const dalleService = new DalleImageService();
@@ -69,7 +93,7 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
         content: imageMessage,
         role: "assistant",
         imageUrl: imageResult.url,
-      });
+      } as any);
       
       // ストリーミングレスポンスとして返す
       const encoder = new TextEncoder();
@@ -90,7 +114,7 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
       await chatHistory.addMessage({
         content: errorMessage,
         role: "assistant",
-      });
+      } as any);
       
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
@@ -121,12 +145,12 @@ export const ChatAPISimple = async (props: PromptGPTProps) => {
       stream: true,
     });
 
-    const stream = OpenAIStream(response, {
+    const stream = OpenAIStream(response as any, {
       async onCompletion(completion) {
         await chatHistory.addMessage({
           content: completion,
           role: "assistant",
-        });
+        } as any);
       },
     });
     return new StreamingTextResponse(stream);

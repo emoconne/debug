@@ -84,11 +84,12 @@ export async function refreshDropboxAccessToken(): Promise<{ success: boolean; n
       return { success: false, error: 'リフレッシュトークンが設定されていません' };
     }
 
-    const DROPBOX_APP_KEY = process.env.DROPBOX_APP_KEY || '';
-    const DROPBOX_APP_SECRET = process.env.DROPBOX_APP_SECRET || '';
+    // 保存されたApp設定を取得
+    const { getDropboxAppConfig } = await import('@/app/api/settings/dropbox/app-config/route');
+    const appConfig = await getDropboxAppConfig();
 
-    if (!DROPBOX_APP_KEY || !DROPBOX_APP_SECRET) {
-      return { success: false, error: 'Dropbox設定が不完全です' };
+    if (!appConfig || !appConfig.appKey || !appConfig.appSecret) {
+      return { success: false, error: 'Dropbox App設定が不完全です' };
     }
 
     // リフレッシュトークンを使用して新しいアクセストークンを取得
@@ -100,8 +101,8 @@ export async function refreshDropboxAccessToken(): Promise<{ success: boolean; n
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: settings.refreshToken,
-        client_id: DROPBOX_APP_KEY,
-        client_secret: DROPBOX_APP_SECRET,
+        client_id: appConfig.appKey,
+        client_secret: appConfig.appSecret,
       }),
     });
 

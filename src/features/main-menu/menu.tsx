@@ -83,6 +83,7 @@ export const MainMenu = () => {
                 <Settings />
               </Link>
             </Button>
+            {/* テストメニューは今後完成させるので非表示
             <Button
               asChild
               className="rounded-full w-[40px] h-[40px] p-2 text-primary"
@@ -92,6 +93,7 @@ export const MainMenu = () => {
                 <TestTube />
               </Link>
             </Button>
+            */}
           </>
         ) : (
           <></>

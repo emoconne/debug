@@ -40,11 +40,11 @@ export class BingSearchResult {
         throw new Error(`認証に失敗しました: ${authError instanceof Error ? authError.message : '不明なエラー'}`);
       }
 
-      // タイムアウト付きでAzure AI Projects SDKを実行
+      // タイムアウト付きでAzure AI Projects SDKを実行（120秒に延長）
       const result = await Promise.race([
         this.executeAzureAISearch(projectEndpoint, agentId, searchText, threadId),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Azure AI Projects SDK timeout (60秒)')), 60000)
+          setTimeout(() => reject(new Error('Azure AI Projects SDK timeout (120秒)')), 120000)
         )
       ]);
 
@@ -102,9 +102,18 @@ export class BingSearchResult {
 
     console.log('Attempting to authenticate with Azure AI Foundry...');
     
-    console.log('Using DefaultAzureCredential with Azure CLI...');
-    // DefaultAzureCredentialを使用（az loginでログイン済み）
-    const project = new AIProjectClient(projectEndpoint, new DefaultAzureCredential());
+    let project;
+    const apiKey = process.env.AZURE_AI_FOUNDRY_API_KEY;
+    
+    if (apiKey) {
+      console.log('Using API Key authentication...');
+      // API Key認証を使用
+      project = new AIProjectClient(projectEndpoint, { apiKey });
+    } else {
+      console.log('Using DefaultAzureCredential with Azure CLI...');
+      // DefaultAzureCredentialを使用（az loginでログイン済み）
+      project = new AIProjectClient(projectEndpoint, new DefaultAzureCredential());
+    }
     
     // エージェントを取得
     const agent = await project.agents.getAgent(agentId);
@@ -137,12 +146,20 @@ export class BingSearchResult {
     let run = await project.agents.runs.create(thread.id, agent.id);
     console.log(`Created run, ID: ${run.id}`);
 
-    // ランが完了するまでポーリング
+    // ランが完了するまでポーリング（最大120秒）
+    let pollCount = 0;
+    const maxPolls = 120; // 120秒
+    
     while (run.status === "queued" || run.status === "in_progress") {
+      if (pollCount >= maxPolls) {
+        throw new Error('ランがタイムアウトしました（120秒）');
+      }
+      
       // 1秒待機
       await new Promise((resolve) => setTimeout(resolve, 1000));
       run = await project.agents.runs.get(thread.id, run.id);
-      console.log(`Run status: ${run.status}`);
+      pollCount++;
+      console.log(`Run status: ${run.status} (${pollCount}/${maxPolls})`);
     }
 
     if (run.status === "failed") {
