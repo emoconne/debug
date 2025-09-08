@@ -53,19 +53,37 @@ export const useSpeechToText = (props: Props): SpeechToTextProps => {
       setIsMicrophoneUsed(true);
       setIsMicrophonePressed(true);
       
-      const speechConfig = SpeechConfig.fromAuthorizationToken(
-        token.token,
-        token.region
-      );
+      // エンドポイントまたはリージョンを使用してSpeechConfigを作成
+      let speechConfig;
+      if (token.endpoint) {
+        // エンドポイントが指定されている場合
+        speechConfig = SpeechConfig.fromEndpoint(
+          new URL(token.endpoint),
+          token.token
+        );
+        console.log('Using Speech endpoint:', token.endpoint);
+      } else {
+        // リージョンを使用する場合
+        speechConfig = SpeechConfig.fromAuthorizationToken(
+          token.token,
+          token.region
+        );
+        console.log('Using Speech region:', token.region);
+      }
+
+      // 日本語を優先言語として設定
+      speechConfig.speechRecognitionLanguage = "ja-JP";
+      speechConfig.outputFormat = 1; // Detailed result format
 
       const audioConfig = AudioConfig.fromDefaultMicrophoneInput();
 
+      // 日本語を優先した言語検出設定
       const autoDetectSourceLanguageConfig =
         AutoDetectSourceLanguageConfig.fromLanguages([
+          "ja-JP", // 日本語を最優先
           "en-US",
           "zh-CN",
-          "it-IT",
-          "pt-BR",
+          "ko-KR", // 韓国語を追加
         ]);
 
       const recognizer = SpeechRecognizer.FromConfig(
@@ -76,15 +94,53 @@ export const useSpeechToText = (props: Props): SpeechToTextProps => {
 
       recognizerRef.current = recognizer;
 
+      // 音声認識中のイベント（リアルタイム結果）
       recognizer.recognizing = (s, e) => {
-        props.onSpeech(e.result.text);
+        if (e.result.text && e.result.text.trim()) {
+          console.log('Recognizing:', e.result.text);
+          props.onSpeech(e.result.text);
+        }
       };
 
+      // 音声認識完了のイベント（最終結果）
+      recognizer.recognized = (s, e) => {
+        if (e.result.reason === 1 && e.result.text && e.result.text.trim()) { // ResultReason.RecognizedSpeech
+          console.log('Recognized:', e.result.text);
+          props.onSpeech(e.result.text);
+        }
+      };
+
+      // エラーハンドリング
       recognizer.canceled = (s, e) => {
-        showError(e.errorDetails);
+        console.error('Speech recognition canceled:', e.errorDetails);
+        if (e.reason === 1) { // CancellationReason.Error
+          showError(`音声認識エラー: ${e.errorDetails}`);
+        }
+        setIsMicrophonePressed(false);
       };
 
-      recognizer.startContinuousRecognitionAsync();
+      // セッション開始
+      recognizer.sessionStarted = (s, e) => {
+        console.log('Speech recognition session started');
+      };
+
+      // セッション終了
+      recognizer.sessionStopped = (s, e) => {
+        console.log('Speech recognition session stopped');
+        setIsMicrophonePressed(false);
+      };
+
+      console.log('Starting continuous speech recognition...');
+      recognizer.startContinuousRecognitionAsync(
+        () => {
+          console.log('Speech recognition started successfully');
+        },
+        (error) => {
+          console.error('Failed to start speech recognition:', error);
+          showError(`音声認識の開始に失敗しました: ${error}`);
+          setIsMicrophonePressed(false);
+        }
+      );
     } catch (error) {
       console.error("音声認識開始エラー:", error);
       showError("音声認識の開始に失敗しました。");
