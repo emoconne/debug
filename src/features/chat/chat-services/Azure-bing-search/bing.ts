@@ -1,21 +1,25 @@
 // Azure AI Projects SDK経由でのWeb検索
 export class BingSearchResult {
   async SearchWeb(searchText: string, threadId?: string) {
-    const projectEndpoint = process.env.AZURE_AI_FOUNDRY_ENDPOINT || "https://tutorialjbdemoai3fkg2gu-resource.services.ai.azure.com/api/projects/tutorialjbdemoai3fkg2gu-project";
-    const agentId = process.env.AZURE_AI_FOUNDRY_AGENT_ID || "asst_MCLyvD44JpMKO8WZIHeWnRyZ";
+    const projectEndpoint = process.env.AZURE_AI_FOUNDRY_ENDPOINT;
+    const agentId = process.env.AZURE_AI_FOUNDRY_AGENT_ID;
+    const apiKey = process.env.AZURE_AI_FOUNDRY_API_KEY;
+    
+    // 環境変数の詳細なデバッグ情報
+    console.log('Debug - Environment variables:');
+    console.log('AZURE_AI_FOUNDRY_ENDPOINT:', projectEndpoint ? 'SET' : 'NOT SET');
+    console.log('AZURE_AI_FOUNDRY_AGENT_ID:', agentId ? 'SET' : 'NOT SET');
+    console.log('AZURE_AI_FOUNDRY_API_KEY:', apiKey ? 'SET' : 'NOT SET');
     
     if (!projectEndpoint || !agentId) {
       console.error('Missing Azure AI Project configuration:', {
         projectEndpoint: projectEndpoint ? 'set' : 'missing',
-        agentId: agentId ? 'set' : 'missing'
+        agentId: agentId ? 'set' : 'missing',
+        apiKey: apiKey ? 'set' : 'missing'
       });
       
-      // 環境変数の詳細なデバッグ情報
-      console.log('Debug - Environment variables:');
-      console.log('AZURE_AI_FOUNDRY_ENDPOINT:', process.env.AZURE_AI_FOUNDRY_ENDPOINT);
-      console.log('AZURE_AI_FOUNDRY_AGENT_ID:', process.env.AZURE_AI_FOUNDRY_AGENT_ID);
-      
-      throw new Error('Azure AI Project configuration is missing');
+      // フォールバック検索を実行
+      return this.fallbackSearch(searchText);
     }
 
     try {
@@ -26,17 +30,34 @@ export class BingSearchResult {
       console.log('Search Text:', searchText);
       console.log('Using Azure CLI authentication');
 
-      // 認証の確認
+      // 認証の確認（App Service環境でのManaged Identity対応）
       try {
         const { DefaultAzureCredential } = await import("@azure/identity");
-        const credential = new DefaultAzureCredential();
-        console.log('DefaultAzureCredential created successfully');
+        
+        // App Service環境でのManaged Identity設定
+        const credentialOptions = {
+          // App Service環境でのManaged Identityを優先
+          managedIdentityClientId: process.env.AZURE_CLIENT_ID || undefined,
+          // デバッグ情報を有効化
+          loggingOptions: {
+            enableLogging: true,
+            logLevel: 'info'
+          }
+        };
+        
+        const credential = new DefaultAzureCredential(credentialOptions);
+        console.log('DefaultAzureCredential created successfully with options:', credentialOptions);
         
         // 認証トークンの取得を試行
         const token = await credential.getToken("https://cognitiveservices.azure.com/.default");
-        console.log('Authentication successful, token obtained');
+        console.log('Authentication successful, token obtained, expires:', token?.expiresOnTimestamp);
       } catch (authError) {
         console.error('Authentication failed:', authError);
+        console.error('Auth error details:', {
+          name: authError instanceof Error ? authError.name : 'Unknown',
+          message: authError instanceof Error ? authError.message : String(authError),
+          stack: authError instanceof Error ? authError.stack : undefined
+        });
         throw new Error(`認証に失敗しました: ${authError instanceof Error ? authError.message : '不明なエラー'}`);
       }
 
@@ -79,13 +100,79 @@ export class BingSearchResult {
         }
       }
       
-      // エラーが発生した場合は基本的な検索結果を返す
+      // エラーが発生した場合はフォールバック検索を実行
+      console.log('Azure AI Foundry search failed, trying fallback search...');
+      return this.fallbackSearch(searchText);
+    }
+  }
+
+  // フォールバック検索機能（DuckDuckGo Instant Answer API使用）
+  private async fallbackSearch(searchText: string) {
+    console.log('Executing fallback search for:', searchText);
+    
+    try {
+      // DuckDuckGo Instant Answer APIを使用
+      const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(searchText)}&format=json&no_html=1&skip_disambig=1`);
+      
+      if (!response.ok) {
+        throw new Error(`DuckDuckGo API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // 検索結果を構築
+      const searchResults = [];
+      
+      // Abstract（要約）がある場合
+      if (data.Abstract) {
+        searchResults.push({
+          name: data.Heading || '検索結果',
+          snippet: data.Abstract,
+          url: data.AbstractURL || '#',
+          sortOrder: 1
+        });
+      }
+      
+      // Related Topics（関連トピック）がある場合
+      if (data.RelatedTopics && Array.isArray(data.RelatedTopics)) {
+        data.RelatedTopics.slice(0, 5).forEach((topic: any, index: number) => {
+          if (topic.Text && topic.FirstURL) {
+            searchResults.push({
+              name: topic.Text.split(' - ')[0] || `関連情報 ${index + 1}`,
+              snippet: topic.Text,
+              url: topic.FirstURL,
+              sortOrder: index + 2
+            });
+          }
+        });
+      }
+      
+      // 検索結果がない場合のデフォルト
+      if (searchResults.length === 0) {
+        searchResults.push({
+          name: '検索結果',
+          snippet: `「${searchText}」についての情報が見つかりませんでした。一般的な知識に基づいて回答いたします。`,
+          url: '#',
+          sortOrder: 0
+        });
+      }
+      
+      return {
+        webPages: {
+          value: searchResults
+        }
+      };
+      
+    } catch (fallbackError) {
+      console.error('Fallback search also failed:', fallbackError);
+      
+      // 最終的なフォールバック
       return {
         webPages: {
           value: [
             {
-              name: '検索エラー',
-              snippet: `「${searchText}」についての検索中にエラーが発生しました。\n\nエラー: ${errorMessage}\n\n対処法: ${suggestion}`,
+              name: '検索サービス利用不可',
+              snippet: `「${searchText}」についての検索サービスが現在利用できません。一般的な知識に基づいて回答いたします。`,
               url: '#',
               sortOrder: 0
             }
@@ -101,6 +188,11 @@ export class BingSearchResult {
     const { DefaultAzureCredential } = await import("@azure/identity");
 
     console.log('Attempting to authenticate with Azure AI Foundry...');
+    console.log('Environment check:', {
+      isAppService: !!process.env.WEBSITE_SITE_NAME,
+      hasApiKey: !!process.env.AZURE_AI_FOUNDRY_API_KEY,
+      hasClientId: !!process.env.AZURE_CLIENT_ID
+    });
     
     let project;
     const apiKey = process.env.AZURE_AI_FOUNDRY_API_KEY;
@@ -110,9 +202,19 @@ export class BingSearchResult {
       // API Key認証を使用
       project = new AIProjectClient(projectEndpoint, { apiKey });
     } else {
-      console.log('Using DefaultAzureCredential with Azure CLI...');
-      // DefaultAzureCredentialを使用（az loginでログイン済み）
-      project = new AIProjectClient(projectEndpoint, new DefaultAzureCredential());
+      console.log('Using DefaultAzureCredential with Managed Identity...');
+      
+      // App Service環境でのManaged Identity設定
+      const credentialOptions = {
+        managedIdentityClientId: process.env.AZURE_CLIENT_ID || undefined,
+        loggingOptions: {
+          enableLogging: true,
+          logLevel: 'info'
+        }
+      };
+      
+      const credential = new DefaultAzureCredential(credentialOptions);
+      project = new AIProjectClient(projectEndpoint, credential);
     }
     
     // エージェントを取得

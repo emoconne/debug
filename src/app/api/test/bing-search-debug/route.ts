@@ -32,7 +32,10 @@ export async function GET(request: NextRequest) {
 
     // テスト検索を実行
     const bing = new BingSearchResult();
-    const testQuery = "JBCCの本社所在地";
+    
+    // URLパラメータからクエリを取得、デフォルトは"Microsoft"
+    const url = new URL(request.url);
+    const testQuery = url.searchParams.get('query') || "Microsoft";
     
     console.log('Testing Bing search with query:', testQuery);
     

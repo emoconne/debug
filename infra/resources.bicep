@@ -172,6 +172,18 @@ resource webApp 'Microsoft.Web/sites@2020-06-01' = {
           name: 'AZURE_SPEECH_KEY'
           value: '@Microsoft.KeyVault(VaultName=${kv.name};SecretName=${kv::AZURE_SPEECH_KEY.name})'
         }
+        {
+          name: 'AZURE_AI_FOUNDRY_ENDPOINT'
+          value: 'https://bing-new-fujibo-resource.cognitiveservices.azure.com'
+        }
+        {
+          name: 'AZURE_AI_FOUNDRY_API_KEY'
+          value: 'your-azure-ai-foundry-api-key-here'
+        }
+        {
+          name: 'AZURE_AI_FOUNDRY_AGENT_ID'
+          value: 'asst_VGKxyS6qe9b5UiIt5G3xc8nP'
+        }
         // Bing Search APIは非推奨のため削除
       ]
     }
@@ -255,6 +267,8 @@ resource kv 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
       value: speechService.listKeys().key1
     }
   }
+
+  // Azure AI Foundry secrets removed - using direct environment variables
 
 
   resource AZURE_SEARCH_API_KEY 'secrets' = {
