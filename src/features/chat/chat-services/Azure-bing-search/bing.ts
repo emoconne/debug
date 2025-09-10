@@ -194,28 +194,25 @@ export class BingSearchResult {
       hasClientId: !!process.env.AZURE_CLIENT_ID
     });
     
-    let project;
-    const apiKey = process.env.AZURE_AI_FOUNDRY_API_KEY;
+    // 常にDefaultAzureCredentialを使用（Entra認証）
+    console.log('Using DefaultAzureCredential with Entra authentication...');
     
-    if (apiKey) {
-      console.log('Using API Key authentication...');
-      // API Key認証を使用
-      project = new AIProjectClient(projectEndpoint, { apiKey });
-    } else {
-      console.log('Using DefaultAzureCredential with Managed Identity...');
-      
-      // App Service環境でのManaged Identity設定
-      const credentialOptions = {
-        managedIdentityClientId: process.env.AZURE_CLIENT_ID || undefined,
-        loggingOptions: {
-          enableLogging: true,
-          logLevel: 'info'
-        }
-      };
-      
-      const credential = new DefaultAzureCredential(credentialOptions);
-      project = new AIProjectClient(projectEndpoint, credential);
-    }
+    // App Service環境でのManaged Identity設定
+    const credentialOptions = {
+      managedIdentityClientId: process.env.AZURE_CLIENT_ID || undefined,
+      loggingOptions: {
+        enableLogging: true,
+        logLevel: 'info'
+      },
+      retryOptions: {
+        maxRetries: 5,
+        retryDelayInMs: 800
+      },
+      allowInsecureConnection: true
+    };
+    
+    const credential = new DefaultAzureCredential(credentialOptions);
+    const project = new AIProjectClient(projectEndpoint, credential);
     
     // エージェントを取得
     const agent = await project.agents.getAgent(agentId);
