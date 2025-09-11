@@ -1,0 +1,967 @@
+2025-09-10T06:28:37.5909049Z Container start method called.
+2025-09-10T06:28:37.5910373Z Establishing network.
+2025-09-10T06:28:37.5928953Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T06:28:37.7918337Z Container is starting.
+2025-09-10T06:28:37.7919703Z Establishing user namespace if not established already.
+2025-09-10T06:28:37.7921170Z Establishing network if not established already.
+2025-09-10T06:28:37.7932481Z Mounting volumes.
+2025-09-10T06:28:37.7934236Z Nested mountpoint 
+2025-09-10T06:28:37.7950535Z Nested mountpoint volatile/logs
+2025-09-10T06:28:37.7993436Z Nested mountpoint 
+2025-09-10T06:28:37.7999690Z Nested mountpoint 
+2025-09-10T06:28:37.8035986Z Nested mountpoint 
+2025-09-10T06:28:37.8045217Z Nested mountpoint 
+2025-09-10T06:28:37.8072057Z Nested mountpoint 
+2025-09-10T06:28:37.9338738Z Creating container.
+2025-09-10T06:28:37.9339914Z Creating pipes for streaming container io.
+2025-09-10T06:28:37.9340903Z Creating stdout named pipe at /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stdout_1c2769af60e34affa466359fb82af8d4.
+2025-09-10T06:28:37.9343817Z Successfully created stdout named pipe at: /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stdout_1c2769af60e34affa466359fb82af8d4.
+2025-09-10T06:28:37.9344868Z Opening named pipe /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stdout_1c2769af60e34affa466359fb82af8d4 for reading in non-blocking mode.
+2025-09-10T06:28:37.9346145Z Successfully opened named pipe: /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stdout_1c2769af60e34affa466359fb82af8d4.
+2025-09-10T06:28:37.9347453Z Successfully removed non-blocking flag from /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stdout_1c2769af60e34affa466359fb82af8d4.
+2025-09-10T06:28:37.9348653Z Creating stderr named pipe at /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stderr_a3d55ec154934d74a84d7610c138a612.
+2025-09-10T06:28:37.9350331Z Successfully created stderr named pipe at: /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stderr_a3d55ec154934d74a84d7610c138a612.
+2025-09-10T06:28:37.9351438Z Opening named pipe /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stderr_a3d55ec154934d74a84d7610c138a612 for reading in non-blocking mode.
+2025-09-10T06:28:37.9352823Z Successfully opened named pipe: /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stderr_a3d55ec154934d74a84d7610c138a612.
+2025-09-10T06:28:37.9353833Z Successfully removed non-blocking flag from /podr/container/pipe/2d6aad96f0cd_fujibogpt1/stderr_a3d55ec154934d74a84d7610c138a612.
+2025-09-10T06:28:37.9354898Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:28:38.0727446Z Starting container: 2d6aad96f0cd_fujibogpt1.
+2025-09-10T06:28:38.0939150Z Starting watchers and probes.
+2025-09-10T06:28:38.0941608Z Starting metrics collection.
+2025-09-10T06:28:38.0943120Z Container is running.
+2025-09-10T06:28:38.9574284Z Container start method finished after 1366 ms.
+2025-09-10T06:28:42.9887912Z Site startup probe succeeded after 4.0305931 seconds.
+2025-09-10T06:28:43.0010045Z Site started.
+2025-09-10T06:28:43.0045547Z Site is running with patch version: 22.17.0
+2025-09-10T06:33:18.0185046Z Container start method called.
+2025-09-10T06:33:18.0186321Z Establishing network.
+2025-09-10T06:33:18.0187499Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T06:33:18.2145733Z Container is starting.
+2025-09-10T06:33:18.2147495Z Establishing user namespace if not established already.
+2025-09-10T06:33:18.2148784Z Establishing network if not established already.
+2025-09-10T06:33:18.2149872Z Mounting volumes.
+2025-09-10T06:33:18.2151646Z Nested mountpoint 
+2025-09-10T06:33:18.2185657Z Nested mountpoint volatile/logs
+2025-09-10T06:33:18.2228720Z Nested mountpoint 
+2025-09-10T06:33:18.2248459Z Nested mountpoint 
+2025-09-10T06:33:18.2265842Z Nested mountpoint 
+2025-09-10T06:33:18.2319138Z Nested mountpoint 
+2025-09-10T06:33:18.2518231Z Nested mountpoint 
+2025-09-10T06:33:18.3765639Z Creating container.
+2025-09-10T06:33:18.3776089Z Creating pipes for streaming container io.
+2025-09-10T06:33:18.3783105Z Creating stdout named pipe at /podr/container/pipe/461683578837_fujibogpt1/stdout_8f8650bdf591494c87c95d3734d9a9f2.
+2025-09-10T06:33:18.3790434Z Successfully created stdout named pipe at: /podr/container/pipe/461683578837_fujibogpt1/stdout_8f8650bdf591494c87c95d3734d9a9f2.
+2025-09-10T06:33:18.3793472Z Opening named pipe /podr/container/pipe/461683578837_fujibogpt1/stdout_8f8650bdf591494c87c95d3734d9a9f2 for reading in non-blocking mode.
+2025-09-10T06:33:18.3797976Z Successfully opened named pipe: /podr/container/pipe/461683578837_fujibogpt1/stdout_8f8650bdf591494c87c95d3734d9a9f2.
+2025-09-10T06:33:18.3801397Z Successfully removed non-blocking flag from /podr/container/pipe/461683578837_fujibogpt1/stdout_8f8650bdf591494c87c95d3734d9a9f2.
+2025-09-10T06:33:18.3804995Z Creating stderr named pipe at /podr/container/pipe/461683578837_fujibogpt1/stderr_4169278cfd4d466cb6254e11998ead8a.
+2025-09-10T06:33:18.3810561Z Successfully created stderr named pipe at: /podr/container/pipe/461683578837_fujibogpt1/stderr_4169278cfd4d466cb6254e11998ead8a.
+2025-09-10T06:33:18.3815729Z Opening named pipe /podr/container/pipe/461683578837_fujibogpt1/stderr_4169278cfd4d466cb6254e11998ead8a for reading in non-blocking mode.
+2025-09-10T06:33:18.3821727Z Successfully opened named pipe: /podr/container/pipe/461683578837_fujibogpt1/stderr_4169278cfd4d466cb6254e11998ead8a.
+2025-09-10T06:33:18.3828216Z Successfully removed non-blocking flag from /podr/container/pipe/461683578837_fujibogpt1/stderr_4169278cfd4d466cb6254e11998ead8a.
+2025-09-10T06:33:18.3829949Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:33:18.5445347Z Starting container: 461683578837_fujibogpt1.
+2025-09-10T06:33:18.5680000Z Starting watchers and probes.
+2025-09-10T06:33:18.5685495Z Starting metrics collection.
+2025-09-10T06:33:18.5687372Z Container is running.
+2025-09-10T06:33:18.6008591Z Container start method finished after 582 ms.
+2025-09-10T06:33:23.6323512Z Site startup probe succeeded after 5.0285321 seconds.
+2025-09-10T06:33:23.6435023Z Site started.
+2025-09-10T06:33:23.6461035Z Site is running with patch version: 22.17.0
+2025-09-10T06:33:43.6578480Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T06:33:43.6618436Z Stop and delete container. Retry count = 0
+2025-09-10T06:33:43.6627349Z Stopping container: 2d6aad96f0cd_fujibogpt1.
+2025-09-10T06:33:48.6952781Z Deleting container: 2d6aad96f0cd_fujibogpt1. Retry count = 0
+2025-09-10T06:33:48.7561524Z Container spec TerminationMessagePolicy  path 
+2025-09-10T06:33:48.7563889Z Container is terminated. Total time elapsed: 5098 ms.
+2025-09-10T06:33:48.7564211Z Site: fujibogpt1 stopped.
+2025-09-10T06:33:51.8198228Z Container start method called.
+2025-09-10T06:33:51.8199517Z Establishing network.
+2025-09-10T06:33:51.8200626Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T06:33:52.0525632Z Container is starting.
+2025-09-10T06:33:52.0527093Z Establishing user namespace if not established already.
+2025-09-10T06:33:52.0528435Z Establishing network if not established already.
+2025-09-10T06:33:52.0604951Z Mounting volumes.
+2025-09-10T06:33:52.0608548Z Nested mountpoint 
+2025-09-10T06:33:52.0618554Z Nested mountpoint volatile/logs
+2025-09-10T06:33:52.0936266Z Nested mountpoint 
+2025-09-10T06:33:52.0944396Z Nested mountpoint 
+2025-09-10T06:33:52.1295048Z Nested mountpoint 
+2025-09-10T06:33:52.1303532Z Nested mountpoint 
+2025-09-10T06:33:52.1552152Z Nested mountpoint 
+2025-09-10T06:33:52.3016436Z Creating container.
+2025-09-10T06:33:52.3017739Z Creating pipes for streaming container io.
+2025-09-10T06:33:52.3018715Z Creating stdout named pipe at /podr/container/pipe/4715870a0231_fujibogpt1/stdout_5578d79d58bf48d18f9950989ff2b585.
+2025-09-10T06:33:52.3020805Z Successfully created stdout named pipe at: /podr/container/pipe/4715870a0231_fujibogpt1/stdout_5578d79d58bf48d18f9950989ff2b585.
+2025-09-10T06:33:52.3022016Z Opening named pipe /podr/container/pipe/4715870a0231_fujibogpt1/stdout_5578d79d58bf48d18f9950989ff2b585 for reading in non-blocking mode.
+2025-09-10T06:33:52.3036522Z Successfully opened named pipe: /podr/container/pipe/4715870a0231_fujibogpt1/stdout_5578d79d58bf48d18f9950989ff2b585.
+2025-09-10T06:33:52.3038032Z Successfully removed non-blocking flag from /podr/container/pipe/4715870a0231_fujibogpt1/stdout_5578d79d58bf48d18f9950989ff2b585.
+2025-09-10T06:33:52.3039566Z Creating stderr named pipe at /podr/container/pipe/4715870a0231_fujibogpt1/stderr_c20c267bb6c44013b5f06114386c35c6.
+2025-09-10T06:33:52.3041645Z Successfully created stderr named pipe at: /podr/container/pipe/4715870a0231_fujibogpt1/stderr_c20c267bb6c44013b5f06114386c35c6.
+2025-09-10T06:33:52.3045684Z Opening named pipe /podr/container/pipe/4715870a0231_fujibogpt1/stderr_c20c267bb6c44013b5f06114386c35c6 for reading in non-blocking mode.
+2025-09-10T06:33:52.3047419Z Successfully opened named pipe: /podr/container/pipe/4715870a0231_fujibogpt1/stderr_c20c267bb6c44013b5f06114386c35c6.
+2025-09-10T06:33:52.3048932Z Successfully removed non-blocking flag from /podr/container/pipe/4715870a0231_fujibogpt1/stderr_c20c267bb6c44013b5f06114386c35c6.
+2025-09-10T06:33:52.3050764Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:33:52.4497487Z Starting container: 4715870a0231_fujibogpt1.
+2025-09-10T06:33:52.4690287Z Starting watchers and probes.
+2025-09-10T06:33:52.4694793Z Starting metrics collection.
+2025-09-10T06:33:52.4696283Z Container is running.
+2025-09-10T06:33:54.0134954Z Container start method finished after 2193 ms.
+2025-09-10T06:33:57.0423380Z Site startup probe succeeded after 3.0281248 seconds.
+2025-09-10T06:33:57.0521806Z Site started.
+2025-09-10T06:33:57.0525776Z Site is running with patch version: 22.17.0
+2025-09-10T06:34:17.0534607Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T06:34:17.0555869Z Stop and delete container. Retry count = 0
+2025-09-10T06:34:17.0561695Z Stopping container: 461683578837_fujibogpt1.
+2025-09-10T06:34:22.0810204Z Deleting container: 461683578837_fujibogpt1. Retry count = 0
+2025-09-10T06:34:22.1469239Z Container spec TerminationMessagePolicy  path 
+2025-09-10T06:34:22.1471169Z Container is terminated. Total time elapsed: 5093 ms.
+2025-09-10T06:34:22.1471565Z Site: fujibogpt1 stopped.
+2025-09-10T06:34:25.2224215Z Container start method called.
+2025-09-10T06:34:25.2225442Z Establishing network.
+2025-09-10T06:34:25.2226436Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T06:34:25.4343881Z Container is starting.
+2025-09-10T06:34:25.4345053Z Establishing user namespace if not established already.
+2025-09-10T06:34:25.4346364Z Establishing network if not established already.
+2025-09-10T06:34:25.4347626Z Mounting volumes.
+2025-09-10T06:34:25.4349449Z Nested mountpoint 
+2025-09-10T06:34:25.4420357Z Nested mountpoint volatile/logs
+2025-09-10T06:34:25.4492627Z Nested mountpoint 
+2025-09-10T06:34:25.4500368Z Nested mountpoint 
+2025-09-10T06:34:25.4506416Z Nested mountpoint 
+2025-09-10T06:34:25.4671077Z Nested mountpoint 
+2025-09-10T06:34:25.4808362Z Nested mountpoint 
+2025-09-10T06:34:25.6480446Z Creating container.
+2025-09-10T06:34:25.6481701Z Creating pipes for streaming container io.
+2025-09-10T06:34:25.6483173Z Creating stdout named pipe at /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stdout_473b1643b40c45a98c3c0b13023c3d00.
+2025-09-10T06:34:25.6503260Z Successfully created stdout named pipe at: /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stdout_473b1643b40c45a98c3c0b13023c3d00.
+2025-09-10T06:34:25.6504479Z Opening named pipe /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stdout_473b1643b40c45a98c3c0b13023c3d00 for reading in non-blocking mode.
+2025-09-10T06:34:25.6505765Z Successfully opened named pipe: /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stdout_473b1643b40c45a98c3c0b13023c3d00.
+2025-09-10T06:34:25.6506772Z Successfully removed non-blocking flag from /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stdout_473b1643b40c45a98c3c0b13023c3d00.
+2025-09-10T06:34:25.6507913Z Creating stderr named pipe at /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stderr_15f7c6f5792e45ec9be0316fd8a6cec1.
+2025-09-10T06:34:25.6509456Z Successfully created stderr named pipe at: /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stderr_15f7c6f5792e45ec9be0316fd8a6cec1.
+2025-09-10T06:34:25.6510512Z Opening named pipe /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stderr_15f7c6f5792e45ec9be0316fd8a6cec1 for reading in non-blocking mode.
+2025-09-10T06:34:25.6511751Z Successfully opened named pipe: /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stderr_15f7c6f5792e45ec9be0316fd8a6cec1.
+2025-09-10T06:34:25.6512734Z Successfully removed non-blocking flag from /podr/container/pipe/a7b610fdcf2c_fujibogpt1/stderr_15f7c6f5792e45ec9be0316fd8a6cec1.
+2025-09-10T06:34:25.6513750Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:34:25.7840795Z Starting container: a7b610fdcf2c_fujibogpt1.
+2025-09-10T06:34:25.8028842Z Starting watchers and probes.
+2025-09-10T06:34:25.8060387Z Starting metrics collection.
+2025-09-10T06:34:25.8071789Z Container is running.
+2025-09-10T06:34:25.8673965Z Container start method finished after 644 ms.
+2025-09-10T06:34:30.9585232Z Site startup probe succeeded after 5.0826399 seconds.
+2025-09-10T06:34:30.9761215Z Site started.
+2025-09-10T06:34:30.9765336Z Site is running with patch version: 22.17.0
+2025-09-10T06:34:50.9841159Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T06:34:50.9864803Z Stop and delete container. Retry count = 0
+2025-09-10T06:34:50.9866456Z Stopping container: 4715870a0231_fujibogpt1.
+2025-09-10T06:34:56.0331699Z Deleting container: 4715870a0231_fujibogpt1. Retry count = 0
+2025-09-10T06:34:56.0911206Z Container spec TerminationMessagePolicy  path 
+2025-09-10T06:34:56.0912916Z Container is terminated. Total time elapsed: 5107 ms.
+2025-09-10T06:34:56.0918517Z Site: fujibogpt1 stopped.
+2025-09-10T06:38:28.1939356Z Container start method called.
+2025-09-10T06:38:28.1985171Z Establishing network.
+2025-09-10T06:38:28.1987823Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T06:38:28.4585268Z Container is starting.
+2025-09-10T06:38:28.4589943Z Establishing user namespace if not established already.
+2025-09-10T06:38:28.4592989Z Establishing network if not established already.
+2025-09-10T06:38:28.4597257Z Mounting volumes.
+2025-09-10T06:38:28.4603064Z Nested mountpoint 
+2025-09-10T06:38:28.4613960Z Nested mountpoint volatile/logs
+2025-09-10T06:38:28.4657945Z Nested mountpoint 
+2025-09-10T06:38:28.4691698Z Nested mountpoint 
+2025-09-10T06:38:28.4758946Z Nested mountpoint 
+2025-09-10T06:38:28.4773025Z Nested mountpoint 
+2025-09-10T06:38:28.4820752Z Nested mountpoint 
+2025-09-10T06:38:29.7322677Z Creating container.
+2025-09-10T06:38:29.7324598Z Creating pipes for streaming container io.
+2025-09-10T06:38:29.7325939Z Creating stdout named pipe at /podr/container/pipe/5298c770a054_fujibogpt1/stdout_c0e83c3a8eb74e74b2e69d8944189c0b.
+2025-09-10T06:38:29.7328347Z Successfully created stdout named pipe at: /podr/container/pipe/5298c770a054_fujibogpt1/stdout_c0e83c3a8eb74e74b2e69d8944189c0b.
+2025-09-10T06:38:29.7329329Z Opening named pipe /podr/container/pipe/5298c770a054_fujibogpt1/stdout_c0e83c3a8eb74e74b2e69d8944189c0b for reading in non-blocking mode.
+2025-09-10T06:38:29.7330599Z Successfully opened named pipe: /podr/container/pipe/5298c770a054_fujibogpt1/stdout_c0e83c3a8eb74e74b2e69d8944189c0b.
+2025-09-10T06:38:29.7331599Z Successfully removed non-blocking flag from /podr/container/pipe/5298c770a054_fujibogpt1/stdout_c0e83c3a8eb74e74b2e69d8944189c0b.
+2025-09-10T06:38:29.7332672Z Creating stderr named pipe at /podr/container/pipe/5298c770a054_fujibogpt1/stderr_596650c973a74571ad732daccdfde17e.
+2025-09-10T06:38:29.7334286Z Successfully created stderr named pipe at: /podr/container/pipe/5298c770a054_fujibogpt1/stderr_596650c973a74571ad732daccdfde17e.
+2025-09-10T06:38:29.7335346Z Opening named pipe /podr/container/pipe/5298c770a054_fujibogpt1/stderr_596650c973a74571ad732daccdfde17e for reading in non-blocking mode.
+2025-09-10T06:38:29.7336571Z Successfully opened named pipe: /podr/container/pipe/5298c770a054_fujibogpt1/stderr_596650c973a74571ad732daccdfde17e.
+2025-09-10T06:38:29.7337643Z Successfully removed non-blocking flag from /podr/container/pipe/5298c770a054_fujibogpt1/stderr_596650c973a74571ad732daccdfde17e.
+2025-09-10T06:38:29.7338721Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:38:29.8961477Z Starting container: 5298c770a054_fujibogpt1.
+2025-09-10T06:38:29.9131675Z Starting watchers and probes.
+2025-09-10T06:38:29.9142213Z Starting metrics collection.
+2025-09-10T06:38:29.9151140Z Container is running.
+2025-09-10T06:38:29.9429453Z Container start method finished after 1747 ms.
+2025-09-10T06:38:34.5048452Z Container has finished running with exit code: 1.
+2025-09-10T06:38:34.5049934Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T06:38:34.5054115Z Stop and delete container. Retry count = 0
+2025-09-10T06:38:34.5055264Z Stopping container: 5298c770a054_fujibogpt1.
+2025-09-10T06:38:34.5190674Z Deleting container: 5298c770a054_fujibogpt1. Retry count = 0
+2025-09-10T06:38:34.5849408Z Container spec TerminationMessagePolicy  path 
+2025-09-10T06:38:34.5860809Z Container is terminated. Total time elapsed: 80 ms.
+2025-09-10T06:38:34.5867187Z Site container: fujibogpt1 terminated during site startup.
+2025-09-10T06:38:34.5885387Z Site startup probe failed after 4.6441205 seconds.
+2025-09-10T06:38:34.6001772Z Failed to start site. Revert by stopping site.
+2025-09-10T06:38:34.6004938Z Site: fujibogpt1 stopped.
+2025-09-10T06:38:55.0498317Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T06:38:55.0525184Z Stop and delete container. Retry count = 0
+2025-09-10T06:38:55.0526687Z Stopping container: a7b610fdcf2c_fujibogpt1.
+2025-09-10T06:39:00.0848801Z Deleting container: a7b610fdcf2c_fujibogpt1. Retry count = 0
+2025-09-10T06:39:00.1422644Z Container spec TerminationMessagePolicy  path 
+2025-09-10T06:39:00.1429956Z Container is terminated. Total time elapsed: 5091 ms.
+2025-09-10T06:39:00.1430247Z Site: fujibogpt1 stopped.
+2025-09-10T06:38:34.9189379Z Site container: fujibogpt1_managedIdentity terminated during site startup.
+2025-09-10T06:38:34.9218114Z ManagedIdentity container failed to startup
+2025-09-10T06:39:03.5473837Z Container start method called.
+2025-09-10T06:39:03.5475522Z Establishing network.
+2025-09-10T06:39:03.5476516Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T06:39:03.7533607Z Container is starting.
+2025-09-10T06:39:03.7570942Z Establishing user namespace if not established already.
+2025-09-10T06:39:03.7574923Z Establishing network if not established already.
+2025-09-10T06:39:03.7578760Z Mounting volumes.
+2025-09-10T06:39:03.7583143Z Nested mountpoint 
+2025-09-10T06:39:03.7802697Z Nested mountpoint volatile/logs
+2025-09-10T06:39:03.8032728Z Nested mountpoint 
+2025-09-10T06:39:03.8195166Z Nested mountpoint 
+2025-09-10T06:39:03.8287149Z Nested mountpoint 
+2025-09-10T06:39:03.8309110Z Nested mountpoint 
+2025-09-10T06:39:03.8692870Z Nested mountpoint 
+2025-09-10T06:39:04.0459195Z Creating container.
+2025-09-10T06:39:04.0463283Z Creating pipes for streaming container io.
+2025-09-10T06:39:04.0468612Z Creating stdout named pipe at /podr/container/pipe/db36ae66e769_fujibogpt1/stdout_e6ed96c0497b42b88d7e961b4a933096.
+2025-09-10T06:39:04.0471046Z Successfully created stdout named pipe at: /podr/container/pipe/db36ae66e769_fujibogpt1/stdout_e6ed96c0497b42b88d7e961b4a933096.
+2025-09-10T06:39:04.0472292Z Opening named pipe /podr/container/pipe/db36ae66e769_fujibogpt1/stdout_e6ed96c0497b42b88d7e961b4a933096 for reading in non-blocking mode.
+2025-09-10T06:39:04.0476674Z Successfully opened named pipe: /podr/container/pipe/db36ae66e769_fujibogpt1/stdout_e6ed96c0497b42b88d7e961b4a933096.
+2025-09-10T06:39:04.0477886Z Successfully removed non-blocking flag from /podr/container/pipe/db36ae66e769_fujibogpt1/stdout_e6ed96c0497b42b88d7e961b4a933096.
+2025-09-10T06:39:04.0479198Z Creating stderr named pipe at /podr/container/pipe/db36ae66e769_fujibogpt1/stderr_0b89b9ecb3bd447495b6c1fe33a517ba.
+2025-09-10T06:39:04.0480900Z Successfully created stderr named pipe at: /podr/container/pipe/db36ae66e769_fujibogpt1/stderr_0b89b9ecb3bd447495b6c1fe33a517ba.
+2025-09-10T06:39:04.0491576Z Opening named pipe /podr/container/pipe/db36ae66e769_fujibogpt1/stderr_0b89b9ecb3bd447495b6c1fe33a517ba for reading in non-blocking mode.
+2025-09-10T06:39:04.0493275Z Successfully opened named pipe: /podr/container/pipe/db36ae66e769_fujibogpt1/stderr_0b89b9ecb3bd447495b6c1fe33a517ba.
+2025-09-10T06:39:04.0494432Z Successfully removed non-blocking flag from /podr/container/pipe/db36ae66e769_fujibogpt1/stderr_0b89b9ecb3bd447495b6c1fe33a517ba.
+2025-09-10T06:39:04.0495496Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:39:04.1719144Z Starting container: db36ae66e769_fujibogpt1.
+2025-09-10T06:39:04.1918230Z Starting watchers and probes.
+2025-09-10T06:39:04.1941288Z Starting metrics collection.
+2025-09-10T06:39:04.1959973Z Container is running.
+2025-09-10T06:39:04.2453483Z Container start method finished after 697 ms.
+2025-09-10T06:39:08.4127239Z Container has finished running with exit code: 1.
+2025-09-10T06:39:08.4128795Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T06:39:08.4137118Z Stop and delete container. Retry count = 0
+2025-09-10T06:39:08.4141592Z Stopping container: db36ae66e769_fujibogpt1.
+2025-09-10T06:39:08.4290273Z Deleting container: db36ae66e769_fujibogpt1. Retry count = 0
+2025-09-10T06:39:08.4932836Z Container spec TerminationMessagePolicy  path 
+2025-09-10T06:39:08.4935581Z Container is terminated. Total time elapsed: 80 ms.
+2025-09-10T06:39:08.4936785Z Site container: fujibogpt1 terminated during site startup.
+2025-09-10T06:39:08.4938923Z Site startup probe failed after 4.2440145 seconds.
+2025-09-10T06:39:08.4991420Z Failed to start site. Revert by stopping site.
+2025-09-10T06:39:08.5000001Z Site: fujibogpt1 stopped.
+2025-09-10T06:39:16.997Z INFO  - 22-lts_20250724.2.tuxprod Pulling from appsvc/node
+2025-09-10T06:39:17.001Z INFO  - c19952135643 Pulling fs layer
+2025-09-10T06:39:17.005Z INFO  - b49b2c83cf45 Pulling fs layer
+2025-09-10T06:39:17.006Z INFO  - a7350ec49683 Pulling fs layer
+2025-09-10T06:39:17.008Z INFO  - ca64976d1f75 Pulling fs layer
+2025-09-10T06:39:17.009Z INFO  - 9c231cb2d468 Pulling fs layer
+2025-09-10T06:39:17.010Z INFO  - 6d5ed858bc79 Pulling fs layer
+2025-09-10T06:39:17.017Z INFO  - b147e1d819b6 Pulling fs layer
+2025-09-10T06:39:17.019Z INFO  - bddeee446dea Pulling fs layer
+2025-09-10T06:39:17.024Z INFO  - 3bba0ee51794 Pulling fs layer
+2025-09-10T06:39:17.026Z INFO  - 5b5c68b4e022 Pulling fs layer
+2025-09-10T06:39:17.028Z INFO  - 589fad460b75 Pulling fs layer
+2025-09-10T06:39:17.029Z INFO  - a4ac82e1650a Pulling fs layer
+2025-09-10T06:39:17.030Z INFO  - 6f8965d4e41b Pulling fs layer
+2025-09-10T06:39:17.032Z INFO  - 4f4fb700ef54 Pulling fs layer
+2025-09-10T06:39:17.033Z INFO  - e7443d264769 Pulling fs layer2025-09-10T06:39:52.454Z INFO  - Pulling image: mcr.microsoft.com/appsvc/msitokenservice:stage5
+2025-09-10T06:39:52.656Z INFO  - stage5 Pulling from appsvc/msitokenservice
+2025-09-10T06:39:52.665Z INFO  -  Digest: sha256:15c4360552ca5d886db18e4eaa6a95993305c67dae381aa8505592cd7c45bd46
+2025-09-10T06:39:52.666Z INFO  -  Status: Image is up to date for mcr.microsoft.com/appsvc/msitokenservice:stage5
+2025-09-10T06:39:52.674Z INFO  - Pull Image successful, Time taken: 0 Seconds
+2025-09-10T06:39:52.705Z INFO  - Starting container for site
+2025-09-10T06:39:52.707Z INFO  - docker run -d --expose=8081 --name fujibogpt1_1_38dd6620_msiProxy -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=fujibogpt1.azurewebsites.net -e WEBSITE_INSTANCE_ID=730189150626e653708fea45869173b4ebb92511c6502db94b4f8004b34a54cc mcr.microsoft.com/appsvc/msitokenservice:stage5 REDACTED
+2025-09-10T06:39:52.708Z INFO  - Logging is not enabled for this container.
+Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+.074Z INFO  - b9fb3fc165df Pulling fs layer
+2025-09-10T06:39:17.074Z INFO  - 37b276c339a9 Pulling fs layer
+2025-09-10T06:39:17.074Z INFO  - 641973008da1 Pulling fs layer
+2025-09-10T06:39:17.074Z INFO  - 8a4a7fae06a0 Pulling fs layer
+2025-09-10T06:39:17.074Z INFO  - f1db0f079fc7 Pulling fs layer
+2025-09-10T06:39:17.074Z INFO  - 44346c801d5d Pulling fs layer
+2025-09-10T06:39:17.074Z INFO  - c769700e4a44 Waiting
+2025-09-10T06:39:17.074Z INFO  - 367c9c93200b Waiting
+2025-09-10T06:39:17.074Z INFO  - 81378fd52fac Waiting
+2025-09-10T06:39:17.074Z INFO  - fd9ecfda18c5 Waiting
+2025-09-10T06:39:17.074Z INFO  - accbef6a859b Waiting
+2025-09-10T06:39:17.074Z INFO  - 50579af796ea Waiting
+2025-09-10T06:39:17.074Z INFO  - f515f047c378 Waiting
+2025-09-10T06:39:17.074Z INFO  - 726fa8d4ed16 Waiting
+2025-09-10T06:39:17.074Z INFO  - 1ca5d31144ac Waiting
+2025-09-10T06:39:17.074Z INFO  - d35c15ecf7c3 Waiting
+2025-09-10T06:39:17.075Z INFO  - bb19cf2d87d2 Waiting
+2025-09-10T06:39:17.075Z INFO  - b9fb3fc165df Waiting
+2025-09-10T06:39:17.075Z INFO  - 37b276c339a9 Waiting
+2025-09-10T06:39:17.075Z INFO  - 641973008da1 Waiting
+2025-09-10T06:39:17.075Z INFO  - 8a4a7fae06a0 Waiting
+2025-09-10T06:39:17.075Z INFO  - f1db0f079fc7 Waiting
+2025-09-10T06:39:17.075Z INFO  - 44346c801d5d Waiting
+2025-09-10T06:39:17.083Z INFO  - 6d5ed858bc79 Downloading 39KB / 39KB
+2025-09-10T06:39:17.083Z INFO  - 6d5ed858bc79 Verifying Checksum
+2025-09-10T06:39:17.083Z INFO  - 6d5ed858bc79 Download complete
+2025-09-10T06:39:17.083Z INFO  - a4ac82e1650a Downloading 35KB / 1MB
+2025-09-10T06:39:17.083Z INFO  - b147e1d819b6 Downloading 3KB / 10KB
+2025-09-10T06:39:17.083Z INFO  - c81914910915 Downloading 126B / 126B
+2025-09-10T06:39:17.083Z INFO  - b147e1d819b6 Downloading 10KB / 10KB
+2025-09-10T06:39:17.083Z INFO  - c81914910915 Verifying Checksum
+2025-09-10T06:39:17.083Z INFO  - c81914910915 Download complete
+2025-09-10T06:39:17.083Z INFO  - 589fad460b75 Downloading 35KB / 1MB
+2025-09-10T06:39:17.083Z INFO  - b147e1d819b6 Verifying Checksum
+2025-09-10T06:39:17.083Z INFO  - b147e1d819b6 Download complete
+2025-09-10T06:39:17.084Z INFO  - 9c231cb2d468 Downloading 35KB / 1MB
+2025-09-10T06:39:17.084Z INFO  - ca64976d1f75 Downloading 387B / 387B
+2025-09-10T06:39:17.084Z INFO  - 4f4fb700ef54 Downloading 32B / 32B
+2025-09-10T06:39:17.084Z INFO  - 6f8965d4e41b Downloading 3KB / 3KB
+2025-09-10T06:39:17.084Z INFO  - bddeee446dea Downloading 14KB / 14KB
+2025-09-10T06:39:17.084Z INFO  - 5b5c68b4e022 Downloading 10KB / 10KB
+2025-09-10T06:39:17.084Z INFO  - ca64976d1f75 Verifying Checksum
+2025-09-10T06:39:17.131Z INFO  - ca64976d1f75 Download complete
+2025-09-10T06:39:17.132Z INFO  - 4f4fb700ef54 Verifying Checksum
+2025-09-10T06:39:17.133Z INFO  - 4f4fb700ef54 Download complete
+2025-09-10T06:39:17.161Z INFO  - 6f8965d4e41b Verifying Checksum
+2025-09-10T06:39:17.161Z INFO  - 6f8965d4e41b Download complete
+2025-09-10T06:39:17.161Z INFO  - bddeee446dea Verifying Checksum
+2025-09-10T06:39:17.161Z INFO  - bddeee446dea Download complete
+2025-09-10T06:39:17.161Z INFO  - 5b5c68b4e022 Verifying Checksum
+2025-09-10T06:39:17.161Z INFO  - 5b5c68b4e022 Download complete
+2025-09-10T06:39:17.161Z INFO  - 9853498c3852 Downloading 526KB / 53MB
+2025-09-10T06:39:17.161Z INFO  - 3bba0ee51794 Downloading 281KB / 281KB
+2025-09-10T06:39:17.161Z INFO  - 3bba0ee51794 Verifying Checksum
+2025-09-10T06:39:17.161Z INFO  - 3bba0ee51794 Download complete
+2025-09-10T06:39:17.161Z INFO  - c769700e4a44 Downloading 948B / 948B
+2025-09-10T06:39:17.161Z INFO  - c769700e4a44 Verifying Checksum
+2025-09-10T06:39:17.161Z INFO  - c769700e4a44 Download complete
+2025-09-10T06:39:17.161Z INFO  - e7443d264769 Downloading 536KB / 52MB
+2025-09-10T06:39:17.161Z INFO  - accbef6a859b Downloading 1KB / 1KB
+2025-09-10T06:39:17.162Z INFO  - 726fa8d4ed16 Downloading 156B / 156B
+2025-09-10T06:39:17.162Z INFO  - f515f047c378 Downloading 3KB / 3KB
+2025-09-10T06:39:17.162Z INFO  - accbef6a859b Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - accbef6a859b Download complete
+2025-09-10T06:39:17.162Z INFO  - 726fa8d4ed16 Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - 726fa8d4ed16 Download complete
+2025-09-10T06:39:17.162Z INFO  - f515f047c378 Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - f515f047c378 Download complete
+2025-09-10T06:39:17.162Z INFO  - 589fad460b75 Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - 589fad460b75 Download complete
+2025-09-10T06:39:17.162Z INFO  - a4ac82e1650a Downloading 1MB / 1MB
+2025-09-10T06:39:17.162Z INFO  - 367c9c93200b Downloading 1KB / 1KB
+2025-09-10T06:39:17.162Z INFO  - a4ac82e1650a Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - a4ac82e1650a Download complete
+2025-09-10T06:39:17.162Z INFO  - 367c9c93200b Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - 367c9c93200b Download complete
+2025-09-10T06:39:17.162Z INFO  - 81378fd52fac Downloading 137B / 137B
+2025-09-10T06:39:17.162Z INFO  - 81378fd52fac Verifying Checksum
+2025-09-10T06:39:17.162Z INFO  - 81378fd52fac Download complete
+2025-09-10T06:39:17.162Z INFO  - 9c231cb2d468 Downloading 528KB / 1MB
+2025-09-10T06:39:17.162Z INFO  - 9853498c3852 Downloading 5MB / 53MB
+2025-09-10T06:39:17.163Z INFO  - 1ca5d31144ac Downloading 3KB / 13KB
+2025-09-10T06:39:17.163Z INFO  - 50579af796ea Downloading 1KB / 1KB
+2025-09-10T06:39:17.163Z INFO  - d35c15ecf7c3 Downloading 1KB / 1KB
+2025-09-10T06:39:17.163Z INFO  - 1ca5d31144ac Downloading 13KB / 13KB
+2025-09-10T06:39:17.163Z INFO  - 50579af796ea Verifying Checksum
+2025-09-10T06:39:17.163Z INFO  - 50579af796ea Download complete
+2025-09-10T06:39:17.163Z INFO  - d35c15ecf7c3 Verifying Checksum
+2025-09-10T06:39:17.163Z INFO  - d35c15ecf7c3 Download complete
+2025-09-10T06:39:17.163Z INFO  - 1ca5d31144ac Verifying Checksum
+2025-09-10T06:39:17.163Z INFO  - 1ca5d31144ac Download complete
+2025-09-10T06:39:17.163Z INFO  - b49b2c83cf45 Downloading 3MB / 35MB
+2025-09-10T06:39:17.169Z INFO  - a7350ec49683 Downloading 1MB / 3MB
+2025-09-10T06:39:17.183Z INFO  - 9c231cb2d468 Downloading 1MB / 1MB
+2025-09-10T06:39:17.186Z INFO  - 8a4a7fae06a0 Downloading 1KB / 1KB
+2025-09-10T06:39:17.186Z INFO  - 44346c801d5d Downloading 133B / 133B
+2025-09-10T06:39:17.186Z INFO  - b9fb3fc165df Downloading 270B / 270B
+2025-09-10T06:39:17.186Z INFO  - 37b276c339a9 Downloading 123B / 123B
+2025-09-10T06:39:17.186Z INFO  - 8a4a7fae06a0 Verifying Checksum
+2025-09-10T06:39:17.186Z INFO  - 44346c801d5d Verifying Checksum
+2025-09-10T06:39:17.218Z INFO  - 9c231cb2d468 Verifying Checksum
+2025-09-10T06:39:17.218Z INFO  - 9c231cb2d468 Download complete
+2025-09-10T06:39:17.218Z INFO  - 44346c801d5d Download complete
+2025-09-10T06:39:17.218Z INFO  - b9fb3fc165df Verifying Checksum
+2025-09-10T06:39:17.218Z INFO  - b9fb3fc165df Download complete
+2025-09-10T06:39:17.218Z INFO  - 37b276c339a9 Verifying Checksum
+2025-09-10T06:39:17.218Z INFO  - 37b276c339a9 Download complete
+2025-09-10T06:39:17.218Z INFO  - 8a4a7fae06a0 Download complete
+2025-09-10T06:39:17.218Z INFO  - 641973008da1 Downloading 418B / 418B
+2025-09-10T06:39:17.218Z INFO  - 641973008da1 Verifying Checksum
+2025-09-10T06:39:17.218Z INFO  - 641973008da1 Download complete
+2025-09-10T06:39:17.218Z INFO  - a7350ec49683 Downloading 3MB / 3MB
+2025-09-10T06:39:17.232Z INFO  - a7350ec49683 Verifying Checksum
+2025-09-10T06:39:17.236Z INFO  - a7350ec49683 Download complete
+2025-09-10T06:39:17.256Z INFO  - fd9ecfda18c5 Downloading 536KB / 67MB
+2025-09-10T06:39:17.257Z INFO  - bb19cf2d87d2 Downloading 271B / 271B
+2025-09-10T06:39:17.269Z INFO  - bb19cf2d87d2 Verifying Checksum
+2025-09-10T06:39:17.269Z INFO  - bb19cf2d87d2 Download complete
+2025-09-10T06:39:17.290Z INFO  - 9853498c3852 Downloading 11MB / 53MB
+2025-09-10T06:39:17.290Z INFO  - ddfd7346bfba Verifying Checksum
+2025-09-10T06:39:17.290Z INFO  - ddfd7346bfba Download complete
+2025-09-10T06:39:17.290Z INFO  - f1db0f079fc7 Downloading 1MB / 1MB
+2025-09-10T06:39:17.290Z INFO  - f1db0f079fc7 Verifying Checksum
+2025-09-10T06:39:17.290Z INFO  - f1db0f079fc7 Download complete
+2025-09-10T06:39:17.290Z INFO  - ab00bebea334 Downloading 6MB / 16MB
+2025-09-10T06:39:17.350Z INFO  - c19952135643 Downloading 6MB / 46MB
+2025-09-10T06:39:17.359Z INFO  - 9853498c3852 Downloading 15MB / 53MB
+2025-09-10T06:39:17.440Z INFO  - fd9ecfda18c5 Downloading 9MB / 67MB
+2025-09-10T06:39:17.452Z INFO  - e7443d264769 Downloading 6MB / 52MB
+2025-09-10T06:39:17.465Z INFO  - 9853498c3852 Downloading 21MB / 53MB
+2025-09-10T06:39:17.465Z INFO  - ab00bebea334 Downloading 14MB / 16MB
+2025-09-10T06:39:17.470Z INFO  - 6d39a250ce6f Downloading 9MB / 11MB
+2025-09-10T06:39:17.481Z INFO  - b49b2c83cf45 Downloading 16MB / 35MB
+2025-09-10T06:39:17.525Z INFO  - 6d39a250ce6f Verifying Checksum
+2025-09-10T06:39:17.525Z INFO  - 6d39a250ce6f Download complete
+2025-09-10T06:39:17.534Z INFO  - ab00bebea334 Verifying Checksum
+2025-09-10T06:39:17.534Z INFO  - ab00bebea334 Download complete
+2025-09-10T06:39:17.590Z INFO  - b49b2c83cf45 Downloading 22MB / 35MB
+2025-09-10T06:39:17.666Z INFO  - 9853498c3852 Downloading 37MB / 53MB
+2025-09-10T06:39:17.671Z INFO  - fd9ecfda18c5 Downloading 24MB / 67MB
+2025-09-10T06:39:17.698Z INFO  - b49b2c83cf45 Downloading 29MB / 35MB
+2025-09-10T06:39:17.770Z INFO  - fd9ecfda18c5 Downloading 35MB / 67MB
+2025-09-10T06:39:17.781Z INFO  - b49b2c83cf45 Verifying Checksum
+2025-09-10T06:39:17.781Z INFO  - b49b2c83cf45 Download complete
+2025-09-10T06:39:17.849Z INFO  - 9853498c3852 Verifying Checksum
+2025-09-10T06:39:17.849Z INFO  - 9853498c3852 Download complete
+2025-09-10T06:39:17.860Z INFO  - e7443d264769 Downloading 30MB / 52MB
+2025-09-10T06:39:17.862Z INFO  - c19952135643 Verifying Checksum
+2025-09-10T06:39:17.862Z INFO  - c19952135643 Download complete
+2025-09-10T06:39:17.876Z INFO  - fd9ecfda18c5 Downloading 43MB / 67MB
+2025-09-10T06:39:17.982Z INFO  - e7443d264769 Downloading 40MB / 52MB
+2025-09-10T06:39:17.983Z INFO  - fd9ecfda18c5 Downloading 54MB / 67MB
+2025-09-10T06:39:18.050Z INFO  - fd9ecfda18c5 Verifying Checksum
+2025-09-10T06:39:18.050Z INFO  - fd9ecfda18c5 Download complete
+2025-09-10T06:39:18.060Z INFO  - e7443d264769 Downloading 49MB / 52MB
+2025-09-10T06:39:18.077Z INFO  - e7443d264769 Verifying Checksum
+2025-09-10T06:39:18.077Z INFO  - e7443d264769 Download complete
+2025-09-10T06:39:18.713Z INFO  - c19952135643 Extracting 12MB / 46MB
+2025-09-10T06:39:18.950Z INFO  - c19952135643 Extracting 16MB / 46MB
+2025-09-10T06:39:19.065Z INFO  - c19952135643 Extracting 19MB / 46MB
+2025-09-10T06:39:19.942Z INFO  - c19952135643 Extracting 26MB / 46MB
+2025-09-10T06:39:20.528Z INFO  - c19952135643 Extracting 37MB / 46MB
+2025-09-10T06:39:20.629Z INFO  - c19952135643 Extracting 37MB / 46MB
+2025-09-10T06:39:20.882Z INFO  - c19952135643 Extracting 42MB / 46MB
+2025-09-10T06:39:20.990Z INFO  - c19952135643 Extracting 43MB / 46MB
+2025-09-10T06:39:21.090Z INFO  - c19952135643 Extracting 44MB / 46MB
+2025-09-10T06:39:21.449Z INFO  - c19952135643 Extracting 45MB / 46MB
+2025-09-10T06:39:21.599Z INFO  - c19952135643 Extracting 46MB / 46MB
+2025-09-10T06:39:21.616Z INFO  - c19952135643 Pull complete
+2025-09-10T06:39:21.794Z INFO  - b49b2c83cf45 Extracting 3MB / 35MB
+2025-09-10T06:39:22.040Z INFO  - b49b2c83cf45 Extracting 10MB / 35MB
+2025-09-10T06:39:22.150Z INFO  - b49b2c83cf45 Extracting 15MB / 35MB
+2025-09-10T06:39:22.596Z INFO  - b49b2c83cf45 Extracting 23MB / 35MB
+2025-09-10T06:39:22.971Z INFO  - b49b2c83cf45 Extracting 35MB / 35MB
+2025-09-10T06:39:23.009Z INFO  - b49b2c83cf45 Pull complete
+2025-09-10T06:39:23.205Z INFO  - a7350ec49683 Extracting 3MB / 3MB
+2025-09-10T06:39:24.407Z INFO  - a7350ec49683 Pull complete
+2025-09-10T06:39:24.409Z INFO  - ca64976d1f75 Extracting 387B / 387B
+2025-09-10T06:39:24.424Z INFO  - ca64976d1f75 Extracting 387B / 387B
+2025-09-10T06:39:24.456Z INFO  - ca64976d1f75 Pull complete
+2025-09-10T06:39:24.458Z INFO  - 9c231cb2d468 Extracting 32KB / 1MB
+2025-09-10T06:39:24.503Z INFO  - 9c231cb2d468 Extracting 1MB / 1MB
+2025-09-10T06:39:24.553Z INFO  - 9c231cb2d468 Pull complete
+2025-09-10T06:39:24.555Z INFO  - 6d5ed858bc79 Extracting 32KB / 39KB
+2025-09-10T06:39:24.595Z INFO  - 6d5ed858bc79 Extracting 39KB / 39KB
+2025-09-10T06:39:24.601Z INFO  - 6d5ed858bc79 Extracting 39KB / 39KB
+2025-09-10T06:39:24.610Z INFO  - 6d5ed858bc79 Pull complete
+2025-09-10T06:39:24.612Z INFO  - b147e1d819b6 Extracting 10KB / 10KB
+2025-09-10T06:39:24.623Z INFO  - b147e1d819b6 Extracting 10KB / 10KB
+2025-09-10T06:39:24.634Z INFO  - b147e1d819b6 Pull complete
+2025-09-10T06:39:24.652Z INFO  - bddeee446dea Extracting 14KB / 14KB
+2025-09-10T06:39:24.665Z INFO  - bddeee446dea Extracting 14KB / 14KB
+2025-09-10T06:39:24.672Z INFO  - bddeee446dea Pull complete
+2025-09-10T06:39:24.711Z INFO  - 3bba0ee51794 Extracting 281KB / 281KB
+2025-09-10T06:39:24.715Z INFO  - 3bba0ee51794 Extracting 281KB / 281KB
+2025-09-10T06:39:24.738Z INFO  - 3bba0ee51794 Pull complete
+2025-09-10T06:39:24.740Z INFO  - 5b5c68b4e022 Extracting 10KB / 10KB
+2025-09-10T06:39:24.746Z INFO  - 5b5c68b4e022 Extracting 10KB / 10KB
+2025-09-10T06:39:24.770Z INFO  - 5b5c68b4e022 Pull complete
+2025-09-10T06:39:24.772Z INFO  - 589fad460b75 Extracting 32KB / 1MB
+2025-09-10T06:39:24.789Z INFO  - 589fad460b75 Extracting 1MB / 1MB
+2025-09-10T06:39:24.808Z INFO  - 589fad460b75 Pull complete
+2025-09-10T06:39:24.810Z INFO  - a4ac82e1650a Extracting 32KB / 1MB
+2025-09-10T06:39:24.885Z INFO  - a4ac82e1650a Extracting 1MB / 1MB
+2025-09-10T06:39:24.905Z INFO  - a4ac82e1650a Pull complete
+2025-09-10T06:39:24.907Z INFO  - 6f8965d4e41b Extracting 3KB / 3KB
+2025-09-10T06:39:24.929Z INFO  - 6f8965d4e41b Extracting 3KB / 3KB
+2025-09-10T06:39:24.937Z INFO  - 6f8965d4e41b Pull complete
+2025-09-10T06:39:24.939Z INFO  - 4f4fb700ef54 Extracting 32B / 32B
+2025-09-10T06:39:24.960Z INFO  - 4f4fb700ef54 Extracting 32B / 32B
+2025-09-10T06:39:24.981Z INFO  - 4f4fb700ef54 Pull complete
+2025-09-10T06:39:25.195Z INFO  - e7443d264769 Extracting 31MB / 52MB
+2025-09-10T06:39:25.395Z INFO  - e7443d264769 Extracting 52MB / 52MB
+2025-09-10T06:39:25.461Z INFO  - e7443d264769 Pull complete
+2025-09-10T06:39:25.492Z INFO  - 9853498c3852 Extracting 544KB / 53MB
+2025-09-10T06:39:25.597Z INFO  - 9853498c3852 Extracting 3MB / 53MB
+2025-09-10T06:39:25.953Z INFO  - 9853498c3852 Extracting 13MB / 53MB
+2025-09-10T06:39:26.055Z INFO  - 9853498c3852 Extracting 15MB / 53MB
+2025-09-10T06:39:26.162Z INFO  - 9853498c3852 Extracting 17MB / 53MB
+2025-09-10T06:39:26.319Z INFO  - 9853498c3852 Extracting 19MB / 53MB
+2025-09-10T06:39:26.441Z INFO  - 9853498c3852 Extracting 21MB / 53MB
+2025-09-10T06:39:26.542Z INFO  - 9853498c3852 Extracting 23MB / 53MB
+2025-09-10T06:39:26.766Z INFO  - 9853498c3852 Extracting 28MB / 53MB
+2025-09-10T06:39:27.007Z INFO  - 9853498c3852 Extracting 33MB / 53MB
+2025-09-10T06:39:27.596Z INFO  - 9853498c3852 Extracting 41MB / 53MB
+2025-09-10T06:39:29.037Z INFO  - 9853498c3852 Extracting 51MB / 53MB
+2025-09-10T06:39:29.374Z INFO  - 9853498c3852 Extracting 52MB / 53MB
+2025-09-10T06:39:29.618Z INFO  - 9853498c3852 Extracting 53MB / 53MB
+2025-09-10T06:39:30.044Z INFO  - 9853498c3852 Extracting 53MB / 53MB
+2025-09-10T06:39:30.892Z INFO  - 9853498c3852 Pull complete
+2025-09-10T06:39:31.054Z INFO  - 6d39a250ce6f Extracting 4MB / 11MB
+2025-09-10T06:39:31.433Z INFO  - 6d39a250ce6f Extracting 8MB / 11MB
+2025-09-10T06:39:31.536Z INFO  - 6d39a250ce6f Extracting 9MB / 11MB
+2025-09-10T06:39:32.079Z INFO  - 6d39a250ce6f Extracting 10MB / 11MB
+2025-09-10T06:39:32.222Z INFO  - 6d39a250ce6f Extracting 11MB / 11MB
+2025-09-10T06:39:32.398Z INFO  - 6d39a250ce6f Extracting 11MB / 11MB
+2025-09-10T06:39:32.608Z INFO  - 6d39a250ce6f Extracting 11MB / 11MB
+2025-09-10T06:39:32.764Z INFO  - 6d39a250ce6f Pull complete
+2025-09-10T06:39:32.895Z INFO  - ab00bebea334 Extracting 2MB / 16MB
+2025-09-10T06:39:33.106Z INFO  - ab00bebea334 Extracting 6MB / 16MB
+2025-09-10T06:39:33.512Z INFO  - ab00bebea334 Extracting 8MB / 16MB
+2025-09-10T06:39:33.653Z INFO  - ab00bebea334 Extracting 8MB / 16MB
+2025-09-10T06:39:33.779Z INFO  - ab00bebea334 Extracting 9MB / 16MB
+2025-09-10T06:39:33.952Z INFO  - ab00bebea334 Extracting 9MB / 16MB
+2025-09-10T06:39:34.226Z INFO  - ab00bebea334 Extracting 10MB / 16MB
+2025-09-10T06:39:34.387Z INFO  - ab00bebea334 Extracting 10MB / 16MB
+2025-09-10T06:39:34.832Z INFO  - ab00bebea334 Extracting 11MB / 16MB
+2025-09-10T06:39:35.467Z INFO  - ab00bebea334 Extracting 13MB / 16MB
+2025-09-10T06:39:35.716Z INFO  - ab00bebea334 Extracting 14MB / 16MB
+2025-09-10T06:39:35.836Z INFO  - ab00bebea334 Extracting 14MB / 16MB
+2025-09-10T06:39:38.152Z INFO  - ab00bebea334 Extracting 15MB / 16MB
+2025-09-10T06:39:38.152Z INFO  - ab00bebea334 Extracting 15MB / 16MB
+2025-09-10T06:39:38.152Z INFO  - ab00bebea334 Extracting 15MB / 16MB
+2025-09-10T06:39:38.152Z INFO  - ab00bebea334 Extracting 16MB / 16MB
+2025-09-10T06:39:38.152Z INFO  - ab00bebea334 Extracting 16MB / 16MB
+2025-09-10T06:39:38.153Z INFO  - ab00bebea334 Pull complete
+2025-09-10T06:39:38.153Z INFO  - c81914910915 Extracting 126B / 126B
+2025-09-10T06:39:38.153Z INFO  - c81914910915 Extracting 126B / 126B
+2025-09-10T06:39:38.153Z INFO  - c81914910915 Pull complete
+2025-09-10T06:39:38.153Z INFO  - ddfd7346bfba Extracting 5MB / 5MB
+2025-09-10T06:39:38.153Z INFO  - ddfd7346bfba Pull complete
+2025-09-10T06:39:38.153Z INFO  - c769700e4a44 Extracting 948B / 948B
+2025-09-10T06:39:38.153Z INFO  - c769700e4a44 Extracting 948B / 948B
+2025-09-10T06:39:38.153Z INFO  - c769700e4a44 Pull complete
+2025-09-10T06:39:38.153Z INFO  - 367c9c93200b Extracting 1KB / 1KB
+2025-09-10T06:39:38.153Z INFO  - 367c9c93200b Extracting 1KB / 1KB
+2025-09-10T06:39:38.153Z INFO  - 367c9c93200b Pull complete
+2025-09-10T06:39:38.153Z INFO  - 81378fd52fac Extracting 137B / 137B
+2025-09-10T06:39:38.153Z INFO  - 81378fd52fac Extracting 137B / 137B
+2025-09-10T06:39:38.153Z INFO  - 81378fd52fac Pull complete
+2025-09-10T06:39:38.153Z INFO  - fd9ecfda18c5 Extracting 544KB / 67MB
+2025-09-10T06:39:38.153Z INFO  - fd9ecfda18c5 Extracting 11MB / 67MB
+2025-09-10T06:39:38.153Z INFO  - fd9ecfda18c5 Extracting 12MB / 67MB
+2025-09-10T06:39:38.153Z INFO  - fd9ecfda18c5 Extracting 12MB / 67MB
+2025-09-10T06:39:38.195Z INFO  - fd9ecfda18c5 Extracting 14MB / 67MB
+2025-09-10T06:39:38.342Z INFO  - fd9ecfda18c5 Extracting 16MB / 67MB
+2025-09-10T06:39:38.444Z INFO  - fd9ecfda18c5 Extracting 19MB / 67MB
+2025-09-10T06:39:38.550Z INFO  - fd9ecfda18c5 Extracting 23MB / 67MB
+2025-09-10T06:39:38.657Z INFO  - fd9ecfda18c5 Extracting 27MB / 67MB
+2025-09-10T06:39:40.153Z INFO  - fd9ecfda18c5 Extracting 42MB / 67MB
+2025-09-10T06:39:40.153Z INFO  - fd9ecfda18c5 Extracting 44MB / 67MB
+2025-09-10T06:39:40.153Z INFO  - fd9ecfda18c5 Extracting 47MB / 67MB
+2025-09-10T06:39:40.388Z INFO  - fd9ecfda18c5 Extracting 55MB / 67MB
+2025-09-10T06:39:40.605Z INFO  - fd9ecfda18c5 Extracting 65MB / 67MB
+2025-09-10T06:39:40.784Z INFO  - fd9ecfda18c5 Extracting 67MB / 67MB
+2025-09-10T06:39:41.482Z INFO  - fd9ecfda18c5 Pull complete
+2025-09-10T06:39:41.484Z INFO  - accbef6a859b Extracting 1KB / 1KB
+2025-09-10T06:39:41.496Z INFO  - accbef6a859b Extracting 1KB / 1KB
+2025-09-10T06:39:41.513Z INFO  - accbef6a859b Pull complete
+2025-09-10T06:39:41.518Z INFO  - 50579af796ea Extracting 1KB / 1KB
+2025-09-10T06:39:41.538Z INFO  - 50579af796ea Extracting 1KB / 1KB
+2025-09-10T06:39:41.565Z INFO  - 50579af796ea Pull complete
+2025-09-10T06:39:41.570Z INFO  - f515f047c378 Extracting 3KB / 3KB
+2025-09-10T06:39:41.584Z INFO  - f515f047c378 Extracting 3KB / 3KB
+2025-09-10T06:39:41.592Z INFO  - f515f047c378 Pull complete
+2025-09-10T06:39:41.594Z INFO  - 726fa8d4ed16 Extracting 156B / 156B
+2025-09-10T06:39:41.602Z INFO  - 726fa8d4ed16 Extracting 156B / 156B
+2025-09-10T06:39:41.608Z INFO  - 726fa8d4ed16 Pull complete
+2025-09-10T06:39:41.610Z INFO  - 1ca5d31144ac Extracting 13KB / 13KB
+2025-09-10T06:39:41.617Z INFO  - 1ca5d31144ac Extracting 13KB / 13KB
+2025-09-10T06:39:41.642Z INFO  - 1ca5d31144ac Pull complete
+2025-09-10T06:39:41.644Z INFO  - d35c15ecf7c3 Extracting 1KB / 1KB
+2025-09-10T06:39:41.666Z INFO  - d35c15ecf7c3 Extracting 1KB / 1KB
+2025-09-10T06:39:41.672Z INFO  - d35c15ecf7c3 Pull complete
+2025-09-10T06:39:41.674Z INFO  - bb19cf2d87d2 Extracting 271B / 271B
+2025-09-10T06:39:41.696Z INFO  - bb19cf2d87d2 Extracting 271B / 271B
+2025-09-10T06:39:41.718Z INFO  - bb19cf2d87d2 Pull complete
+2025-09-10T06:39:41.720Z INFO  - b9fb3fc165df Extracting 270B / 270B
+2025-09-10T06:39:41.732Z INFO  - b9fb3fc165df Extracting 270B / 270B
+2025-09-10T06:39:41.760Z INFO  - b9fb3fc165df Pull complete
+2025-09-10T06:39:41.794Z INFO  - 37b276c339a9 Extracting 123B / 123B
+2025-09-10T06:39:41.825Z INFO  - 37b276c339a9 Extracting 123B / 123B
+2025-09-10T06:39:41.837Z INFO  - 37b276c339a9 Pull complete
+2025-09-10T06:39:41.845Z INFO  - 641973008da1 Extracting 418B / 418B
+2025-09-10T06:39:41.865Z INFO  - 641973008da1 Extracting 418B / 418B
+2025-09-10T06:39:41.898Z INFO  - 641973008da1 Pull complete
+2025-09-10T06:39:41.900Z INFO  - 8a4a7fae06a0 Extracting 1KB / 1KB
+2025-09-10T06:39:41.906Z INFO  - 8a4a7fae06a0 Extracting 1KB / 1KB
+2025-09-10T06:39:41.929Z INFO  - 8a4a7fae06a0 Pull complete
+2025-09-10T06:39:42.043Z INFO  - f1db0f079fc7 Extracting 288KB / 1MB
+2025-09-10T06:39:42.246Z INFO  - f1db0f079fc7 Extracting 1MB / 1MB
+2025-09-10T06:39:42.330Z INFO  - f1db0f079fc7 Extracting 1MB / 1MB
+2025-09-10T06:39:42.363Z INFO  - f1db0f079fc7 Pull complete
+2025-09-10T06:39:42.365Z INFO  - 44346c801d5d Extracting 133B / 133B
+2025-09-10T06:39:42.371Z INFO  - 44346c801d5d Extracting 133B / 133B
+2025-09-10T06:39:42.385Z INFO  - 44346c801d5d Pull complete
+2025-09-10T06:39:42.403Z INFO  -  Digest: sha256:87e250814d46e564f3e6e6b16a772471fdfa9c507e10415be73c4300f6a97cd4
+2025-09-10T06:39:42.405Z INFO  -  Status: Downloaded newer image for 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:39:42.419Z INFO  - Pull Image successful, Time taken: 25 Seconds
+2025-09-10T06:39:42.674Z INFO  - Starting container for site
+2025-09-10T06:39:42.674Z INFO  - docker run -d --expose=8080 --name fujibogpt1_0_f2b7cb31 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=fujibogpt1 -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=fujibogpt1.azurewebsites.net -e WEBSITE_INSTANCE_ID=730189150626e653708fea45869173b4ebb92511c6502db94b4f8004b34a54cc -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:22-lts_20250724.2.tuxprod REDACTED
+2025-09-10T06:39:42.674Z INFO  - Logging is not enabled for this container.
+Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-09-10T06:39:43.327Z INFO  - Initiating warmup request to container fujibogpt1_0_f2b7cb31_msiProxy for site fujibogpt1
+2025-09-10T06:39:43.339Z INFO  - Container fujibogpt1_0_f2b7cb31_msiProxy for site fujibogpt1 initialized successfully and is ready to serve requests.
+2025-09-10T06:39:43.340Z INFO  - Initiating warmup request to container fujibogpt1_0_f2b7cb31 for site fujibogpt1
+2025-09-10T06:39:49.629Z INFO  - Container fujibogpt1_0_f2b7cb31 for site fujibogpt1 initialized successfully and is ready to serve requests.
+2025-09-10T06:39:55.484Z INFO  - Starting container for site
+2025-09-10T06:39:55.484Z INFO  - docker run -d --expose=8080 --name fujibogpt1_1_38dd6620 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=fujibogpt1 -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=fujibogpt1.azurewebsites.net -e WEBSITE_INSTANCE_ID=730189150626e653708fea45869173b4ebb92511c6502db94b4f8004b34a54cc -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:22-lts_20250724.2.tuxprod REDACTED
+2025-09-10T06:39:55.484Z INFO  - Logging is not enabled for this container.
+Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-09-10T06:39:56.415Z INFO  - Initiating warmup request to container fujibogpt1_1_38dd6620_msiProxy for site fujibogpt1
+2025-09-10T06:39:56.425Z INFO  - Container fujibogpt1_1_38dd6620_msiProxy for site fujibogpt1 initialized successfully and is ready to serve requests.
+2025-09-10T06:39:56.425Z INFO  - Initiating warmup request to container fujibogpt1_1_38dd6620 for site fujibogpt1
+2025-09-10T06:40:03.754Z INFO  - Container fujibogpt1_1_38dd6620 for site fujibogpt1 initialized successfully and is ready to serve requests.
+2025-09-10T06:53:29.410Z INFO  - Starting container for site
+2025-09-10T06:53:29.418Z INFO  - docker run -d --expose=8080 --name fujibogpt1_2_41208f0f -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=fujibogpt1 -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=fujibogpt1.azurewebsites.net -e WEBSITE_INSTANCE_ID=730189150626e653708fea45869173b4ebb92511c6502db94b4f8004b34a54cc -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:22-lts_20250724.2.tuxprod REDACTED
+2025-09-10T06:53:29.420Z INFO  - Logging is not enabled for this container.
+Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-09-10T06:53:32.153Z INFO  - Initiating warmup request to container fujibogpt1_2_41208f0f_msiProxy for site fujibogpt1
+2025-09-10T06:53:32.218Z INFO  - Container fujibogpt1_2_41208f0f_msiProxy for site fujibogpt1 initialized successfully and is ready to serve requests.
+2025-09-10T06:53:32.221Z INFO  - Initiating warmup request to container fujibogpt1_2_41208f0f for site fujibogpt1
+2025-09-10T06:53:41.975Z INFO  - Container fujibogpt1_2_41208f0f for site fujibogpt1 initialized successfully and is ready to serve requests.
+2025-09-10T06:53:31.2630303Z Container is starting.
+2025-09-10T06:53:31.2631680Z Establishing user namespace if not established already.
+2025-09-10T06:53:31.2632867Z Establishing network if not established already.
+2025-09-10T06:53:31.2634130Z Mounting volumes.
+2025-09-10T06:53:31.2635563Z Nested mountpoint 
+2025-09-10T06:53:31.2663449Z Nested mountpoint volatile/logs
+2025-09-10T06:53:31.2760404Z Nested mountpoint 
+2025-09-10T06:53:31.2800872Z Nested mountpoint 
+2025-09-10T06:53:31.2810069Z Nested mountpoint 
+2025-09-10T06:53:31.2821010Z Nested mountpoint 
+2025-09-10T06:53:31.2959152Z Nested mountpoint 
+2025-09-10T06:53:32.1838256Z Creating container.
+2025-09-10T06:53:32.1884177Z Creating pipes for streaming container io.
+2025-09-10T06:53:32.1886090Z Creating stdout named pipe at /podr/container/pipe/21e9fc568804_fujibogpt1/stdout_bcf7b610172341f19e08083c2eebe716.
+2025-09-10T06:53:32.1888776Z Successfully created stdout named pipe at: /podr/container/pipe/21e9fc568804_fujibogpt1/stdout_bcf7b610172341f19e08083c2eebe716.
+2025-09-10T06:53:32.1907924Z Opening named pipe /podr/container/pipe/21e9fc568804_fujibogpt1/stdout_bcf7b610172341f19e08083c2eebe716 for reading in non-blocking mode.
+2025-09-10T06:53:32.1921345Z Successfully opened named pipe: /podr/container/pipe/21e9fc568804_fujibogpt1/stdout_bcf7b610172341f19e08083c2eebe716.
+2025-09-10T06:53:32.1958852Z Successfully removed non-blocking flag from /podr/container/pipe/21e9fc568804_fujibogpt1/stdout_bcf7b610172341f19e08083c2eebe716.
+2025-09-10T06:53:32.1960114Z Creating stderr named pipe at /podr/container/pipe/21e9fc568804_fujibogpt1/stderr_9c0206c75b0740d197c827f268bbbb20.
+2025-09-10T06:53:32.1962062Z Successfully created stderr named pipe at: /podr/container/pipe/21e9fc568804_fujibogpt1/stderr_9c0206c75b0740d197c827f268bbbb20.
+2025-09-10T06:53:32.1970795Z Opening named pipe /podr/container/pipe/21e9fc568804_fujibogpt1/stderr_9c0206c75b0740d197c827f268bbbb20 for reading in non-blocking mode.
+2025-09-10T06:53:32.1989326Z Successfully opened named pipe: /podr/container/pipe/21e9fc568804_fujibogpt1/stderr_9c0206c75b0740d197c827f268bbbb20.
+2025-09-10T06:53:32.1990932Z Successfully removed non-blocking flag from /podr/container/pipe/21e9fc568804_fujibogpt1/stderr_9c0206c75b0740d197c827f268bbbb20.
+2025-09-10T06:53:32.2046898Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T06:53:32.4837571Z Starting container: 21e9fc568804_fujibogpt1.
+2025-09-10T06:53:32.5195449Z Starting watchers and probes.
+2025-09-10T06:53:32.5204894Z Starting metrics collection.
+2025-09-10T06:53:32.5220579Z Container is running.
+2025-09-10T06:53:33.4486719Z Container start method finished after 3120 ms.
+2025-09-10T06:53:43.7413317Z Site startup probe succeeded after 10.2845667 seconds.
+2025-09-10T06:53:43.7563936Z Site is running with deployment version: 1f68efa3-32db-47f3-a109-8b03bfc1e6ec
+2025-09-10T06:53:43.7572191Z Site started.
+2025-09-10T06:53:43.7655392Z Site is running with patch version: 22.17.0
+2025-09-10T09:56:23.4443077Z Container start method called.
+2025-09-10T09:56:23.4534960Z Establishing network.
+2025-09-10T09:56:23.4603673Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T09:56:23.6781890Z Container is starting.
+2025-09-10T09:56:23.6794420Z Establishing user namespace if not established already.
+2025-09-10T09:56:23.6795974Z Establishing network if not established already.
+2025-09-10T09:56:23.6797086Z Mounting volumes.
+2025-09-10T09:56:23.6798386Z Nested mountpoint 
+2025-09-10T09:56:23.6888687Z Nested mountpoint volatile/logs
+2025-09-10T09:56:23.7047406Z Nested mountpoint 
+2025-09-10T09:56:23.7053643Z Nested mountpoint 
+2025-09-10T09:56:23.7059138Z Nested mountpoint 
+2025-09-10T09:56:23.7174337Z Nested mountpoint 
+2025-09-10T09:56:23.7528024Z Nested mountpoint 
+2025-09-10T09:56:23.9250157Z Creating container.
+2025-09-10T09:56:23.9251298Z Creating pipes for streaming container io.
+2025-09-10T09:56:23.9252226Z Creating stdout named pipe at /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stdout_7d33047e102e4ecea3948ecd8bb7cc09.
+2025-09-10T09:56:23.9254277Z Successfully created stdout named pipe at: /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stdout_7d33047e102e4ecea3948ecd8bb7cc09.
+2025-09-10T09:56:23.9255229Z Opening named pipe /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stdout_7d33047e102e4ecea3948ecd8bb7cc09 for reading in non-blocking mode.
+2025-09-10T09:56:23.9256440Z Successfully opened named pipe: /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stdout_7d33047e102e4ecea3948ecd8bb7cc09.
+2025-09-10T09:56:23.9257352Z Successfully removed non-blocking flag from /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stdout_7d33047e102e4ecea3948ecd8bb7cc09.
+2025-09-10T09:56:23.9342656Z Creating stderr named pipe at /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stderr_357eb3bb710944d7bf495b8195abe54d.
+2025-09-10T09:56:23.9348485Z Successfully created stderr named pipe at: /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stderr_357eb3bb710944d7bf495b8195abe54d.
+2025-09-10T09:56:23.9352690Z Opening named pipe /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stderr_357eb3bb710944d7bf495b8195abe54d for reading in non-blocking mode.
+2025-09-10T09:56:23.9362007Z Successfully opened named pipe: /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stderr_357eb3bb710944d7bf495b8195abe54d.
+2025-09-10T09:56:23.9363995Z Successfully removed non-blocking flag from /podr/container/pipe/1d3366a6d6d2_fujibogpt1/stderr_357eb3bb710944d7bf495b8195abe54d.
+2025-09-10T09:56:23.9369839Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T09:56:24.0768680Z Starting container: 1d3366a6d6d2_fujibogpt1.
+2025-09-10T09:56:24.0998433Z Starting watchers and probes.
+2025-09-10T09:56:24.1050664Z Starting metrics collection.
+2025-09-10T09:56:24.1057819Z Container is running.
+2025-09-10T09:56:24.1696987Z Container start method finished after 724 ms.
+2025-09-10T09:56:30.4135269Z Site startup probe succeeded after 6.2423973 seconds.
+2025-09-10T09:56:30.4328824Z Site is running with deployment version: 2261e3d4-cd84-4db1-9468-e305895bf04b
+2025-09-10T09:56:30.4331138Z Site started.
+2025-09-10T09:56:30.4334875Z Site is running with patch version: 22.17.0
+2025-09-10T09:56:50.4346635Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T09:56:50.4360234Z Stop and delete container. Retry count = 0
+2025-09-10T09:56:50.4361535Z Stopping container: 21e9fc568804_fujibogpt1.
+2025-09-10T09:56:55.4893656Z Deleting container: 21e9fc568804_fujibogpt1. Retry count = 0
+2025-09-10T09:56:55.6248457Z Container spec TerminationMessagePolicy  path 
+2025-09-10T09:56:55.6250342Z Container is terminated. Total time elapsed: 5190 ms.
+2025-09-10T09:56:55.6250601Z Site: fujibogpt1 stopped.
+2025-09-10T09:57:40.0779893Z Container start method called.
+2025-09-10T09:57:40.0782687Z Establishing network.
+2025-09-10T09:57:40.0784785Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T09:57:40.2838606Z Container is starting.
+2025-09-10T09:57:40.2839869Z Establishing user namespace if not established already.
+2025-09-10T09:57:40.2841091Z Establishing network if not established already.
+2025-09-10T09:57:40.2851306Z Mounting volumes.
+2025-09-10T09:57:40.2856582Z Nested mountpoint 
+2025-09-10T09:57:40.2891921Z Nested mountpoint volatile/logs
+2025-09-10T09:57:40.3061588Z Nested mountpoint 
+2025-09-10T09:57:40.3283960Z Nested mountpoint 
+2025-09-10T09:57:40.3619970Z Nested mountpoint 
+2025-09-10T09:57:40.3823864Z Nested mountpoint 
+2025-09-10T09:57:40.3975387Z Nested mountpoint 
+2025-09-10T09:57:40.5007449Z Creating container.
+2025-09-10T09:57:40.5008776Z Creating pipes for streaming container io.
+2025-09-10T09:57:40.5009857Z Creating stdout named pipe at /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stdout_00cda35d22f94fc4a9bcf7b410e91e53.
+2025-09-10T09:57:40.5012121Z Successfully created stdout named pipe at: /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stdout_00cda35d22f94fc4a9bcf7b410e91e53.
+2025-09-10T09:57:40.5013253Z Opening named pipe /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stdout_00cda35d22f94fc4a9bcf7b410e91e53 for reading in non-blocking mode.
+2025-09-10T09:57:40.5014788Z Successfully opened named pipe: /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stdout_00cda35d22f94fc4a9bcf7b410e91e53.
+2025-09-10T09:57:40.5015879Z Successfully removed non-blocking flag from /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stdout_00cda35d22f94fc4a9bcf7b410e91e53.
+2025-09-10T09:57:40.5017068Z Creating stderr named pipe at /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stderr_61f2f11cdefa48669a725b2acd9136b7.
+2025-09-10T09:57:40.5018746Z Successfully created stderr named pipe at: /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stderr_61f2f11cdefa48669a725b2acd9136b7.
+2025-09-10T09:57:40.5019808Z Opening named pipe /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stderr_61f2f11cdefa48669a725b2acd9136b7 for reading in non-blocking mode.
+2025-09-10T09:57:40.5021061Z Successfully opened named pipe: /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stderr_61f2f11cdefa48669a725b2acd9136b7.
+2025-09-10T09:57:40.5022179Z Successfully removed non-blocking flag from /podr/container/pipe/c9a4daeb4c07_fujibogpt1/stderr_61f2f11cdefa48669a725b2acd9136b7.
+2025-09-10T09:57:40.5023452Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T09:57:40.6771312Z Starting container: c9a4daeb4c07_fujibogpt1.
+2025-09-10T09:57:40.6993650Z Starting watchers and probes.
+2025-09-10T09:57:40.6999533Z Starting metrics collection.
+2025-09-10T09:57:40.7008242Z Container is running.
+2025-09-10T09:57:41.6910756Z Container start method finished after 1612 ms.
+2025-09-10T09:57:47.3340271Z Site startup probe succeeded after 5.6420425 seconds.
+2025-09-10T09:57:47.3485746Z Site is running with deployment version: 2261e3d4-cd84-4db1-9468-e305895bf04b
+2025-09-10T09:57:47.3488256Z Site started.
+2025-09-10T09:57:47.3494534Z Site is running with patch version: 22.17.0
+2025-09-10T09:58:07.3563186Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T09:58:07.3605620Z Stop and delete container. Retry count = 0
+2025-09-10T09:58:07.3606806Z Stopping container: 1d3366a6d6d2_fujibogpt1.
+2025-09-10T09:58:12.4020050Z Deleting container: 1d3366a6d6d2_fujibogpt1. Retry count = 0
+2025-09-10T09:58:12.5384500Z Container spec TerminationMessagePolicy  path 
+2025-09-10T09:58:12.5386787Z Container is terminated. Total time elapsed: 5182 ms.
+2025-09-10T09:58:12.5387051Z Site: fujibogpt1 stopped.
+2025-09-10T09:58:50.1505048Z Container start method called.
+2025-09-10T09:58:50.1506253Z Establishing network.
+2025-09-10T09:58:50.1507233Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T09:58:50.4411242Z Container is starting.
+2025-09-10T09:58:50.4412355Z Establishing user namespace if not established already.
+2025-09-10T09:58:50.4413658Z Establishing network if not established already.
+2025-09-10T09:58:50.4414850Z Mounting volumes.
+2025-09-10T09:58:50.4416536Z Nested mountpoint 
+2025-09-10T09:58:50.4532383Z Nested mountpoint volatile/logs
+2025-09-10T09:58:50.4733430Z Nested mountpoint 
+2025-09-10T09:58:50.4809856Z Nested mountpoint 
+2025-09-10T09:58:50.4927582Z Nested mountpoint 
+2025-09-10T09:58:50.4936157Z Nested mountpoint 
+2025-09-10T09:58:50.5531995Z Nested mountpoint 
+2025-09-10T09:58:52.1186852Z Creating container.
+2025-09-10T09:58:52.1200884Z Creating pipes for streaming container io.
+2025-09-10T09:58:52.1209705Z Creating stdout named pipe at /podr/container/pipe/30e306092be1_fujibogpt1/stdout_a0a7aa3914b4487293eea1ef50c1cd9a.
+2025-09-10T09:58:52.1221819Z Successfully created stdout named pipe at: /podr/container/pipe/30e306092be1_fujibogpt1/stdout_a0a7aa3914b4487293eea1ef50c1cd9a.
+2025-09-10T09:58:52.1229184Z Opening named pipe /podr/container/pipe/30e306092be1_fujibogpt1/stdout_a0a7aa3914b4487293eea1ef50c1cd9a for reading in non-blocking mode.
+2025-09-10T09:58:52.1249470Z Successfully opened named pipe: /podr/container/pipe/30e306092be1_fujibogpt1/stdout_a0a7aa3914b4487293eea1ef50c1cd9a.
+2025-09-10T09:58:52.1282225Z Successfully removed non-blocking flag from /podr/container/pipe/30e306092be1_fujibogpt1/stdout_a0a7aa3914b4487293eea1ef50c1cd9a.
+2025-09-10T09:58:52.1292017Z Creating stderr named pipe at /podr/container/pipe/30e306092be1_fujibogpt1/stderr_920dcc84183e4725910d727d0386026e.
+2025-09-10T09:58:52.1296926Z Successfully created stderr named pipe at: /podr/container/pipe/30e306092be1_fujibogpt1/stderr_920dcc84183e4725910d727d0386026e.
+2025-09-10T09:58:52.1307328Z Opening named pipe /podr/container/pipe/30e306092be1_fujibogpt1/stderr_920dcc84183e4725910d727d0386026e for reading in non-blocking mode.
+2025-09-10T09:58:52.1325913Z Successfully opened named pipe: /podr/container/pipe/30e306092be1_fujibogpt1/stderr_920dcc84183e4725910d727d0386026e.
+2025-09-10T09:58:52.1362736Z Successfully removed non-blocking flag from /podr/container/pipe/30e306092be1_fujibogpt1/stderr_920dcc84183e4725910d727d0386026e.
+2025-09-10T09:58:52.1366466Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T09:58:52.3842104Z Starting container: 30e306092be1_fujibogpt1.
+2025-09-10T09:58:52.4081455Z Starting watchers and probes.
+2025-09-10T09:58:52.4096683Z Starting metrics collection.
+2025-09-10T09:58:52.4098404Z Container is running.
+2025-09-10T09:58:52.4653001Z Container start method finished after 2314 ms.
+2025-09-10T09:58:58.7176982Z Site startup probe succeeded after 6.2485218 seconds.
+2025-09-10T09:58:58.7320498Z Site is running with deployment version: 2261e3d4-cd84-4db1-9468-e305895bf04b
+2025-09-10T09:58:58.7322970Z Site started.
+2025-09-10T09:58:58.7326116Z Site is running with patch version: 22.17.0
+2025-09-10T09:59:18.7352150Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T09:59:18.7366431Z Stop and delete container. Retry count = 0
+2025-09-10T09:59:18.7367635Z Stopping container: c9a4daeb4c07_fujibogpt1.
+2025-09-10T09:59:23.7823596Z Deleting container: c9a4daeb4c07_fujibogpt1. Retry count = 0
+2025-09-10T09:59:23.9185391Z Container spec TerminationMessagePolicy  path 
+2025-09-10T09:59:23.9188068Z Container is terminated. Total time elapsed: 5183 ms.
+2025-09-10T09:59:23.9188363Z Site: fujibogpt1 stopped.
+2025-09-10T09:59:27.4816933Z Container start method called.
+2025-09-10T09:59:27.4818107Z Establishing network.
+2025-09-10T09:59:27.4819208Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T09:59:27.6787401Z Container is starting.
+2025-09-10T09:59:27.6794483Z Establishing user namespace if not established already.
+2025-09-10T09:59:27.6795841Z Establishing network if not established already.
+2025-09-10T09:59:27.6797097Z Mounting volumes.
+2025-09-10T09:59:27.6798511Z Nested mountpoint 
+2025-09-10T09:59:27.6891827Z Nested mountpoint volatile/logs
+2025-09-10T09:59:27.6989571Z Nested mountpoint 
+2025-09-10T09:59:27.6996100Z Nested mountpoint 
+2025-09-10T09:59:27.7221677Z Nested mountpoint 
+2025-09-10T09:59:27.7646329Z Nested mountpoint 
+2025-09-10T09:59:27.8127187Z Nested mountpoint 
+2025-09-10T09:59:27.9455095Z Creating container.
+2025-09-10T09:59:27.9456445Z Creating pipes for streaming container io.
+2025-09-10T09:59:27.9464208Z Creating stdout named pipe at /podr/container/pipe/b6446fa18a2d_fujibogpt1/stdout_e07f95f8702b4819b7f3d2bcb996bddc.
+2025-09-10T09:59:27.9468983Z Successfully created stdout named pipe at: /podr/container/pipe/b6446fa18a2d_fujibogpt1/stdout_e07f95f8702b4819b7f3d2bcb996bddc.
+2025-09-10T09:59:27.9470934Z Opening named pipe /podr/container/pipe/b6446fa18a2d_fujibogpt1/stdout_e07f95f8702b4819b7f3d2bcb996bddc for reading in non-blocking mode.
+2025-09-10T09:59:27.9474854Z Successfully opened named pipe: /podr/container/pipe/b6446fa18a2d_fujibogpt1/stdout_e07f95f8702b4819b7f3d2bcb996bddc.
+2025-09-10T09:59:27.9477710Z Successfully removed non-blocking flag from /podr/container/pipe/b6446fa18a2d_fujibogpt1/stdout_e07f95f8702b4819b7f3d2bcb996bddc.
+2025-09-10T09:59:27.9480611Z Creating stderr named pipe at /podr/container/pipe/b6446fa18a2d_fujibogpt1/stderr_bad4848131b64272a4c3f17bcbe5de1e.
+2025-09-10T09:59:27.9483456Z Successfully created stderr named pipe at: /podr/container/pipe/b6446fa18a2d_fujibogpt1/stderr_bad4848131b64272a4c3f17bcbe5de1e.
+2025-09-10T09:59:27.9485321Z Opening named pipe /podr/container/pipe/b6446fa18a2d_fujibogpt1/stderr_bad4848131b64272a4c3f17bcbe5de1e for reading in non-blocking mode.
+2025-09-10T09:59:27.9487263Z Successfully opened named pipe: /podr/container/pipe/b6446fa18a2d_fujibogpt1/stderr_bad4848131b64272a4c3f17bcbe5de1e.
+2025-09-10T09:59:27.9489173Z Successfully removed non-blocking flag from /podr/container/pipe/b6446fa18a2d_fujibogpt1/stderr_bad4848131b64272a4c3f17bcbe5de1e.
+2025-09-10T09:59:27.9490966Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T09:59:28.0766946Z Starting container: b6446fa18a2d_fujibogpt1.
+2025-09-10T09:59:28.0985533Z Starting watchers and probes.
+2025-09-10T09:59:28.0992834Z Starting metrics collection.
+2025-09-10T09:59:28.0995446Z Container is running.
+2025-09-10T09:59:28.1395320Z Container start method finished after 657 ms.
+2025-09-10T09:59:34.3817597Z Site startup probe succeeded after 6.2369266 seconds.
+2025-09-10T09:59:34.3998231Z Site is running with deployment version: 0469e2da7018a35579f80e20a3ce43d6f4db6366
+2025-09-10T09:59:34.4000376Z Site started.
+2025-09-10T09:59:34.4010706Z Site is running with patch version: 22.17.0
+2025-09-10T09:59:54.4041118Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T09:59:54.4061967Z Stop and delete container. Retry count = 0
+2025-09-10T09:59:54.4063226Z Stopping container: 30e306092be1_fujibogpt1.
+2025-09-10T09:59:59.4507100Z Deleting container: 30e306092be1_fujibogpt1. Retry count = 0
+2025-09-10T09:59:59.6058365Z Container spec TerminationMessagePolicy  path 
+2025-09-10T09:59:59.6060314Z Container is terminated. Total time elapsed: 5201 ms.
+2025-09-10T09:59:59.6060815Z Site: fujibogpt1 stopped.
+2025-09-10T10:00:05.1597959Z Container start method called.
+2025-09-10T10:00:05.1599319Z Establishing network.
+2025-09-10T10:00:05.1600438Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T10:00:05.3990503Z Container is starting.
+2025-09-10T10:00:05.3991806Z Establishing user namespace if not established already.
+2025-09-10T10:00:05.3992925Z Establishing network if not established already.
+2025-09-10T10:00:05.3994024Z Mounting volumes.
+2025-09-10T10:00:05.3995372Z Nested mountpoint 
+2025-09-10T10:00:05.4145575Z Nested mountpoint volatile/logs
+2025-09-10T10:00:05.4412094Z Nested mountpoint 
+2025-09-10T10:00:05.4419362Z Nested mountpoint 
+2025-09-10T10:00:05.4425292Z Nested mountpoint 
+2025-09-10T10:00:05.4878510Z Nested mountpoint 
+2025-09-10T10:00:05.5072440Z Nested mountpoint 
+2025-09-10T10:00:05.6661945Z Creating container.
+2025-09-10T10:00:05.6666252Z Creating pipes for streaming container io.
+2025-09-10T10:00:05.6667404Z Creating stdout named pipe at /podr/container/pipe/1212e927a6cb_fujibogpt1/stdout_2a3634435df5442689d0c449b5a6fe2d.
+2025-09-10T10:00:05.6669511Z Successfully created stdout named pipe at: /podr/container/pipe/1212e927a6cb_fujibogpt1/stdout_2a3634435df5442689d0c449b5a6fe2d.
+2025-09-10T10:00:05.6675383Z Opening named pipe /podr/container/pipe/1212e927a6cb_fujibogpt1/stdout_2a3634435df5442689d0c449b5a6fe2d for reading in non-blocking mode.
+2025-09-10T10:00:05.6677237Z Successfully opened named pipe: /podr/container/pipe/1212e927a6cb_fujibogpt1/stdout_2a3634435df5442689d0c449b5a6fe2d.
+2025-09-10T10:00:05.6678183Z Successfully removed non-blocking flag from /podr/container/pipe/1212e927a6cb_fujibogpt1/stdout_2a3634435df5442689d0c449b5a6fe2d.
+2025-09-10T10:00:05.6679086Z Creating stderr named pipe at /podr/container/pipe/1212e927a6cb_fujibogpt1/stderr_33c2f6eb121c4e2bbea2331a58b4f44e.
+2025-09-10T10:00:05.6680479Z Successfully created stderr named pipe at: /podr/container/pipe/1212e927a6cb_fujibogpt1/stderr_33c2f6eb121c4e2bbea2331a58b4f44e.
+2025-09-10T10:00:05.6681434Z Opening named pipe /podr/container/pipe/1212e927a6cb_fujibogpt1/stderr_33c2f6eb121c4e2bbea2331a58b4f44e for reading in non-blocking mode.
+2025-09-10T10:00:05.6684024Z Successfully opened named pipe: /podr/container/pipe/1212e927a6cb_fujibogpt1/stderr_33c2f6eb121c4e2bbea2331a58b4f44e.
+2025-09-10T10:00:05.6685364Z Successfully removed non-blocking flag from /podr/container/pipe/1212e927a6cb_fujibogpt1/stderr_33c2f6eb121c4e2bbea2331a58b4f44e.
+2025-09-10T10:00:05.6686605Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T10:00:05.8304936Z Starting container: 1212e927a6cb_fujibogpt1.
+2025-09-10T10:00:05.8566823Z Starting watchers and probes.
+2025-09-10T10:00:05.8600509Z Starting metrics collection.
+2025-09-10T10:00:05.8637484Z Container is running.
+2025-09-10T10:00:05.9071461Z Container start method finished after 747 ms.
+2025-09-10T10:00:12.1561457Z Site startup probe succeeded after 6.2344883 seconds.
+2025-09-10T10:00:12.1737773Z Site is running with deployment version: 0469e2da7018a35579f80e20a3ce43d6f4db6366
+2025-09-10T10:00:12.1741207Z Site started.
+2025-09-10T10:00:12.1744235Z Site is running with patch version: 22.17.0
+2025-09-10T10:00:33.1680616Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T10:00:33.1698327Z Stop and delete container. Retry count = 0
+2025-09-10T10:00:33.1699513Z Stopping container: b6446fa18a2d_fujibogpt1.
+2025-09-10T10:00:38.2299352Z Deleting container: b6446fa18a2d_fujibogpt1. Retry count = 0
+2025-09-10T10:00:38.3657970Z Container spec TerminationMessagePolicy  path 
+2025-09-10T10:00:38.3660049Z Container is terminated. Total time elapsed: 5197 ms.
+2025-09-10T10:00:38.3660334Z Site: fujibogpt1 stopped.
+2025-09-10T10:03:07.7458930Z Container start method called.
+2025-09-10T10:03:07.7460136Z Establishing network.
+2025-09-10T10:03:07.7461213Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T10:03:08.0074321Z Container is starting.
+2025-09-10T10:03:08.0080052Z Establishing user namespace if not established already.
+2025-09-10T10:03:08.0083398Z Establishing network if not established already.
+2025-09-10T10:03:08.0084899Z Mounting volumes.
+2025-09-10T10:03:08.0086273Z Nested mountpoint 
+2025-09-10T10:03:08.0130873Z Nested mountpoint volatile/logs
+2025-09-10T10:03:08.0221552Z Nested mountpoint 
+2025-09-10T10:03:08.0227033Z Nested mountpoint 
+2025-09-10T10:03:08.0231902Z Nested mountpoint 
+2025-09-10T10:03:08.0483222Z Nested mountpoint 
+2025-09-10T10:03:08.0911275Z Nested mountpoint 
+2025-09-10T10:03:08.2202004Z Creating container.
+2025-09-10T10:03:08.2205101Z Creating pipes for streaming container io.
+2025-09-10T10:03:08.2206256Z Creating stdout named pipe at /podr/container/pipe/5ded0af13032_fujibogpt1/stdout_01f954c271244c9ab1615d6abc453439.
+2025-09-10T10:03:08.2208549Z Successfully created stdout named pipe at: /podr/container/pipe/5ded0af13032_fujibogpt1/stdout_01f954c271244c9ab1615d6abc453439.
+2025-09-10T10:03:08.2209592Z Opening named pipe /podr/container/pipe/5ded0af13032_fujibogpt1/stdout_01f954c271244c9ab1615d6abc453439 for reading in non-blocking mode.
+2025-09-10T10:03:08.2210799Z Successfully opened named pipe: /podr/container/pipe/5ded0af13032_fujibogpt1/stdout_01f954c271244c9ab1615d6abc453439.
+2025-09-10T10:03:08.2211701Z Successfully removed non-blocking flag from /podr/container/pipe/5ded0af13032_fujibogpt1/stdout_01f954c271244c9ab1615d6abc453439.
+2025-09-10T10:03:08.2212586Z Creating stderr named pipe at /podr/container/pipe/5ded0af13032_fujibogpt1/stderr_1ccde90b127647e29a0278e5702043d1.
+2025-09-10T10:03:08.2214034Z Successfully created stderr named pipe at: /podr/container/pipe/5ded0af13032_fujibogpt1/stderr_1ccde90b127647e29a0278e5702043d1.
+2025-09-10T10:03:08.2214872Z Opening named pipe /podr/container/pipe/5ded0af13032_fujibogpt1/stderr_1ccde90b127647e29a0278e5702043d1 for reading in non-blocking mode.
+2025-09-10T10:03:08.2215892Z Successfully opened named pipe: /podr/container/pipe/5ded0af13032_fujibogpt1/stderr_1ccde90b127647e29a0278e5702043d1.
+2025-09-10T10:03:08.2216719Z Successfully removed non-blocking flag from /podr/container/pipe/5ded0af13032_fujibogpt1/stderr_1ccde90b127647e29a0278e5702043d1.
+2025-09-10T10:03:08.2217681Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T10:03:08.3709180Z Starting container: 5ded0af13032_fujibogpt1.
+2025-09-10T10:03:08.3931559Z Starting watchers and probes.
+2025-09-10T10:03:08.3957775Z Starting metrics collection.
+2025-09-10T10:03:08.3959262Z Container is running.
+2025-09-10T10:03:08.4357394Z Container start method finished after 689 ms.
+2025-09-10T10:03:14.6737012Z Site startup probe succeeded after 6.2367056 seconds.
+2025-09-10T10:03:15.2496249Z Site is running with deployment version: 0469e2da7018a35579f80e20a3ce43d6f4db6366
+2025-09-10T10:03:15.2498143Z Site started.
+2025-09-10T10:03:15.2500756Z Site is running with patch version: 22.17.0
+2025-09-10T10:03:35.2542009Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T10:03:35.2593011Z Stop and delete container. Retry count = 0
+2025-09-10T10:03:35.2594846Z Stopping container: 1212e927a6cb_fujibogpt1.
+2025-09-10T10:03:40.2994435Z Deleting container: 1212e927a6cb_fujibogpt1. Retry count = 0
+2025-09-10T10:03:40.4926803Z Container spec TerminationMessagePolicy  path 
+2025-09-10T10:03:40.4928584Z Container is terminated. Total time elapsed: 5238 ms.
+2025-09-10T10:03:40.4928882Z Site: fujibogpt1 stopped.
+2025-09-10T10:04:15.2852977Z Container start method called.
+2025-09-10T10:04:15.2854413Z Establishing network.
+2025-09-10T10:04:15.2855866Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-10T10:04:15.6040001Z Container is starting.
+2025-09-10T10:04:15.6041169Z Establishing user namespace if not established already.
+2025-09-10T10:04:15.6042170Z Establishing network if not established already.
+2025-09-10T10:04:15.6080424Z Mounting volumes.
+2025-09-10T10:04:15.6087097Z Nested mountpoint 
+2025-09-10T10:04:15.6160263Z Nested mountpoint volatile/logs
+2025-09-10T10:04:15.6226619Z Nested mountpoint 
+2025-09-10T10:04:15.6253624Z Nested mountpoint 
+2025-09-10T10:04:15.6279455Z Nested mountpoint 
+2025-09-10T10:04:15.6301869Z Nested mountpoint 
+2025-09-10T10:04:15.6353649Z Nested mountpoint 
+2025-09-10T10:04:15.9281054Z Creating container.
+2025-09-10T10:04:15.9282154Z Creating pipes for streaming container io.
+2025-09-10T10:04:15.9286628Z Creating stdout named pipe at /podr/container/pipe/c94853cf22f2_fujibogpt1/stdout_5ba2bc124b904591b5813df23e932e91.
+2025-09-10T10:04:15.9297626Z Successfully created stdout named pipe at: /podr/container/pipe/c94853cf22f2_fujibogpt1/stdout_5ba2bc124b904591b5813df23e932e91.
+2025-09-10T10:04:15.9300519Z Opening named pipe /podr/container/pipe/c94853cf22f2_fujibogpt1/stdout_5ba2bc124b904591b5813df23e932e91 for reading in non-blocking mode.
+2025-09-10T10:04:15.9303576Z Successfully opened named pipe: /podr/container/pipe/c94853cf22f2_fujibogpt1/stdout_5ba2bc124b904591b5813df23e932e91.
+2025-09-10T10:04:15.9306985Z Successfully removed non-blocking flag from /podr/container/pipe/c94853cf22f2_fujibogpt1/stdout_5ba2bc124b904591b5813df23e932e91.
+2025-09-10T10:04:15.9308560Z Creating stderr named pipe at /podr/container/pipe/c94853cf22f2_fujibogpt1/stderr_540079f6751a4683bf139f470f744ace.
+2025-09-10T10:04:15.9310125Z Successfully created stderr named pipe at: /podr/container/pipe/c94853cf22f2_fujibogpt1/stderr_540079f6751a4683bf139f470f744ace.
+2025-09-10T10:04:15.9311179Z Opening named pipe /podr/container/pipe/c94853cf22f2_fujibogpt1/stderr_540079f6751a4683bf139f470f744ace for reading in non-blocking mode.
+2025-09-10T10:04:15.9312355Z Successfully opened named pipe: /podr/container/pipe/c94853cf22f2_fujibogpt1/stderr_540079f6751a4683bf139f470f744ace.
+2025-09-10T10:04:15.9313344Z Successfully removed non-blocking flag from /podr/container/pipe/c94853cf22f2_fujibogpt1/stderr_540079f6751a4683bf139f470f744ace.
+2025-09-10T10:04:15.9314343Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.6:13209 and fully qualified image name: 10.1.0.6:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-10T10:04:16.9232820Z Starting container: c94853cf22f2_fujibogpt1.
+2025-09-10T10:04:16.9509596Z Starting watchers and probes.
+2025-09-10T10:04:16.9563142Z Starting metrics collection.
+2025-09-10T10:04:16.9567547Z Container is running.
+2025-09-10T10:04:17.8104921Z Container start method finished after 2523 ms.
+2025-09-10T10:04:24.0438501Z Site startup probe succeeded after 6.2235057 seconds.
+2025-09-10T10:04:24.0658620Z Site is running with deployment version: 0469e2da7018a35579f80e20a3ce43d6f4db6366
+2025-09-10T10:04:24.0662364Z Site started.
+2025-09-10T10:04:24.0674649Z Site is running with patch version: 22.17.0
+2025-09-10T10:04:44.0739497Z Container is terminating. Grace period: 5 seconds.
+2025-09-10T10:04:44.0755460Z Stop and delete container. Retry count = 0
+2025-09-10T10:04:44.0756524Z Stopping container: 5ded0af13032_fujibogpt1.
+2025-09-10T10:04:49.1144441Z Deleting container: 5ded0af13032_fujibogpt1. Retry count = 0
+2025-09-10T10:04:49.2486859Z Container spec TerminationMessagePolicy  path 
+2025-09-10T10:04:49.2489841Z Container is terminated. Total time elapsed: 5174 ms.
+2025-09-10T10:04:49.2490114Z Site: fujibogpt1 stopped.

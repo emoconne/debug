@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<deployment>
+  <id>0469e2da7018a35579f80e20a3ce43d6f4db6366</id>
+  <author>emoconne</author>
+  <deployer>GitHub</deployer>
+  <authorEmail>jbcc.okamoto@gmail.com</authorEmail>
+  <message>Fix Azure AI Foundry authentication to use Entra ID (DefaultAzureCredential)
+    
+    - Remove API Key authentication and use DefaultAzureCredential only
+    - Fix variable declaration issue (const project)
+    - Azure AI Foundry Web search now works correctly with Entra authentication
+    - Tested successfully with both debug API and actual web search
+    - Resolves 401 authentication errors</message>
+  <progress></progress>
+  <status>Success</status>
+  <statusText></statusText>
+  <lastSuccessEndTime>2025-09-10T09:59:52.6078481Z</lastSuccessEndTime>
+  <receivedTime>2025-09-10T09:59:06.9762732Z</receivedTime>
+  <startTime>2025-09-10T09:59:46.2245676Z</startTime>
+  <endTime>2025-09-10T09:59:52.6078481Z</endTime>
+  <complete>True</complete>
+  <is_temp>False</is_temp>
+  <is_readonly>False</is_readonly>
+  <buildSummary />
+</deployment>

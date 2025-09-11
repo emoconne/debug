@@ -1,0 +1,43 @@
+2025-09-11T01:51:27.1078290Z Container start method called.
+2025-09-11T01:51:27.1081744Z Establishing network.
+2025-09-11T01:51:27.1086535Z Pulling image: appsvc/node:22-lts_20250724.2.tuxprod.
+2025-09-11T01:51:27.4159304Z Container is starting.
+2025-09-11T01:51:27.4160503Z Establishing user namespace if not established already.
+2025-09-11T01:51:27.4216358Z Establishing network if not established already.
+2025-09-11T01:51:27.4224376Z Mounting volumes.
+2025-09-11T01:51:27.4241821Z Nested mountpoint 
+2025-09-11T01:51:27.4445410Z Nested mountpoint volatile/logs
+2025-09-11T01:51:27.4731341Z Nested mountpoint 
+2025-09-11T01:51:27.5287263Z Nested mountpoint 
+2025-09-11T01:51:27.5301374Z Nested mountpoint 
+2025-09-11T01:51:27.5344889Z Nested mountpoint 
+2025-09-11T01:51:27.5552795Z Nested mountpoint 
+2025-09-11T01:51:29.4212343Z Creating container.
+2025-09-11T01:51:29.4217487Z Creating pipes for streaming container io.
+2025-09-11T01:51:29.4218658Z Creating stdout named pipe at /podr/container/pipe/82d65c054c69_fujibogpt1/stdout_1e849cf1003f48a0b430ffe406f83849.
+2025-09-11T01:51:29.4221091Z Successfully created stdout named pipe at: /podr/container/pipe/82d65c054c69_fujibogpt1/stdout_1e849cf1003f48a0b430ffe406f83849.
+2025-09-11T01:51:29.4222209Z Opening named pipe /podr/container/pipe/82d65c054c69_fujibogpt1/stdout_1e849cf1003f48a0b430ffe406f83849 for reading in non-blocking mode.
+2025-09-11T01:51:29.4223397Z Successfully opened named pipe: /podr/container/pipe/82d65c054c69_fujibogpt1/stdout_1e849cf1003f48a0b430ffe406f83849.
+2025-09-11T01:51:29.4224346Z Successfully removed non-blocking flag from /podr/container/pipe/82d65c054c69_fujibogpt1/stdout_1e849cf1003f48a0b430ffe406f83849.
+2025-09-11T01:51:29.4225362Z Creating stderr named pipe at /podr/container/pipe/82d65c054c69_fujibogpt1/stderr_5282cb3974f145a48813b21830b36355.
+2025-09-11T01:51:29.4226966Z Successfully created stderr named pipe at: /podr/container/pipe/82d65c054c69_fujibogpt1/stderr_5282cb3974f145a48813b21830b36355.
+2025-09-11T01:51:29.4228158Z Opening named pipe /podr/container/pipe/82d65c054c69_fujibogpt1/stderr_5282cb3974f145a48813b21830b36355 for reading in non-blocking mode.
+2025-09-11T01:51:29.4229300Z Successfully opened named pipe: /podr/container/pipe/82d65c054c69_fujibogpt1/stderr_5282cb3974f145a48813b21830b36355.
+2025-09-11T01:51:29.4230393Z Successfully removed non-blocking flag from /podr/container/pipe/82d65c054c69_fujibogpt1/stderr_5282cb3974f145a48813b21830b36355.
+2025-09-11T01:51:29.4231448Z Creating container with image: appsvc/node:22-lts_20250724.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/node:22-lts_20250724.2.tuxprod
+2025-09-11T01:51:29.6438039Z Starting container: 82d65c054c69_fujibogpt1.
+2025-09-11T01:51:29.6666551Z Starting watchers and probes.
+2025-09-11T01:51:29.6670542Z Starting metrics collection.
+2025-09-11T01:51:29.6673456Z Container is running.
+2025-09-11T01:51:30.6652963Z Container start method finished after 3557 ms.
+2025-09-11T01:51:36.0712822Z Site startup probe succeeded after 5.4049263 seconds.
+2025-09-11T01:51:36.0969789Z Site is running with deployment version: 0469e2da7018a35579f80e20a3ce43d6f4db6366
+2025-09-11T01:51:36.0972173Z Site started.
+2025-09-11T01:51:36.0975687Z Site is running with patch version: 22.17.0
+2025-09-11T01:51:56.0980729Z Container is terminating. Grace period: 5 seconds.
+2025-09-11T01:51:56.0995028Z Stop and delete container. Retry count = 0
+2025-09-11T01:51:56.0996144Z Stopping container: c94853cf22f2_fujibogpt1.
+2025-09-11T01:52:01.1592554Z Deleting container: c94853cf22f2_fujibogpt1. Retry count = 0
+2025-09-11T01:52:01.4704504Z Container spec TerminationMessagePolicy  path 
+2025-09-11T01:52:01.4714907Z Container is terminated. Total time elapsed: 5372 ms.
+2025-09-11T01:52:01.4715357Z Site: fujibogpt1 stopped.

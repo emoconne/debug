@@ -1,0 +1,6 @@
+<step title="Incoming Request" date="2025-09-10T09:58:34.697" instance="730189" url="/api/settings" method="POST" type="request" pid="821,1,7" Host="fujibogpt1.scm.azurewebsites.net" User-Agent="Azure-WebSites-Controller/105.0.7.92" Authorization="Bas..." Content-Type="application/json" Expect="100-continue" Content-Length="24" x-ms-request-id="330aaec9-aa28-4272-bed5-68bdb7e2baa6" X-ARR-LOG-ID="330aaec9-aa28-4272-bed5-68bdb7e2baa6" CLIENT-IP="20.43.67.39:4288" X-SITE-DEPLOYMENT-ID="fujibogpt1" WAS-DEFAULT-HOSTNAME="fujibogpt1.scm.azurewebsites.net" X-MS-PLATFORM-INTERNAL="True" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/settings" X-Client-IP="20.43.67.39" X-Client-Port="4288" >
+  <step title="Acquiring Deployment Lock" date="2025-09-10T09:58:34.875" /><!-- duration: 5ms -->
+  <step title="Acquired Deployment Lock" date="2025-09-10T09:58:34.921" /><!-- duration: 6ms -->
+  <step title="Releasing Deployment Lock" date="2025-09-10T09:58:34.985" /><!-- duration: 6ms -->
+  <step title="Outgoing response" date="2025-09-10T09:58:35.013" type="response" statusCode="204" statusText="NoContent" /><!-- duration: 6ms -->
+</step><!-- duration: 327ms -->
