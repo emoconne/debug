@@ -28,9 +28,19 @@ export const GetSpeechToken = async () => {
   }
 
   // エンドポイントが指定されている場合はそれを使用、そうでなければリージョンから構築
-  const tokenEndpoint = speechEndpoint 
-    ? `${speechEndpoint}/sts/v1.0/issueToken`
-    : `https://${speechRegion}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
+  let tokenEndpoint;
+  if (speechEndpoint) {
+    // エンドポイントが指定されている場合、正しい形式に修正
+    if (speechEndpoint.includes('cognitiveservices.azure.com')) {
+      // 古い形式のエンドポイントを新しい形式に変換
+      const region = speechRegion || 'japaneast';
+      tokenEndpoint = `https://${region}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
+    } else {
+      tokenEndpoint = `${speechEndpoint}/sts/v1.0/issueToken`;
+    }
+  } else {
+    tokenEndpoint = `https://${speechRegion}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
+  }
 
   console.log('Speech token endpoint:', tokenEndpoint);
 

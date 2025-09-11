@@ -18,9 +18,21 @@ const ChatInput: FC<Props> = (props) => {
   const { speechEnabled } = useGlobalConfigContext();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { rows, resetRows, onKeyDown, onKeyUp } = useChatInputDynamicHeight({
     buttonRef,
   });
+
+  const focusInput = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
+  const handleBrowserSpeech = (text: string) => {
+    // ブラウザ音声認識の結果を入力欄に設定
+    setInput(text);
+  };
 
   const fileCHatVisible =
     chatBody.chatType === "data" && chatBody.chatOverFileName;
@@ -62,6 +74,7 @@ const ChatInput: FC<Props> = (props) => {
       <div className="container mx-auto max-w-4xl relative py-2 flex gap-2 items-center">
           {fileCHatVisible && <ChatFileSlider />}
         <Textarea
+          ref={textareaRef}
           rows={rows}
           value={input}
           placeholder="ChatGPTにメッセージを送る"
@@ -71,7 +84,7 @@ const ChatInput: FC<Props> = (props) => {
           onChange={onChange}
         ></Textarea>
         <div className="absolute right-0 bottom-0 px-8 flex items-end h-full mr-2 mb-4">
-          {speechEnabled && <Microphone disabled={isLoading} />}
+          {speechEnabled && <Microphone disabled={isLoading} onFocusInput={focusInput} onSpeech={handleBrowserSpeech} />}
           <Button
             size="icon"
             type="submit"

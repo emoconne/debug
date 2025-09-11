@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
@@ -10,6 +13,15 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose'
   },
+  // HTTPS設定（開発環境用）
+  ...(process.env.NODE_ENV === 'development' && {
+    server: {
+      https: {
+        key: fs.readFileSync(path.join(__dirname, 'certs/localhost+2-key.pem')),
+        cert: fs.readFileSync(path.join(__dirname, 'certs/localhost+2.pem')),
+      },
+    },
+  }),
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = config.externals || [];

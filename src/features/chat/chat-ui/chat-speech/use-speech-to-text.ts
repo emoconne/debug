@@ -55,15 +55,15 @@ export const useSpeechToText = (props: Props): SpeechToTextProps => {
       
       // エンドポイントまたはリージョンを使用してSpeechConfigを作成
       let speechConfig;
-      if (token.endpoint) {
-        // エンドポイントが指定されている場合
+      if (token.endpoint && !token.endpoint.includes('cognitiveservices.azure.com')) {
+        // エンドポイントが指定されている場合（古い形式でない場合）
         speechConfig = SpeechConfig.fromEndpoint(
           new URL(token.endpoint),
           token.token
         );
         console.log('Using Speech endpoint:', token.endpoint);
       } else {
-        // リージョンを使用する場合
+        // リージョンを使用する場合（推奨）
         speechConfig = SpeechConfig.fromAuthorizationToken(
           token.token,
           token.region
